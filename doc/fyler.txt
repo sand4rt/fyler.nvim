@@ -1,0 +1,12 @@
+================================================================================
+CONTENTS                                                        *fyler.contents*
+
+1. Introduction                                                     |fyler.nvim|
+
+================================================================================
+INTRODUCTION                                                        *fyler.nvim*
+
+Fyler is a buffer based file manager which is design to reduce friction from
+user hands.
+
+vim:tw=78:ts=8:ft=help:norl:
