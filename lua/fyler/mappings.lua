@@ -1,7 +1,14 @@
+local actions = require 'fyler.actions'
 local config = require 'fyler.config'
 local mappings = {}
 
-mappings.default_mappings = {}
+mappings.default_mappings = {
+  main = {
+    n = {
+      ['q'] = actions.close_current,
+    },
+  },
+}
 
 for window, map_group in pairs(config.values.mappings or {}) do
   for mode, mapping in pairs(map_group) do
