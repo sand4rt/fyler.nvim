@@ -31,31 +31,6 @@ function utils.get_win_config(window_instance)
 end
 
 ---@param instance Fyler.Window
-function utils.show_window(instance)
-  if instance.winid and utils.is_valid_win(instance.winid) then
-    return
-  end
-
-  instance.bufnr = vim.api.nvim_create_buf(false, true)
-  instance.winid = vim.api.nvim_open_win(instance.bufnr, instance.enter, utils.get_win_config(instance))
-end
-
----@param instance Fyler.Window
-function utils.hide_window(instance)
-  if not (instance.winid and utils.is_valid_win(instance.winid)) then
-    return
-  end
-
-  vim.api.nvim_win_close(instance.winid, true)
-
-  if not (instance.bufnr and utils.is_valid_buf(instance.bufnr)) then
-    return
-  end
-
-  vim.api.nvim_buf_delete(instance.bufnr, { force = true })
-end
-
----@param instance Fyler.Window
 ---@param win_config vim.api.keyset.win_config
 function utils.set_win_config(instance, win_config)
   if instance.winid and utils.is_valid_win(instance.winid) then
@@ -86,6 +61,60 @@ function utils.set_buf_option(instance, option, value)
   else
     vim.api.nvim_set_option_value(option, value, { buf = instance.bufnr })
   end
+end
+
+---@class Fyler.Window.Keymap.Config
+---@field mode string|string[]
+---@field lhs string
+---@field rhs string|function|Fyler.Action
+---@field options? vim.keymap.set.Opts
+
+---@param key_config Fyler.Window.Keymap.Config
+function utils.set_keymap(key_config)
+  key_config = key_config or {}
+  local mode = key_config.mode or 'n'
+  local lhs = key_config.lhs
+  local rhs = key_config.rhs
+  local opts = vim.tbl_deep_extend('force', key_config.options or {}, {
+    silent = true,
+    noremap = true,
+    desc = (type(rhs) == 'table' and rhs:get_name() or nil),
+  })
+
+  if type(rhs) == 'string' then
+    vim.keymap.set(mode, lhs, rhs, opts)
+  elseif type(rhs) == 'function' then
+    vim.keymap.set(mode, lhs, rhs, opts)
+  else
+    vim.keymap.set(mode, lhs, function()
+      rhs()
+    end, opts)
+  end
+end
+
+---@param instance Fyler.Window
+function utils.show_window(instance)
+  if instance.winid and utils.is_valid_win(instance.winid) then
+    return
+  end
+
+  instance.bufnr = vim.api.nvim_create_buf(false, true)
+  instance.winid = vim.api.nvim_open_win(instance.bufnr, instance.enter, utils.get_win_config(instance))
+end
+
+---@param instance Fyler.Window
+function utils.hide_window(instance)
+  if not (instance.winid and utils.is_valid_win(instance.winid)) then
+    return
+  end
+
+  vim.api.nvim_win_close(instance.winid, true)
+
+  if not (instance.bufnr and utils.is_valid_buf(instance.bufnr)) then
+    return
+  end
+
+  vim.api.nvim_buf_delete(instance.bufnr, { force = true })
 end
 
 return utils

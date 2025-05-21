@@ -61,7 +61,18 @@ function fyler.show()
 
   fyler.render_node:get_equivalent_text():render(fyler.window.bufnr)
 
-  vim.keymap.set('n', 'q', fyler.hide, { desc = 'fyler.nvim close' })
+  for mode, mappings in pairs(require('fyler.mappings').default_mappings.main or {}) do
+    for k, v in pairs(mappings) do
+      utils.set_keymap {
+        mode = mode,
+        lhs = k,
+        rhs = v,
+        options = {
+          buffer = fyler.window.bufnr,
+        },
+      }
+    end
+  end
 end
 
 function fyler.setup()
