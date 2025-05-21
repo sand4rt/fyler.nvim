@@ -32,6 +32,10 @@ local function scan_dir(path)
   return items
 end
 
+function fyler.hide()
+  utils.hide_window(fyler.window)
+end
+
 function fyler.show()
   fyler.text = Text.new {}
   fyler.render_node = RenderNode.new {
@@ -55,14 +59,9 @@ function fyler.show()
     fyler.render_node:add_child(result)
   end
 
-  fyler.render_node:calculate_text(fyler.text, 0)
-  fyler.text:render(fyler.window.bufnr)
+  fyler.render_node:get_equivalent_text():render(fyler.window.bufnr)
 
   vim.keymap.set('n', 'q', fyler.hide, { desc = 'fyler.nvim close' })
-end
-
-function fyler.hide()
-  utils.hide_window(fyler.window)
 end
 
 function fyler.setup()

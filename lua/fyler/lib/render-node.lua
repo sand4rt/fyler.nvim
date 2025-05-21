@@ -1,3 +1,5 @@
+local Text = require 'fyler.lib.text'
+
 ---@class Fyler.RenderNode.Options
 ---@field name string
 ---@field type string
@@ -5,6 +7,7 @@
 
 ---@class Fyler.RenderNode : Fyler.RenderNode.Options
 ---@field children Fyler.RenderNode[]
+---@field parent? Fyler.RenderNode
 local RenderNode = {}
 
 ---@param options Fyler.RenderNode.Options
@@ -30,29 +33,44 @@ end
 
 ---@param child Fyler.RenderNode.Options
 function RenderNode:add_child(child)
-  table.insert(self.children, RenderNode.new(child))
+  table.insert(
+    self.children,
+    RenderNode.new(vim.tbl_deep_extend('force', child, {
+      parent = self,
+    }))
+  )
 end
 
----@param text Fyler.Text
----@param depth? integer
-function RenderNode:calculate_text(text, depth)
-  depth = depth or 0
-
-  if self.type == 'directory' then
-    text:append(string.format(string.rep(' ', depth) .. ' %s', self.name), 'Directory')
-  elseif self.type == 'file' then
-    text:append(string.format(string.rep(' ', depth) .. ' %s', self.name), 'NavicText')
-  elseif self.type == 'link' then
-    text:append(string.format(string.rep(' ', depth) .. ' %s (link)', self.name), 'NavicText')
+---@return integer
+function RenderNode:get_depth()
+  if not self.parent then
+    return 0
   end
 
-  text:nl()
+  return self.get_depth(self.parent) + 1
+end
+
+function RenderNode:get_equivalent_text()
+  local text = Text.new {}
+  local depth = self:get_depth()
 
   if self.revealed then
-    for _, child in ipairs(self.children or {}) do
-      self.calculate_text(child, text, depth + 2)
+    for index, child in ipairs(self.children or {}) do
+      if child.type == 'directory' then
+        text:append(string.format(string.rep(' ', depth) .. ' %s', child.name), 'Directory')
+      elseif child.type == 'file' then
+        text:append(string.format(string.rep(' ', depth) .. ' %s', child.name), 'NavicText')
+      elseif child.type == 'link' then
+        text:append(string.format(string.rep(' ', depth) .. ' %s (link)', child.name), 'NavicText')
+      end
+
+      if index < #self.children then
+        text:nl()
+      end
     end
   end
+
+  return text
 end
 
 return RenderNode
