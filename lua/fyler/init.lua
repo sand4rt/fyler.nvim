@@ -50,7 +50,7 @@ function fyler.show()
   }
 
   utils.show_window(fyler.window)
-  utils.set_buf_option(fyler.window, 'filetype', 'fyler')
+  utils.set_buf_option(fyler.window, 'filetype', 'fyler-main')
   utils.set_win_option(fyler.window, 'cursorline', true)
 
   local results = scan_dir(vim.uv.cwd())
