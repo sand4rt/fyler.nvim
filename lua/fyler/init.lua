@@ -38,7 +38,7 @@ end
 
 function fyler.show()
   local render_node = RenderNode.new {
-    name = vim.fn.fnamemodify(vim.uv.cwd() or '', ':t'),
+    name = vim.fn.fnamemodify(luv.cwd() or '', ':t'),
     type = 'directory',
     revealed = true,
   }
@@ -50,11 +50,12 @@ function fyler.show()
 
   state.set_key('fyler-main-window', window)
   state.set_key('render-node', render_node)
+
   utils.show_window(window)
   utils.set_buf_option(window, 'filetype', 'fyler-main')
   utils.set_win_option(window, 'cursorline', true)
 
-  local results = scan_dir(vim.uv.cwd())
+  local results = scan_dir(luv.cwd())
 
   for _, result in ipairs(results) do
     render_node:add_child(result)
