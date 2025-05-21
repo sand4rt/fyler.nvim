@@ -54,6 +54,16 @@ function RenderNode:get_equivalent_text()
   local text = Text.new {}
   local depth = self:get_depth()
 
+  table.sort(self.children, function(a, b)
+    if a.type == 'directory' and b.type == 'file' then
+      return true
+    elseif a.type == 'file' and b.type == 'directory' then
+      return false
+    else
+      return a.name < b.name
+    end
+  end)
+
   if self.revealed then
     for index, child in ipairs(self.children or {}) do
       if child.type == 'directory' then
