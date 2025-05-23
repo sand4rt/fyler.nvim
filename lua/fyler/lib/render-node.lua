@@ -67,11 +67,11 @@ function RenderNode:get_equivalent_text()
   if self.revealed then
     for index, child in ipairs(self.children or {}) do
       if child.type == 'directory' then
-        text:append(string.format(string.rep(' ', depth) .. ' %s', child.name), 'Directory')
+        text:append(string.format(string.rep(' ', depth) .. '%s', child.name), 'Directory')
       elseif child.type == 'file' then
-        text:append(string.format(string.rep(' ', depth) .. ' %s', child.name), 'NavicText')
+        text:append(string.format(string.rep(' ', depth) .. '%s', child.name), 'NavicText')
       elseif child.type == 'link' then
-        text:append(string.format(string.rep(' ', depth) .. ' %s (link)', child.name), 'NavicText')
+        text:append(string.format(string.rep(' ', depth) .. '%s (link)', child.name), 'NavicText')
       end
 
       if index < #self.children then
