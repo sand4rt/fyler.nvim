@@ -6,6 +6,7 @@ mappings.default_mappings = {
   main = {
     n = {
       ['q'] = actions.close_current,
+      ['<CR>'] = actions.toggle_reveal,
     },
   },
 }
