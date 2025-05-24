@@ -1,3 +1,4 @@
+local config = require 'fyler.config'
 local utils = {}
 
 ---@param bufnr? integer
@@ -92,6 +93,14 @@ function utils.set_keymap(key_config)
   end
 end
 
+---@param events string|string[]
+---@param options vim.api.keyset.create_autocmd
+function utils.create_autocmd(events, options)
+  options = options or {}
+  options.group = config.values.augroup
+  vim.api.nvim_create_autocmd(events, options)
+end
+
 ---@param instance Fyler.Window
 function utils.show_window(instance)
   if instance.winid and utils.is_valid_win(instance.winid) then
@@ -115,6 +124,20 @@ function utils.hide_window(instance)
   end
 
   vim.api.nvim_buf_delete(instance.bufnr, { force = true })
+end
+
+---@generic T
+---@param tbl T[]
+---@param target T
+---@return integer?
+function utils.indexof(tbl, target)
+  for index, element in ipairs(tbl) do
+    if target == element then
+      return index
+    end
+  end
+
+  return nil
 end
 
 return utils
