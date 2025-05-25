@@ -8,6 +8,14 @@ local function generate_node_meta_key()
   return string.format('/%d', node_count)
 end
 
+local function get_node_prefix(node)
+  if _G.MiniIcons then
+    local category = node.type == 'directory' and 'directory' or 'file'
+    local icon, hl = _G.MiniIcons.get(category, node.path)
+    return icon, hl
+  end
+end
+
 ---@class Fyler.RenderNode.Options
 ---@field name string
 ---@field type string
@@ -116,20 +124,21 @@ function RenderNode:get_equivalent_text()
 
   if self.revealed then
     for _, child in ipairs(self.children or {}) do
+      local icon, hl = get_node_prefix(child)
       if child.type == 'directory' then
         text:append(
-          string.format('%s ', child.meta_key) .. string.format(string.rep(' ', depth) .. '  %s', child.name),
-          'Directory'
+          string.format('%s ', child.meta_key) .. string.format(string.rep(' ', depth) .. '%s  %s', icon, child.name),
+          hl
         )
       elseif child.type == 'file' then
         text:append(
-          string.format('%s ', child.meta_key) .. string.format(string.rep(' ', depth) .. '  %s', child.name),
-          'NavicText'
+          string.format('%s ', child.meta_key) .. string.format(string.rep(' ', depth) .. '%s  %s', icon, child.name),
+          hl
         )
       elseif child.type == 'link' then
         text:append(
-          string.format('%s ', child.meta_key) .. string.format(string.rep(' ', depth) .. '  %s', child.name),
-          'NavicText'
+          string.format('%s ', child.meta_key) .. string.format(string.rep(' ', depth) .. '%s %s', icon, child.name),
+          hl
         )
       end
 

@@ -42,6 +42,10 @@ function fyler.show()
     callback = function()
       local current_line = vim.api.nvim_get_current_line()
       local meta_key = current_line:match '^/(%d+)'
+      if not meta_key then
+        return
+      end
+
       local node = render_node:find(state('metakeys'):get(meta_key).path)
       if not node then
         return
