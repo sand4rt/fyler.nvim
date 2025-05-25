@@ -26,10 +26,18 @@ function fyler.show()
   state('windows'):set('main', window)
   state('rendernodes'):set(render_node.path, render_node)
   utils.show_window(window)
-  utils.set_buf_option(window, 'filetype', 'fyler')
+  utils.set_buf_option(window, 'filetype', 'fyler-main')
+  utils.set_buf_option(window, 'syntax', 'fyler')
   utils.set_win_option(window, 'cursorline', true)
   utils.set_win_option(window, 'conceallevel', 3)
   utils.set_win_option(window, 'concealcursor', 'nvic')
+
+  utils.create_autocmd('WinClosed', {
+    buffer = window.bufnr,
+    callback = function()
+      utils.hide_window(window)
+    end,
+  })
 
   for mode, mappings in pairs(require('fyler.mappings').default_mappings.main or {}) do
     for k, v in pairs(mappings) do

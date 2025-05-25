@@ -113,17 +113,13 @@ end
 
 ---@param instance Fyler.Window
 function utils.hide_window(instance)
-  if not (instance.winid and utils.is_valid_win(instance.winid)) then
-    return
+  if instance.winid and utils.is_valid_win(instance.winid) then
+    vim.api.nvim_win_close(instance.winid, true)
   end
 
-  vim.api.nvim_win_close(instance.winid, true)
-
-  if not (instance.bufnr and utils.is_valid_buf(instance.bufnr)) then
-    return
+  if instance.bufnr and utils.is_valid_buf(instance.bufnr) then
+    vim.api.nvim_buf_delete(instance.bufnr, { force = true })
   end
-
-  vim.api.nvim_buf_delete(instance.bufnr, { force = true })
 end
 
 ---@generic T

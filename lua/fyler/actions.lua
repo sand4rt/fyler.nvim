@@ -6,7 +6,7 @@ function actions.close_current()
   local match = vim.bo.filetype:match '^[^-]+-(.+)$'
 
   if match then
-    utils.hide_window(state('windows'):get(string.format('fyler%swindow', match)))
+    utils.hide_window(state('windows'):get(match))
   end
 end
 
