@@ -31,11 +31,28 @@ function fyler.show()
   utils.set_win_option(window, 'cursorline', true)
   utils.set_win_option(window, 'conceallevel', 3)
   utils.set_win_option(window, 'concealcursor', 'nvic')
-
   utils.create_autocmd('WinClosed', {
     buffer = window.bufnr,
     callback = function()
       utils.hide_window(window)
+    end,
+  })
+  utils.create_autocmd('CursorMoved', {
+    buffer = window.bufnr,
+    callback = function()
+      local current_line = vim.api.nvim_get_current_line()
+      local meta_key = current_line:match '^/(%d+)'
+      local node = render_node:find(state('metakeys'):get(meta_key).path)
+      if not node then
+        return
+      end
+
+      local current_cursor_pos = vim.api.nvim_win_get_cursor(window.winid)
+      local desired_cusor_pos = { current_cursor_pos[1], current_line:find(node.name, 1, true) - 1 }
+
+      if current_cursor_pos[2] < desired_cusor_pos[2] then
+        vim.api.nvim_win_set_cursor(window.winid, desired_cusor_pos)
+      end
     end,
   })
 
