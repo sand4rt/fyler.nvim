@@ -24,6 +24,7 @@ function fyler.show()
   }
 
   state('windows'):set('main', window)
+  state('winids'):set('user', vim.api.nvim_get_current_win())
   state('rendernodes'):set(render_node.path, render_node)
   utils.show_window(window)
   utils.set_buf_option(window, 'filetype', 'fyler-main')
