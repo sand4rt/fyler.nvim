@@ -16,7 +16,6 @@ function Text.new(options)
     __add = function(t1, t2)
       local result = Text.new {}
       result.lines = {}
-
       for _, line in ipairs(t1.lines) do
         table.insert(result.lines, line)
       end
@@ -40,6 +39,7 @@ function Text:init(options)
   options = options or {}
   self.left_margin = options.left_margin or 0
   self.lines = { { words = {} } }
+
   return self
 end
 
@@ -49,6 +49,7 @@ function Text:nl(count)
   for _ = 1, (count or 1) do
     table.insert(self.lines, { words = {} })
   end
+
   return self
 end
 
@@ -57,6 +58,7 @@ end
 ---@return Fyler.Text
 function Text:append(str, hl)
   table.insert(self.lines[#self.lines].words, { str = str, hl = hl })
+
   return self
 end
 
@@ -64,7 +66,6 @@ end
 function Text:render(bufnr)
   local ns = require('fyler.config').values.namespace
   local start_line = 0
-
   if not (bufnr and vim.api.nvim_buf_is_valid(bufnr)) then
     return
   end
@@ -85,7 +86,6 @@ function Text:render(bufnr)
 
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, virt_lines)
   vim.api.nvim_buf_clear_namespace(bufnr, ns.highlights, 0, -1)
-
   for i, line in ipairs(self.lines) do
     local col = self.left_margin
     for _, segment in ipairs(line.words) do

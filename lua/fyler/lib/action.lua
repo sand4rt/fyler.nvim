@@ -19,7 +19,6 @@ end
 function Action_mt.__add(lhs, rhs)
   local merged_func = {}
   local merged_order = {}
-
   for _, name in ipairs(lhs._order) do
     merged_func[name] = lhs._func[name]
     table.insert(merged_order, name)
@@ -58,6 +57,7 @@ function Action.transform_mod(mod)
   for name, fn in pairs(mod) do
     out[name] = Action.new(name, fn)
   end
+
   return out
 end
 
