@@ -18,7 +18,7 @@ function actions.toggle_reveal()
   local metadata = state('metadata'):get(meta_key)
   if metadata.type == 'directory' then
     render_node:toggle_reveal(metadata.path)
-    render_node:get_equivalent_text():render(window.bufnr)
+    render_node:get_equivalent_text():remove_trailing_empty_lines():render(window.bufnr)
   else
     vim.fn.win_execute(user_winid, string.format('edit %s', metadata.path))
     vim.fn.win_gotoid(user_winid)
