@@ -47,7 +47,7 @@ function fyler.show()
         return
       end
 
-      local node = render_node:find(state('metakeys'):get(meta_key).path)
+      local node = render_node:find(state('metadata'):get(meta_key).path)
       if not node then
         return
       end

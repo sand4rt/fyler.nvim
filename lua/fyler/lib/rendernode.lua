@@ -46,7 +46,7 @@ function RenderNode:init(options)
   self.children = {}
   self.revealed = options.revealed or false
   self.meta_key = generate_node_meta_key()
-  state('metakeys'):set(self.meta_key:match '^/(%d+)', {
+  state('metadata'):set(self.meta_key:match '^/(%d+)', {
     name = self.name,
     type = self.type,
     path = self.path,

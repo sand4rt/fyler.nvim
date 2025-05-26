@@ -15,7 +15,7 @@ function actions.toggle_reveal()
   local window = state('windows'):get 'main' ---@type Fyler.Window
   local user_winid = state('winids'):get 'user'
   local render_node = state('rendernodes'):get((vim.uv or vim.loop).cwd() or vim.fn.getcwd(0)) ---@type Fyler.RenderNode
-  local metadata = state('metakeys'):get(meta_key)
+  local metadata = state('metadata'):get(meta_key)
   if metadata.type == 'directory' then
     render_node:toggle_reveal(metadata.path)
     render_node:get_equivalent_text():render(window.bufnr)
