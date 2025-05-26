@@ -14,6 +14,14 @@ function Text.new(options)
   return setmetatable({}, {
     __index = Text,
     __add = function(t1, t2)
+      if #t1.lines == 0 then
+        return t2
+      end
+
+      if #t2.lines == 0 then
+        return t1
+      end
+
       local result = Text.new {}
       result.lines = {}
       for _, line in ipairs(t1.lines) do
@@ -58,6 +66,15 @@ end
 ---@return Fyler.Text
 function Text:append(str, hl)
   table.insert(self.lines[#self.lines].words, { str = str, hl = hl })
+
+  return self
+end
+
+---@return Fyler.Text
+function Text:remove_trailing_empty_lines()
+  while #self.lines >= 1 and vim.tbl_isempty(self.lines[#self.lines].words) do
+    table.remove(self.lines)
+  end
 
   return self
 end

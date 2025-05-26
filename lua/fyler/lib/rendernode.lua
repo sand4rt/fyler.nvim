@@ -146,7 +146,7 @@ function RenderNode:get_equivalent_text()
     end
   end
 
-  return text
+  return text:remove_trailing_empty_lines()
 end
 
 ---@param path string
