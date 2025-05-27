@@ -107,9 +107,9 @@ end
 function RenderNode:get_equivalent_text()
   local depth = self:get_depth() * 2
   local text = Text.new {}
-  if vim.tbl_isempty(self.children) then
-    local results = self:scan_dir()
-    for _, result in ipairs(results) do
+  local results = self:scan_dir()
+  for _, result in ipairs(results) do
+    if not self:find(result.path) then
       self:add_child(RenderNode.new(result))
     end
   end
