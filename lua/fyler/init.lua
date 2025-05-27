@@ -29,6 +29,8 @@ function fyler.show()
   utils.show_window(window)
   utils.set_buf_option(window, 'filetype', 'fyler-main')
   utils.set_buf_option(window, 'syntax', 'fyler')
+  utils.set_win_option(window, 'number', config.values.window_options.number)
+  utils.set_win_option(window, 'relativenumber', config.values.window_options.relativenumber)
   utils.set_win_option(window, 'cursorline', true)
   utils.set_win_option(window, 'conceallevel', 3)
   utils.set_win_option(window, 'concealcursor', 'nvic')
@@ -74,11 +76,11 @@ function fyler.show()
     end
   end
 
-  render_node:get_equivalent_text():render(window.bufnr)
+  render_node:get_equivalent_text():remove_trailing_empty_lines():render(window.bufnr)
 end
 
-function fyler.setup()
-  config.set_defaults()
+function fyler.setup(options)
+  config.set_defaults(options)
   vim.api.nvim_create_user_command('Fyler', fyler.show, { nargs = 0 })
 end
 

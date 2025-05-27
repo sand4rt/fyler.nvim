@@ -5,6 +5,7 @@ local node_count = 0
 
 local function generate_node_meta_key()
   node_count = node_count + 1
+
   return string.format('/%d', node_count)
 end
 
@@ -12,6 +13,7 @@ local function get_node_prefix(node)
   if _G.MiniIcons then
     local category = node.type == 'directory' and 'directory' or 'file'
     local icon, hl = _G.MiniIcons.get(category, node.path)
+
     return icon, hl
   end
 end
@@ -74,7 +76,7 @@ function RenderNode:get_depth()
   return self.get_depth(self.parent) + 1
 end
 
----@return {name: string, type: string, path: string}[]
+---@return { name: string, type: string, path: string }[]
 function RenderNode:scan_dir()
   if not self.path then
     return {}
