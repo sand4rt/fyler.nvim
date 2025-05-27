@@ -5,6 +5,10 @@ local defaults = {
     number = true,
     relativenumbers = true,
   },
+  window_config = {
+    width = 0.3,
+    split = 'right',
+  },
 }
 
 function config.set_defaults(options)

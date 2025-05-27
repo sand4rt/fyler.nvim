@@ -19,8 +19,8 @@ function fyler.show()
   }
   local window = Window.new {
     enter = true,
-    width = 0.3,
-    split = 'right',
+    width = config.values.window_config.width,
+    split = config.values.window_config.split,
   }
 
   state('windows'):set('main', window)
