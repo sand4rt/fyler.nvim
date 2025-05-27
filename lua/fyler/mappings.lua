@@ -7,6 +7,7 @@ mappings.default_mappings = {
     n = {
       ['q'] = actions.close_current,
       ['<CR>'] = actions.toggle_reveal,
+      ['s'] = actions.synchronize,
     },
   },
 }

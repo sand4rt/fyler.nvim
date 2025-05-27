@@ -25,14 +25,14 @@ end
 ---@return string
 local function find_parent_path(buf_lines, target_item_index)
   local target_item_indentation = extract_indentation(buf_lines[target_item_index])
-  for current_item_index = target_item_index - 1, 1, -1 do
-    local meta_key = extract_meta_key(buf_lines[current_item_index])
-    local current_item_indentation = extract_indentation(buf_lines[current_item_index])
+  for item_index = target_item_index - 1, 1, -1 do
+    local meta_key = extract_meta_key(buf_lines[item_index])
+    local item_indentation = extract_indentation(buf_lines[item_index])
     if meta_key then
       local metadata = state('metadata'):get(meta_key)
-      if current_item_indentation == target_item_indentation then
+      if item_indentation == target_item_indentation then
         return vim.fn.fnamemodify(metadata.path, ':h')
-      elseif current_item_indentation < target_item_indentation then
+      elseif item_indentation < target_item_indentation then
         if metadata.type == 'directory' then
           return metadata.path
         else

@@ -1,3 +1,4 @@
+local filesystem = require 'fyler.filesystem'
 local state = require 'fyler.state'
 local utils = require 'fyler.utils'
 local actions = {}
@@ -23,6 +24,13 @@ function actions.toggle_reveal()
     vim.fn.win_execute(user_winid, string.format('edit %s', metadata.path))
     vim.fn.win_gotoid(user_winid)
   end
+end
+
+function actions.synchronize()
+  local render_node = state('rendernodes'):get((vim.uv or vim.loop).cwd() or vim.fn.getcwd(0)) ---@type Fyler.RenderNode
+  local window = state('windows'):get 'main' ---@type Fyler.Window
+  filesystem.synchronize_from_buffer()
+  render_node:get_equivalent_text():remove_trailing_empty_lines():render(window.bufnr)
 end
 
 return require('fyler.lib.action').transform_mod(actions)
