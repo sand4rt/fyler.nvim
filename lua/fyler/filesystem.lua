@@ -76,6 +76,15 @@ function filesystem.synchronize_from_buffer()
   for _, change in ipairs(parsed_changes.create) do
     filesystem.create_fs_item(change)
   end
+  for _, change in ipairs(parsed_changes.delete) do
+    filesystem.delete_fs_item(change)
+  end
+  for _, change in ipairs(parsed_changes.move) do
+    filesystem.move_fs_item(change)
+  end
+  for _, change in ipairs(parsed_changes.copy) do
+    filesystem.copy_fs_item(change)
+  end
 end
 
 ---@param path string
@@ -84,14 +93,21 @@ function filesystem.create_fs_item(path)
   if stat then
     return
   end
+
   local path_type = string.sub(path, -1) == '/' and 'directory' or 'file'
   if path_type == 'directory' then
-    uv.fs_mkdir(path, 493)
+    vim.fn.mkdir(path, 'p')
   else
+    local parent_path = vim.fn.fnamemodify(path, ':h')
+    if vim.fn.isdirectory(path) == 0 then
+      vim.fn.mkdir(parent_path, 'p')
+    end
+
     local fd = uv.fs_open(path, 'w', 438)
     if not fd then
       return
     end
+
     uv.fs_close(fd)
   end
 end
