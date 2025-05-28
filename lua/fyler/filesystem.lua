@@ -96,15 +96,22 @@ function filesystem.create_fs_item(path)
 
   local path_type = string.sub(path, -1) == '/' and 'directory' or 'file'
   if path_type == 'directory' then
-    vim.fn.mkdir(path, 'p')
+    local success = vim.fn.mkdir(path, 'p')
+    if not success then
+      return
+    end
   else
     local parent_path = vim.fn.fnamemodify(path, ':h')
     if vim.fn.isdirectory(path) == 0 then
-      vim.fn.mkdir(parent_path, 'p')
+      local success = vim.fn.mkdir(parent_path, 'p')
+      if not success then
+        return
+      end
     end
 
-    local fd = uv.fs_open(path, 'w', 438)
-    if not fd then
+    local fd, err, err_name = uv.fs_open(path, 'w', 438)
+    if not fd or err then
+      vim.notify(err .. err_name, vim.log.levels.ERROR, { title = 'Fyler.nvim' })
       return
     end
 
