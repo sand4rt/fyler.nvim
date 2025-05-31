@@ -107,24 +107,25 @@ end
 function RenderNode:get_equivalent_text()
   local depth = self:get_depth() * 2
   local text = Text.new {}
-  local results = self:scan_dir()
-  for _, result in ipairs(results) do
-    if not self:find(result.path) then
-      self:add_child(RenderNode.new(result))
-    end
-  end
-
-  table.sort(self.children, function(a, b)
-    if a.type == 'directory' and b.type == 'file' then
-      return true
-    elseif a.type == 'file' and b.type == 'directory' then
-      return false
-    else
-      return a.name < b.name
-    end
-  end)
 
   if self.revealed then
+    local results = self:scan_dir()
+    for _, result in ipairs(results) do
+      if not self:find(result.path) then
+        self:add_child(RenderNode.new(result))
+      end
+    end
+
+    table.sort(self.children, function(a, b)
+      if a.type == 'directory' and b.type == 'file' then
+        return true
+      elseif a.type == 'file' and b.type == 'directory' then
+        return false
+      else
+        return a.name < b.name
+      end
+    end)
+
     for _, child in ipairs(self.children or {}) do
       local icon, hl = get_node_prefix(child)
       if child.type == 'directory' then
