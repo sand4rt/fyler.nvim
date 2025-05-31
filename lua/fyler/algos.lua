@@ -51,7 +51,11 @@ function algos.get_snapshot_from_buf_lines(buf_lines)
   table.insert(snapshot, { meta_key = '1', path = root_path })
 
   local stack = { { meta_key = '1', path = root_path, indentation = -1 } }
-  for _, buf_line in ipairs(buf_lines) do
+  for _, buf_line in
+    ipairs(vim.tbl_filter(function(line)
+      return line ~= ''
+    end, buf_lines))
+  do
     local meta_key = algos.extract_meta_key(buf_line)
     local item_name = algos.extract_item_name(buf_line)
     local item_indentation = algos.extract_indentation(buf_line)
@@ -70,6 +74,8 @@ end
 
 ---@return { create: string[], delete: string[], move: { from: string, to: string }[] }
 function algos.get_changes(old_snapshot, new_snapshot)
+  vim.print('old_snapshot: ', old_snapshot)
+  vim.print('new_snapshot: ', new_snapshot)
   local function hash_snapshot_item(meta_key, snapshot)
     for _, item in ipairs(snapshot) do
       if item.meta_key == meta_key then
