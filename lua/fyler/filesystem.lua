@@ -10,7 +10,10 @@ function filesystem.synchronize_from_buffer()
     algos.get_snapshot_from_render_node(state('rendernodes'):get(uv.cwd() or vim.fn.getcwd(0))),
     algos.get_snapshot_from_buf_lines(buf_lines)
   )
-  vim.print(changes)
+  for _, change in ipairs(changes.create) do
+    vim.notify(string.format('CREATE: %s', change))
+    filesystem.create_fs_item(change)
+  end
 end
 
 ---@param path string
@@ -42,6 +45,14 @@ function filesystem.create_fs_item(path)
     end
 
     uv.fs_close(fd)
+  end
+end
+
+---@param path string
+function filesystem.delete_fs_item(path)
+  local stat = uv.fs_stat(path)
+  if not stat then
+    return
   end
 end
 

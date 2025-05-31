@@ -74,8 +74,6 @@ end
 
 ---@return { create: string[], delete: string[], move: { from: string, to: string }[] }
 function algos.get_changes(old_snapshot, new_snapshot)
-  vim.print('old_snapshot: ', old_snapshot)
-  vim.print('new_snapshot: ', new_snapshot)
   local function hash_snapshot_item(meta_key, snapshot)
     for _, item in ipairs(snapshot) do
       if item.meta_key == meta_key then
