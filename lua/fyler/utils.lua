@@ -136,4 +136,15 @@ function utils.indexof(tbl, target)
   return nil
 end
 
+---@return function
+function utils.hide_cursor()
+  local original_guicursor = vim.go.guicursor
+  vim.go.guicursor = 'a:FylerHiddenCursor/FylerHiddenCursor'
+
+  return function()
+    vim.go.guicursor = 'a:'
+    vim.go.guicursor = original_guicursor
+  end
+end
+
 return utils
