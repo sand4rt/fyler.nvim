@@ -1,3 +1,13 @@
+---@brief [[
+--- Fyler.nvim is a file manager which can edit file system like a buffer.
+---
+--- How it different from |oil.nvim|?
+--- - It provides tree view
+---@brief ]]
+
+---@tag fyler.nvim
+---@config { ["name"] = "INTRODUCTION" }
+
 local RenderNode = require 'fyler.lib.rendernode'
 local Window = require 'fyler.lib.window'
 local algos = require 'fyler.algos'

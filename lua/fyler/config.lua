@@ -1,3 +1,24 @@
+---@brief [[
+--- Fyler supports plenty of options to customize. Following are default values
+---
+--- >lua
+--- <pre>
+---   local defaults = {
+---     window_options = {
+---       number = true,
+---       relativenumbers = true,
+---     },
+---     window_config = {
+---       width = 0.3,
+---       split = 'right',
+---     },
+---   }
+--- </pre>
+---@brief ]]
+
+---@tag fyler.config
+---@config { ["name"] = "CONFIGURATION" }
+
 local config = {}
 
 local defaults = {

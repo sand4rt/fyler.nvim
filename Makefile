@@ -10,3 +10,6 @@ lint:
 
 test:
 	nvim -l scripts/minitest.lua
+
+docgen:
+	nvim --headless --noplugin -u scripts/minit.lua -c "luafile ./scripts/docgen.lua" -c 'qa'
