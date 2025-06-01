@@ -138,12 +138,12 @@ function RenderNode:get_equivalent_text()
       local icon, hl = get_node_prefix(child)
       if child.type == 'directory' then
         text:append(
-          string.format('%s ', child.meta_key) .. string.format(string.rep(' ', depth) .. '%s  %s', icon, child.name),
+          string.format('%s ', child.meta_key) .. string.format(string.rep(' ', depth) .. '%s %s', icon, child.name),
           hl
         )
       elseif child.type == 'file' then
         text:append(
-          string.format('%s ', child.meta_key) .. string.format(string.rep(' ', depth) .. '%s  %s', icon, child.name),
+          string.format('%s ', child.meta_key) .. string.format(string.rep(' ', depth) .. '%s %s', icon, child.name),
           hl
         )
       elseif child.type == 'link' then
