@@ -1,5 +1,6 @@
 local RenderNode = require 'fyler.lib.rendernode'
 local Window = require 'fyler.lib.window'
+local algos = require 'fyler.algos'
 local config = require 'fyler.config'
 local state = require 'fyler.state'
 local utils = require 'fyler.utils'
@@ -44,7 +45,7 @@ function fyler.show()
     buffer = window.bufnr,
     callback = function()
       local current_line = vim.api.nvim_get_current_line()
-      local meta_key = current_line:match '^/(%d+)'
+      local meta_key = algos.extract_meta_key(current_line)
       if not meta_key then
         return
       end

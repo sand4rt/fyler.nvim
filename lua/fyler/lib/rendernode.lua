@@ -1,4 +1,5 @@
 local Text = require 'fyler.lib.text'
+local algos = require 'fyler.algos'
 local state = require 'fyler.state'
 local luv = vim.uv or vim.loop
 local node_count = 0
@@ -48,7 +49,7 @@ function RenderNode:init(options)
   self.children = {}
   self.revealed = options.revealed or false
   self.meta_key = generate_node_meta_key()
-  state('metadata'):set(self.meta_key:match '^/(%d+)', { name = self.name, type = self.type, path = self.path })
+  state('metadata'):set(algos.extract_meta_key(self.meta_key), { name = self.name, type = self.type, path = self.path })
   state('rendernodes'):set(self.path, self)
 
   return self

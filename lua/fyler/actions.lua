@@ -1,3 +1,4 @@
+local algos = require 'fyler.algos'
 local filesystem = require 'fyler.filesystem'
 local state = require 'fyler.state'
 local utils = require 'fyler.utils'
@@ -12,7 +13,7 @@ end
 
 function actions.toggle_reveal()
   local current_line = vim.api.nvim_get_current_line()
-  local meta_key = current_line:match '^/(%d+)'
+  local meta_key = algos.extract_meta_key(current_line)
   local window = state('windows'):get 'main' ---@type Fyler.Window
   local user_winid = state('winids'):get 'user'
   local render_node = state('rendernodes'):get((vim.uv or vim.loop).cwd() or vim.fn.getcwd(0)) ---@type Fyler.RenderNode
