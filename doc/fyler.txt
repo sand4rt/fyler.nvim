@@ -1,12 +1,28 @@
 ================================================================================
-CONTENTS                                                        *fyler.contents*
-
-1. Introduction                                                     |fyler.nvim|
-
-================================================================================
 INTRODUCTION                                                        *fyler.nvim*
 
-Fyler is a buffer based file manager which is design to reduce friction from
-user hands.
+Fyler.nvim is a file manager which can edit file system like a buffer.
 
-vim:tw=78:ts=8:ft=help:norl:
+How it different from |oil.nvim|?
+- It provides tree view
+
+
+================================================================================
+CONFIGURATION                                                     *fyler.config*
+
+Fyler supports plenty of options to customize. Following are default values
+
+>lua
+  local defaults = {
+    window_options = {
+      number = true,
+      relativenumbers = true,
+    },
+    window_config = {
+      width = 0.3,
+      split = 'right',
+    },
+  }
+
+
+ vim:tw=78:ts=8:ft=help:norl:
