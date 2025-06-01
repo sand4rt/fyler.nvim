@@ -55,7 +55,7 @@ function fyler.show()
       end
 
       local current_cursor_pos = vim.api.nvim_win_get_cursor(window.winid)
-      local desired_cusor_pos = { current_cursor_pos[1], (current_line:find(node.name, 1, true) - 1) or 0 }
+      local desired_cusor_pos = { current_cursor_pos[1], (current_line:find(node.name, 1, true) or 0) - 1 }
 
       if current_cursor_pos[2] < desired_cusor_pos[2] then
         vim.api.nvim_win_set_cursor(window.winid, desired_cusor_pos)

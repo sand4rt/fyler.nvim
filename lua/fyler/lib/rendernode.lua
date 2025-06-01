@@ -48,11 +48,8 @@ function RenderNode:init(options)
   self.children = {}
   self.revealed = options.revealed or false
   self.meta_key = generate_node_meta_key()
-  state('metadata'):set(self.meta_key:match '^/(%d+)', {
-    name = self.name,
-    type = self.type,
-    path = self.path,
-  })
+  state('metadata'):set(self.meta_key:match '^/(%d+)', { name = self.name, type = self.type, path = self.path })
+  state('rendernodes'):set(self.path, self)
 
   return self
 end
@@ -65,6 +62,17 @@ function RenderNode:add_child(child)
       parent = self,
     }))
   )
+end
+
+function RenderNode:delete_node()
+  if not self.parent then
+    return
+  end
+
+  ---@param child Fyler.RenderNode
+  self.parent.children = vim.tbl_filter(function(child)
+    return child.path ~= self.path
+  end, self.parent.children)
 end
 
 ---@return integer
@@ -107,7 +115,6 @@ end
 function RenderNode:get_equivalent_text()
   local depth = self:get_depth() * 2
   local text = Text.new {}
-
   if self.revealed then
     local results = self:scan_dir()
     for _, result in ipairs(results) do

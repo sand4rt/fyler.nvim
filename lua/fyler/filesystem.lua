@@ -11,8 +11,10 @@ function filesystem.synchronize_from_buffer()
     algos.get_snapshot_from_buf_lines(buf_lines)
   )
   for _, change in ipairs(changes.create) do
-    vim.notify(string.format('CREATE: %s', change))
     filesystem.create_fs_item(change)
+  end
+  for _, change in ipairs(changes.delete) do
+    filesystem.delete_fs_item(change)
   end
 end
 
@@ -54,6 +56,16 @@ function filesystem.delete_fs_item(path)
   if not stat then
     return
   end
+
+  if stat.type == 'directory' then
+    vim.fn.delete(path, 'rf')
+  elseif stat.type == 'file' then
+    vim.fn.delete(path)
+  else
+    vim.notify('Unable to delete item', vim.log.levels.ERROR)
+  end
+
+  state('rendernodes'):get(path):delete_node()
 end
 
 return filesystem
