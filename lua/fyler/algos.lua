@@ -49,7 +49,7 @@ end
 function algos.get_snapshot_from_buf_lines(buf_lines)
   local snapshot = {}
   local root_path = uv.cwd() or vim.fn.getcwd(0)
-  local render_node = state('rendernodes'):get(root_path)
+  local render_node = state.render_node[root_path]
   local stack = { { meta_key = algos.extract_meta_key(render_node.meta_key), path = root_path, indentation = -1 } }
   table.insert(snapshot, { meta_key = algos.extract_meta_key(render_node.meta_key), path = root_path })
 

@@ -1,31 +1,27 @@
-local Collection = {}
+local State = {}
 
-function Collection.new()
-  return setmetatable({}, { __index = Collection })
+local function create_nested_table()
+  return setmetatable({}, {
+    __index = function(tbl, key)
+      rawset(tbl, key, create_nested_table())
+
+      return tbl[key]
+    end,
+  })
 end
 
----@param key string
-function Collection:get(key)
-  return self[key]
-end
+setmetatable(State, {
+  __index = function(tbl, key)
+    rawset(tbl, key, create_nested_table())
 
----@param key string
----@param value string
-function Collection:set(key, value)
-  self[key] = value
-end
-
----@class Fyler.State
----@field collections table<string, table<string, any>>
-local State = setmetatable({ collections = {} }, {
-  __call = function(tbl, collection_name)
-    if tbl.collections[collection_name] then
-      return tbl.collections[collection_name]
+    return tbl[key]
+  end,
+  __newindex = function(tbl, key, val)
+    if type(val) == 'table' then
+      error 'Cannot assign tables directly. Use nested syntax'
     end
 
-    tbl.collections[collection_name] = Collection.new()
-
-    return tbl.collections[collection_name]
+    rawset(tbl, key, val)
   end,
 })
 

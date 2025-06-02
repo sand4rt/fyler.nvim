@@ -11,11 +11,10 @@ local function generate_node_meta_key()
 end
 
 local function get_node_prefix(node)
-  if _G.MiniIcons then
-    local category = node.type == 'directory' and 'directory' or 'file'
-    local icon, hl = _G.MiniIcons.get(category, node.path)
-
-    return icon, hl
+  local mini_icons_status, mini_icons = pcall(require, 'mini.icons')
+  if mini_icons_status then
+    ---@diagnostic disable-next-line: undefined-field
+    return mini_icons.get(node.type == 'directory' and 'directory' or 'file', node.path)
   end
 end
 
@@ -49,8 +48,8 @@ function RenderNode:init(options)
   self.children = {}
   self.revealed = options.revealed or false
   self.meta_key = generate_node_meta_key()
-  state('metadata'):set(algos.extract_meta_key(self.meta_key), { name = self.name, type = self.type, path = self.path })
-  state('rendernodes'):set(self.path, self)
+  state.meta_data[algos.extract_meta_key(self.meta_key)] = { name = self.name, type = self.type, path = self.path }
+  state.render_node[self.path] = self
 
   return self
 end

@@ -18,7 +18,7 @@ local fyler = {}
 local luv = vim.uv or vim.loop
 
 function fyler.hide()
-  utils.hide_window(state('window'):get 'main')
+  utils.hide_window(state.window.main)
 end
 
 function fyler.show()
@@ -34,9 +34,9 @@ function fyler.show()
     split = config.values.window_config.split,
   }
 
-  state('windows'):set('main', window)
-  state('winids'):set('user', vim.api.nvim_get_current_win())
-  state('rendernodes'):set(render_node.path, render_node)
+  state.window.main = window
+  state.window_id.user = vim.api.nvim_get_current_win()
+  state.render_node[render_node.path] = render_node
   utils.show_window(window)
   utils.set_buf_option(window, 'filetype', 'fyler-main')
   utils.set_buf_option(window, 'syntax', 'fyler')
@@ -60,14 +60,13 @@ function fyler.show()
         return
       end
 
-      local node = render_node:find(state('metadata'):get(meta_key).path)
+      local node = render_node:find(state.meta_data[meta_key].path)
       if not node then
         return
       end
 
       local current_cursor_pos = vim.api.nvim_win_get_cursor(window.winid)
       local desired_cusor_pos = { current_cursor_pos[1], (current_line:find(node.name, 1, true) or 0) - 1 }
-
       if current_cursor_pos[2] < desired_cusor_pos[2] then
         vim.api.nvim_win_set_cursor(window.winid, desired_cusor_pos)
       end

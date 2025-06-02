@@ -4,10 +4,10 @@ local filesystem = {}
 local uv = vim.uv or vim.loop
 
 function filesystem.synchronize_from_buffer()
-  local window = state('windows'):get 'main' ---@type Fyler.Window
+  local window = state.window.main
   local buf_lines = vim.api.nvim_buf_get_lines(window.bufnr, 0, -1, false)
   local changes = algos.get_changes(
-    algos.get_snapshot_from_render_node(state('rendernodes'):get(uv.cwd() or vim.fn.getcwd(0))),
+    algos.get_snapshot_from_render_node(state.render_node[uv.cwd() or vim.fn.getcwd(0)]),
     algos.get_snapshot_from_buf_lines(buf_lines)
   )
   for _, change in ipairs(changes.create) do
@@ -65,7 +65,7 @@ function filesystem.delete_fs_item(path)
     vim.notify('Unable to delete item', vim.log.levels.ERROR)
   end
 
-  state('rendernodes'):get(path):delete_node()
+  state.render_node[path]:delete_node()
 end
 
 return filesystem
