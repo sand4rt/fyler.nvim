@@ -14,14 +14,21 @@ local algos = require 'fyler.algos'
 local config = require 'fyler.config'
 local state = require 'fyler.state'
 local utils = require 'fyler.utils'
-local fyler = {}
 local luv = vim.uv or vim.loop
 
-function fyler.hide()
+local M = {}
+
+function M.hide()
   utils.hide_window(state.window.main)
 end
 
-function fyler.show()
+function M.show()
+  -- Check if already open
+  local w = state.window.main
+  if w then
+    utils.hide_window(w)
+  end
+
   local render_node = RenderNode.new {
     name = vim.fn.fnamemodify(luv.cwd() or '', ':t'),
     path = luv.cwd() or vim.fn.getcwd(0),
@@ -89,9 +96,10 @@ function fyler.show()
   render_node:get_equivalent_text():remove_trailing_empty_lines():render(window.bufnr)
 end
 
-function fyler.setup(options)
+function M.setup(options)
   config.set_defaults(options)
-  vim.api.nvim_create_user_command('Fyler', fyler.show, { nargs = 0 })
 end
 
-return fyler
+vim.api.nvim_create_user_command('Fyler', M.show, { nargs = 0 })
+
+return M
