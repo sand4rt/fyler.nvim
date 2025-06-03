@@ -1,4 +1,5 @@
 local algos = require 'fyler.algos'
+local config = require 'fyler.config'
 local filesystem = require 'fyler.filesystem'
 local state = require 'fyler.state'
 local utils = require 'fyler.utils'
@@ -23,8 +24,23 @@ function actions.toggle_reveal()
     render_node:toggle_reveal(metadata.path)
     render_node:get_equivalent_text():remove_trailing_empty_lines():render(window.bufnr)
   else
-    vim.fn.win_execute(user_winid, string.format('edit %s', metadata.path))
-    vim.fn.win_gotoid(user_winid)
+    -- Check if the user window still exists
+    if user_winid and vim.api.nvim_win_is_valid(user_winid) then
+      vim.fn.win_execute(user_winid, string.format('edit %s', metadata.path))
+      vim.fn.win_gotoid(user_winid)
+
+      -- Close the Fyler panel if configured to do so
+      if config.values.close_on_file_open then
+        utils.hide_window(window)
+      end
+    else
+      -- User window is gone: open file in current Fyler window
+      vim.cmd(string.format('edit %s', metadata.path))
+      -- Update the window ID to the current window for future reference
+      state.window_id.user = vim.api.nvim_get_current_win()
+      -- Reset the Fyler window state since we're reusing this window
+      state.window.main = nil
+    end
   end
 end
 

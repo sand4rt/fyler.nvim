@@ -55,6 +55,10 @@ function M.show()
   utils.create_autocmd('WinClosed', {
     buffer = window.bufnr,
     callback = function()
+      -- Switch to the user's original window before hiding
+      if state.window_id.user and vim.api.nvim_win_is_valid(state.window_id.user) then
+        vim.api.nvim_set_current_win(state.window_id.user)
+      end
       utils.hide_window(window)
     end,
   })

@@ -13,6 +13,8 @@
 ---       split = 'right',
 ---     },
 ---   }
+---   hijack_netrw = false,
+---   close_on_file_open = false,
 --- </pre>
 ---@brief ]]
 
@@ -31,6 +33,7 @@ local defaults = {
     split = 'right',
   },
   hijack_netrw = false,
+  close_on_file_open = false,
 }
 
 function config.set_defaults(options)
@@ -64,7 +67,8 @@ function config.set_defaults(options)
           end
           local bufname = vim.api.nvim_buf_get_name(0)
           if vim.fn.isdirectory(bufname) == 0 then
-            _, netrw_bufname = pcall(vim.fn.expand, '#:p:h')
+            local _, netrw_buf = pcall(vim.fn.expand, '#:p:h')
+            netrw_bufname = netrw_buf or ''
             return
           end
           if netrw_bufname == bufname then
@@ -73,10 +77,12 @@ function config.set_defaults(options)
           else
             netrw_bufname = bufname
           end
+
           -- Wipe the buffer so you don't leave a dummy buffer open
-          vim.api.nvim_buf_set_option(0, 'bufhidden', 'wipe')
+          vim.api.nvim_buf_delete(0, {})
+
           -- Call your plugin's open function
-          require('fyler').show(bufname)
+          require('fyler').show(netrw_bufname)
         end)
       end,
       desc = 'fyler.nvim replacement for netrw',
