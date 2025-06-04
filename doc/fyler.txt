@@ -14,16 +14,21 @@ Fyler supports plenty of options to customize. Following are default values
 
 >lua
   local defaults = {
-    window_options = {
-      number = true,
-      relativenumbers = true,
+    close_on_open = false,
+    default_explorer = false,
+    view = {
+      icons = {
+        enable = true
+      }
     },
     window_config = {
       width = 0.3,
       split = 'right',
     },
-    hijack_netrw = false,
-    close_on_open = false,
+    window_options = {
+      number = true,
+      relativenumbers = true,
+    },
   }
 
 

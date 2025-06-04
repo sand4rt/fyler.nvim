@@ -4,16 +4,21 @@
 --- >lua
 --- <pre>
 ---   local defaults = {
----     window_options = {
----       number = true,
----       relativenumbers = true,
+---     close_on_open = false,
+---     default_explorer = false,
+---     view = {
+---       icons = {
+---         enable = true
+---       }
 ---     },
 ---     window_config = {
 ---       width = 0.3,
 ---       split = 'right',
 ---     },
----     hijack_netrw = false,
----     close_on_open = false,
+---     window_options = {
+---       number = true,
+---       relativenumbers = true,
+---     },
 ---   }
 --- </pre>
 ---@brief ]]
@@ -24,29 +29,26 @@
 local config = {}
 
 local defaults = {
-  window_options = {
-    number = true,
-    relativenumbers = true,
-  },
+  close_on_open = false,
+  default_explorer = false,
   window_config = {
     width = 0.3,
     split = 'right',
   },
-  hijack_netrw = false,
-  close_on_open = false,
+  window_options = {
+    number = true,
+    relativenumbers = true,
+  },
 }
 
 function config.set_defaults(options)
   config.values = vim.tbl_deep_extend('force', defaults, options or {})
   config.values.augroup = vim.api.nvim_create_augroup('Fyler', { clear = true })
   config.values.namespace = { highlights = vim.api.nvim_create_namespace 'FylerHighlights' }
-
-  if config.values.hijack_netrw then
+  if config.values.default_explorer then
     local netrw_bufname
-
     -- Clear FileExplorer autocmds to prevent netrw from launching
     pcall(vim.api.nvim_clear_autocmds, { group = 'FileExplorer' })
-
     -- Safety: Also clear on VimEnter
     vim.api.nvim_create_autocmd('VimEnter', {
       pattern = '*',
@@ -55,7 +57,6 @@ function config.set_defaults(options)
         pcall(vim.api.nvim_clear_autocmds, { group = 'FileExplorer' })
       end,
     })
-
     vim.api.nvim_create_autocmd('BufEnter', {
       group = vim.api.nvim_create_augroup('FylerHijackNetrw', { clear = true }),
       pattern = '*',
@@ -83,7 +84,6 @@ function config.set_defaults(options)
 
           -- Wipe the buffer so you don't leave a dummy buffer open
           vim.api.nvim_buf_delete(0, {})
-
           -- Launch plugin
           require('fyler').show()
         end)
