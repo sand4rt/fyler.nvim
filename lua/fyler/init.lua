@@ -24,9 +24,8 @@ end
 
 function M.show()
   -- Check if already open
-  local w = state.window.main
-  if w then
-    utils.hide_window(w)
+  if state.window.main then
+    utils.hide_window(state.window.main)
   end
 
   local render_node = RenderNode.new {
@@ -59,6 +58,7 @@ function M.show()
       if state.window_id.user and vim.api.nvim_win_is_valid(state.window_id.user) then
         vim.api.nvim_set_current_win(state.window_id.user)
       end
+
       utils.hide_window(window)
     end,
   })

@@ -12,9 +12,9 @@
 ---       width = 0.3,
 ---       split = 'right',
 ---     },
+---     hijack_netrw = false,
+---     close_on_open = false,
 ---   }
----   hijack_netrw = false,
----   close_on_file_open = false,
 --- </pre>
 ---@brief ]]
 
@@ -33,7 +33,7 @@ local defaults = {
     split = 'right',
   },
   hijack_netrw = false,
-  close_on_file_open = false,
+  close_on_open = false,
 }
 
 function config.set_defaults(options)
@@ -57,7 +57,7 @@ function config.set_defaults(options)
     })
 
     vim.api.nvim_create_autocmd('BufEnter', {
-      group = vim.api.nvim_create_augroup('fyler-hijack-netrw', { clear = true }),
+      group = vim.api.nvim_create_augroup('FylerHijackNetrw', { clear = true }),
       pattern = '*',
       callback = function()
         vim.schedule(function()
@@ -65,12 +65,15 @@ function config.set_defaults(options)
           if vim.bo[0].filetype == 'netrw' then
             return
           end
+
           local bufname = vim.api.nvim_buf_get_name(0)
           if vim.fn.isdirectory(bufname) == 0 then
             local _, netrw_buf = pcall(vim.fn.expand, '#:p:h')
             netrw_bufname = netrw_buf or ''
+
             return
           end
+
           if netrw_bufname == bufname then
             netrw_bufname = nil
             return
@@ -81,8 +84,8 @@ function config.set_defaults(options)
           -- Wipe the buffer so you don't leave a dummy buffer open
           vim.api.nvim_buf_delete(0, {})
 
-          -- Call your plugin's open function
-          require('fyler').show(netrw_bufname)
+          -- Launch plugin
+          require('fyler').show()
         end)
       end,
       desc = 'fyler.nvim replacement for netrw',

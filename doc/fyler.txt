@@ -23,6 +23,7 @@ Fyler supports plenty of options to customize. Following are default values
       split = 'right',
     },
     hijack_netrw = false,
+    close_on_open = false,
   }
 
 

@@ -30,7 +30,7 @@ function actions.toggle_reveal()
       vim.fn.win_gotoid(user_winid)
 
       -- Close the Fyler panel if configured to do so
-      if config.values.close_on_file_open then
+      if config.values.close_on_open then
         utils.hide_window(window)
       end
     else
