@@ -113,11 +113,18 @@ end
 
 ---@param instance Fyler.Window
 function utils.hide_window(instance)
-  if instance.winid and utils.is_valid_win(instance.winid) then
+  -- Only proceed if instance is a table
+  if type(instance) ~= 'table' then
+    return
+  end
+
+  -- Check winid is a number and is a valid window
+  if type(instance.winid) == 'number' and utils.is_valid_win(instance.winid) then
     vim.api.nvim_win_close(instance.winid, true)
   end
 
-  if instance.bufnr and utils.is_valid_buf(instance.bufnr) then
+  -- Check bufnr is a number and is a valid buffer
+  if type(instance.bufnr) == 'number' and utils.is_valid_buf(instance.bufnr) then
     vim.api.nvim_buf_delete(instance.bufnr, { force = true })
   end
 end
