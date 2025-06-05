@@ -5,9 +5,9 @@ local mappings = {}
 mappings.default_mappings = {
   main = {
     n = {
+      ['s'] = actions.synchronize,
       ['q'] = actions.close_current,
       ['<CR>'] = actions.toggle_reveal,
-      ['s'] = actions.synchronize,
     },
   },
 }

@@ -113,7 +113,7 @@ function RenderNode:scan_dir()
 end
 
 function RenderNode:get_equivalent_text()
-  local depth = self:get_depth() * 2
+  local indentation = self:get_depth() * 2
   local text = Text.new {}
   if self.revealed then
     local results = self:scan_dir()
@@ -135,22 +135,13 @@ function RenderNode:get_equivalent_text()
 
     for _, child in ipairs(self.children or {}) do
       local icon, hl = get_node_prefix(child)
-      if child.type == 'directory' then
-        text:append(
-          string.format('%s ', child.meta_key) .. string.format(string.rep(' ', depth) .. '%s %s', icon, child.name),
-          hl
-        )
-      elseif child.type == 'file' then
-        text:append(
-          string.format('%s ', child.meta_key) .. string.format(string.rep(' ', depth) .. '%s %s', icon, child.name),
-          hl
-        )
-      elseif child.type == 'link' then
-        text:append(
-          string.format('%s ', child.meta_key) .. string.format(string.rep(' ', depth) .. '%s %s', icon, child.name),
-          hl
-        )
-      end
+      text
+        :append(string.rep(' ', indentation), 'FylerBlank')
+        :append(icon, hl)
+        :append(' ', 'FylerBlank')
+        :append(child.name, 'FylerParagraph')
+        :append(' ', 'FylerBlank')
+        :append(child.meta_key, 'FylerBlank')
 
       text = text:nl() + child:get_equivalent_text()
     end

@@ -5,19 +5,28 @@ local uv = vim.uv or vim.loop
 ---@param line string
 ---@return integer
 function algos.extract_indentation(line)
-  return #(line:match '^/?%d+(%s*)' or line:match '^(%s*)' or '')
+  if not line then
+    return 0
+  end
+
+  return #line:match '^(%s*)'
 end
 
 ---@param line string
 ---@return integer?
 function algos.extract_meta_key(line)
-  return line:match '^/(%d+)'
+  return line:match '(%d+)$'
 end
 
 ---@param line string
 ---@return string
 function algos.extract_item_name(line)
-  return line:match '^/?%d+%s+[^%s]+%s+(.*)$' or line:match '^%s*(.*)$'
+  if not line then
+    return ''
+  end
+
+  line = line:match '^%s*(.*)'
+  return line:match '^[^%s]+%s+([^%s]+)%s+/%d+$' or line:match '^[^%s]+%s+([^%s]+)$' or line:match '^([^%s]+)$' or ''
 end
 
 ---@alias Fyler.Snapshot.Item { meta_key: string, path: string }

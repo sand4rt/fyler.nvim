@@ -48,6 +48,8 @@ function filesystem.create_fs_item(path)
 
     uv.fs_close(fd)
   end
+
+  vim.notify('CREATE: ' .. path, vim.log.levels.INFO)
 end
 
 ---@param path string
@@ -66,6 +68,7 @@ function filesystem.delete_fs_item(path)
   end
 
   state.render_node[path]:delete_node()
+  vim.notify('DELETE: ' .. path, vim.log.levels.INFO)
 end
 
 return filesystem
