@@ -10,6 +10,7 @@ local highlights = {
   FylerSuccess = { default = true, link = 'String' },
   FylerFailure = { default = true, link = 'Error' },
   FylerWarning = { default = true, link = 'Constant' },
+  FylerBlank = { default = true, link = 'NonText' },
   FylerHiddenCursor = { default = true, nocombine = true, blend = 100 },
 }
 
