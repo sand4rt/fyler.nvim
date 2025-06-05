@@ -1,6 +1,9 @@
 ---@class Fyler.Window.Options
 ---@field width number
----@field split "top"|"right"|"bottom"|"left"
+---@field height? number
+---@field col? number
+---@field row? number
+---@field split? "top"|"right"|"bottom"|"left"
 ---@field enter boolean
 
 ---@class Fyler.Window : Fyler.Window.Options
