@@ -174,7 +174,9 @@ function utils.hide_cursor()
 
   return function()
     vim.go.guicursor = 'a:'
-    vim.go.guicursor = original_guicursor
+    if original_guicursor ~= '' then
+      vim.go.guicursor = original_guicursor
+    end
   end
 end
 
@@ -188,14 +190,15 @@ function utils.confirm(text, callback)
     col = 1 - config.values.window_config.width,
     row = 0,
   }
-
   utils.show_window(window)
+  local restore_cursor = utils.hide_cursor()
   utils.set_keymap {
     mode = 'n',
     lhs = 'y',
     rhs = function()
       utils.hide_window(window)
-      callback(true, window)
+      restore_cursor()
+      callback(true)
     end,
     options = {
       buffer = window.bufnr,
@@ -206,13 +209,13 @@ function utils.confirm(text, callback)
     lhs = 'n',
     rhs = function()
       utils.hide_window(window)
+      restore_cursor()
       callback(false)
     end,
     options = {
       buffer = window.bufnr,
     },
   }
-
   text:render(window.bufnr)
 end
 
