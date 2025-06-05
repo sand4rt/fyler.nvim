@@ -11,6 +11,8 @@ local highlights = {
   FylerFailure = { default = true, link = 'Error' },
   FylerWarning = { default = true, link = 'Constant' },
   FylerBlank = { default = true, link = 'NonText' },
+  FylerHeading = { default = true, link = 'Title' },
+  FylerParagraph = { default = true, link = 'NavicText' },
   FylerHiddenCursor = { default = true, nocombine = true, blend = 100 },
 }
 
