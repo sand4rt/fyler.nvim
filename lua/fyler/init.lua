@@ -85,11 +85,13 @@ function M.show()
         return
       end
 
-      local current_cursor_pos = vim.api.nvim_win_get_cursor(window.winid)
-      local desired_cusor_pos = { current_cursor_pos[1], (current_line:find(node.name, 1, true) or 0) - 1 }
-      if current_cursor_pos[2] < desired_cusor_pos[2] then
-        vim.api.nvim_win_set_cursor(window.winid, desired_cusor_pos)
+      local current_row, current_col = unpack(vim.api.nvim_win_get_cursor(0))
+      local bound, _ = current_line:find '%s+/%d+'
+      if bound and current_col >= bound - 1 then
+        vim.api.nvim_win_set_cursor(0, { current_row, bound - 1 })
       end
+
+      state.cursor = { current_row, current_col }
     end,
   })
 
@@ -108,6 +110,9 @@ function M.show()
   end
 
   render_node:get_equivalent_text():remove_trailing_empty_lines():render(window.bufnr)
+  if not vim.tbl_isempty(state.cursor) then
+    vim.api.nvim_win_set_cursor(window.winid, state.cursor)
+  end
 end
 
 function M.setup(options)
