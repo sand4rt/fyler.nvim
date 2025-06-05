@@ -28,22 +28,29 @@ function M.show()
     utils.hide_window(state.window.main)
   end
 
-  local render_node = RenderNode.new {
-    name = vim.fn.fnamemodify(luv.cwd() or '', ':t'),
-    path = luv.cwd() or vim.fn.getcwd(0),
-    type = 'directory',
-    revealed = true,
-  }
+  -- Check if existing render_node otherwise create new
+  local cwd = luv.cwd() or vim.fn.getcwd(0)
+  local render_node = vim.tbl_isempty(state.render_node[cwd])
+      and RenderNode.new {
+        name = vim.fn.fnamemodify(luv.cwd() or '', ':t'),
+        path = cwd,
+        type = 'directory',
+        revealed = true,
+      }
+    or state.render_node[cwd]
   local window = Window.new {
     enter = true,
     width = config.values.window_config.width,
     split = config.values.window_config.split,
   }
 
+  -- Sync states
   state.window.main = window
   state.window_id.user = vim.api.nvim_get_current_win()
   state.render_node[render_node.path] = render_node
   utils.show_window(window)
+
+  -- Setup options
   utils.set_buf_option(window, 'filetype', 'fyler-main')
   utils.set_buf_option(window, 'syntax', 'fyler')
   utils.set_win_option(window, 'number', config.values.window_options.number)
@@ -62,6 +69,8 @@ function M.show()
       utils.hide_window(window)
     end,
   })
+
+  -- Constrain cursor position
   utils.create_autocmd('CursorMoved', {
     buffer = window.bufnr,
     callback = function()
@@ -84,6 +93,7 @@ function M.show()
     end,
   })
 
+  -- Apply mappings
   for mode, mappings in pairs(require('fyler.mappings').default_mappings.main or {}) do
     for k, v in pairs(mappings) do
       utils.set_keymap {
