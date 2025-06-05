@@ -195,7 +195,7 @@ function utils.confirm(text, callback)
     lhs = 'y',
     rhs = function()
       utils.hide_window(window)
-      callback(true)
+      callback(true, window)
     end,
     options = {
       buffer = window.bufnr,

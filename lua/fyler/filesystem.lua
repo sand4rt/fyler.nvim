@@ -20,13 +20,16 @@ function filesystem.synchronize_from_buffer(callback)
   local changes_text = Text.new {}
   for change_group, change_list in pairs(changes) do
     for _, change in ipairs(change_list) do
+      changes_text:append(string.upper(change_group), 'FylerHeading')
       if type(change) == 'table' then
-      else
         changes_text
-          :append(string.upper(change_group), 'FylerHeading')
           :append(' ', 'FylerBlank')
-          :append(change, 'FylerParagraph')
+          :append(string.format('%s -> %s', change.from, change.to), 'FylerParagraph')
+      else
+        changes_text:append(' ', 'FylerBlank'):append(change, 'FylerParagraph')
       end
+
+      changes_text:nl()
     end
   end
 
