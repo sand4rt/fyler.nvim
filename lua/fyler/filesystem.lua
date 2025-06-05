@@ -1,21 +1,49 @@
+local Text = require 'fyler.lib.text'
 local algos = require 'fyler.algos'
 local state = require 'fyler.state'
+local utils = require 'fyler.utils'
 local filesystem = {}
 local uv = vim.uv or vim.loop
 
-function filesystem.synchronize_from_buffer()
+---@param callback function
+function filesystem.synchronize_from_buffer(callback)
   local window = state.window.main
   local buf_lines = vim.api.nvim_buf_get_lines(window.bufnr, 0, -1, false)
   local changes = algos.get_changes(
     algos.get_snapshot_from_render_node(state.render_node[uv.cwd() or vim.fn.getcwd(0)]),
     algos.get_snapshot_from_buf_lines(buf_lines)
   )
-  for _, change in ipairs(changes.create) do
-    filesystem.create_fs_item(change)
+  if vim.tbl_isempty(changes.create) and vim.tbl_isempty(changes.delete) and vim.tbl_isempty(changes.move) then
+    return
   end
-  for _, change in ipairs(changes.delete) do
-    filesystem.delete_fs_item(change)
+
+  local changes_text = Text.new {}
+  for change_group, change_list in pairs(changes) do
+    for _, change in ipairs(change_list) do
+      if type(change) == 'table' then
+      else
+        changes_text
+          :append(string.upper(change_group), 'FylerHeading')
+          :append(' ', 'FylerBlank')
+          :append(change, 'FylerParagraph')
+      end
+    end
   end
+
+  changes_text:nl(2):append('[Y]es', 'FylerSuccess'):append('  ', 'FylerBlank'):append('[N]o', 'FylerFailure')
+  utils.confirm(changes_text, function(confirmation)
+    if confirmation then
+      for _, change in ipairs(changes.create) do
+        filesystem.create_fs_item(change)
+      end
+
+      for _, change in ipairs(changes.delete) do
+        filesystem.delete_fs_item(change)
+      end
+    end
+
+    callback()
+  end)
 end
 
 ---@param path string

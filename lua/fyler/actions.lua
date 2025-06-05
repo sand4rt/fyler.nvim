@@ -47,8 +47,9 @@ end
 function actions.synchronize()
   local render_node = state.render_node[uv.cwd() or vim.fn.getcwd(0)]
   local window = state.window.main
-  filesystem.synchronize_from_buffer()
-  render_node:get_equivalent_text():remove_trailing_empty_lines():render(window.bufnr)
+  filesystem.synchronize_from_buffer(function()
+    render_node:get_equivalent_text():remove_trailing_empty_lines():render(window.bufnr)
+  end)
 end
 
 return require('fyler.lib.action').transform_mod(actions)

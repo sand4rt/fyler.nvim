@@ -21,14 +21,38 @@ function utils.is_valid_win(winid)
   return vim.api.nvim_win_is_valid(winid)
 end
 
+---@return integer, integer
+local function get_view_size()
+  local vw = vim.o.columns
+  local vh = vim.o.lines - vim.o.cmdheight
+
+  if vim.o.laststatus ~= 0 then
+    vh = vh - 1
+  end
+
+  return vw, vh
+end
+
 ---@param window_instance Fyler.Window
 ---@return vim.api.keyset.win_config
 function utils.get_win_config(window_instance)
-  return {
-    style = 'minimal',
-    width = math.ceil(window_instance.width * vim.o.columns),
-    split = window_instance.split,
-  }
+  if window_instance.split then
+    return {
+      style = 'minimal',
+      width = math.ceil(window_instance.width * vim.o.columns),
+      split = window_instance.split,
+    }
+  else
+    local vw, vh = get_view_size()
+    return {
+      relative = 'editor',
+      style = 'minimal',
+      width = math.ceil(window_instance.width * vim.o.columns),
+      height = math.ceil(window_instance.height * vim.o.lines),
+      col = math.floor(window_instance.col * vw),
+      row = math.floor(window_instance.row * vh),
+    }
+  end
 end
 
 ---@param instance Fyler.Window
@@ -152,6 +176,44 @@ function utils.hide_cursor()
     vim.go.guicursor = 'a:'
     vim.go.guicursor = original_guicursor
   end
+end
+
+---@param text Fyler.Text
+---@param callback function
+function utils.confirm(text, callback)
+  local window = require('fyler.lib.window').new {
+    enter = true,
+    width = config.values.window_config.width,
+    height = 1,
+    col = 1 - config.values.window_config.width,
+    row = 0,
+  }
+
+  utils.show_window(window)
+  utils.set_keymap {
+    mode = 'n',
+    lhs = 'y',
+    rhs = function()
+      utils.hide_window(window)
+      callback(true)
+    end,
+    options = {
+      buffer = window.bufnr,
+    },
+  }
+  utils.set_keymap {
+    mode = 'n',
+    lhs = 'n',
+    rhs = function()
+      utils.hide_window(window)
+      callback(false)
+    end,
+    options = {
+      buffer = window.bufnr,
+    },
+  }
+
+  text:render(window.bufnr)
 end
 
 return utils
