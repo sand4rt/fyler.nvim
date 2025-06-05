@@ -1,5 +1,3 @@
-local State = {}
-
 local function create_nested_table()
   return setmetatable({}, {
     __index = function(tbl, key)
@@ -10,7 +8,7 @@ local function create_nested_table()
   })
 end
 
-setmetatable(State, {
+return setmetatable({}, {
   __index = function(tbl, key)
     rawset(tbl, key, create_nested_table())
 
@@ -24,5 +22,3 @@ setmetatable(State, {
     rawset(tbl, key, val)
   end,
 })
-
-return State
