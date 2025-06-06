@@ -62,28 +62,25 @@ end
 function filesystem.create_fs_item(path)
   local stat = uv.fs_stat(path)
   if stat then
-    return
+    error 'Item already exist'
   end
 
   local path_type = string.sub(path, -1) == '/' and 'directory' or 'file'
   if path_type == 'directory' then
-    local success = vim.fn.mkdir(path, 'p')
-    if not success then
-      return
+    if not vim.fn.mkdir(path, 'p') then
+      error 'Unable to create directory'
     end
   else
     local parent_path = vim.fn.fnamemodify(path, ':h')
     if vim.fn.isdirectory(path) == 0 then
-      local success = vim.fn.mkdir(parent_path, 'p')
-      if not success then
-        return
+      if not vim.fn.mkdir(parent_path, 'p') then
+        error 'Unable to create directory'
       end
     end
 
     local fd, err, err_name = uv.fs_open(path, 'w', 438)
     if not fd or err then
-      vim.notify(err .. err_name, vim.log.levels.ERROR, { title = 'Fyler.nvim' })
-      return
+      error('Unable to create file: ' .. err_name .. err)
     end
 
     uv.fs_close(fd)
@@ -96,7 +93,7 @@ end
 function filesystem.delete_fs_item(path)
   local stat = uv.fs_stat(path)
   if not stat then
-    return
+    error 'Item already exists'
   end
 
   if stat.type == 'directory' then
@@ -104,7 +101,7 @@ function filesystem.delete_fs_item(path)
   elseif stat.type == 'file' then
     vim.fn.delete(path)
   else
-    vim.notify('Unable to delete item', vim.log.levels.ERROR)
+    error 'Unable to delete item'
   end
 
   state.render_node[path]:delete_node()
