@@ -14,7 +14,7 @@ Fyler supports plenty of options to customize. Following are default values
 
 >lua
   local defaults = {
-    close_on_open = false,
+    close_on_open = true,
     default_explorer = false,
     view = {
       icons = {
