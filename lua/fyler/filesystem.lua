@@ -52,6 +52,10 @@ function filesystem.synchronize_from_buffer(callback)
       for _, change in ipairs(changes.delete) do
         filesystem.delete_fs_item(change)
       end
+
+      for _, change in ipairs(changes.move) do
+        filesystem.move_fs_item(change.from, change.to)
+      end
     end
 
     callback()
@@ -93,7 +97,7 @@ end
 function filesystem.delete_fs_item(path)
   local stat = uv.fs_stat(path)
   if not stat then
-    error 'Item already exists'
+    error 'Item does not exists'
   end
 
   if stat.type == 'directory' then
@@ -106,6 +110,25 @@ function filesystem.delete_fs_item(path)
 
   state.render_node[path]:delete_node()
   vim.notify('DELETE: ' .. path, vim.log.levels.INFO)
+end
+
+---@param from string
+---@param to string
+function filesystem.move_fs_item(from, to)
+  local from_stat = uv.fs_stat(from)
+  if not from_stat then
+    error 'Item does not exists'
+  end
+
+  local parent_dir = vim.fn.fnamemodify(to, ':h')
+  local parent_stat = uv.fs_stat(parent_dir)
+  if not parent_stat then
+    filesystem.create_fs_item(parent_dir .. '/')
+  end
+
+  uv.fs_rename(from, to)
+  state.render_node[from]:delete_node()
+  vim.notify('MOVE: ' .. from .. ' ' .. to, vim.log.levels.INFO)
 end
 
 return filesystem

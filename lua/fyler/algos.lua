@@ -89,14 +89,14 @@ end
 
 ---@return { create: string[], delete: string[], move: { from: string, to: string }[] }
 function algos.get_changes(old_snapshot, new_snapshot)
-  local function has_snapshot_item(meta_key, snapshot)
+  local function find_snapshot_item(meta_key, snapshot)
     for _, item in ipairs(snapshot) do
       if item.meta_key == meta_key then
-        return true
+        return item
       end
     end
 
-    return false
+    return nil
   end
 
   local changes = { create = {}, delete = {}, move = {} }
@@ -107,8 +107,15 @@ function algos.get_changes(old_snapshot, new_snapshot)
   end
 
   for _, item in ipairs(old_snapshot) do
-    if not has_snapshot_item(item.meta_key, new_snapshot) then
+    if not find_snapshot_item(item.meta_key, new_snapshot) then
       table.insert(changes.delete, item.path)
+    end
+  end
+
+  for _, item in ipairs(old_snapshot) do
+    local mirror_item = find_snapshot_item(item.meta_key, new_snapshot)
+    if mirror_item and item.path ~= mirror_item.path then
+      table.insert(changes.move, { from = item.path, to = mirror_item.path })
     end
   end
 
