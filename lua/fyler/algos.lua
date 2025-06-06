@@ -44,9 +44,13 @@ function algos.get_snapshot_from_render_node(render_node)
   end
 
   for _, child in ipairs(render_node.children) do
-    local child_entries = algos.get_snapshot_from_render_node(child)
-    for _, entry in ipairs(child_entries) do
-      table.insert(snapshot, entry)
+    if child.revealed then
+      local child_entries = algos.get_snapshot_from_render_node(child)
+      for _, entry in ipairs(child_entries) do
+        table.insert(snapshot, entry)
+      end
+    else
+      table.insert(snapshot, { meta_key = algos.extract_meta_key(child.meta_key), path = child.path })
     end
   end
 
