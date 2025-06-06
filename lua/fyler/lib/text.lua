@@ -121,4 +121,19 @@ function Text:render(bufnr)
   end
 end
 
+---@return integer
+function Text:get_max_span()
+  local max_span = 0
+  for _, line in ipairs(self.lines) do
+    local curr_span = 0
+    for _, word in ipairs(line.words) do
+      curr_span = curr_span + #word.str
+    end
+
+    max_span = math.max(max_span, curr_span)
+  end
+
+  return max_span
+end
+
 return Text

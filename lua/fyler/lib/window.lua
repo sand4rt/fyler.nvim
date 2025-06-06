@@ -1,9 +1,14 @@
 ---@class Fyler.Window.Options
 ---@field width number
 ---@field height? number
+---@field width_delta? integer
+---@field height_delta? integer
 ---@field col? number
 ---@field row? number
+---@field col_delta? integer
+---@field row_delta? integer
 ---@field split? "top"|"right"|"bottom"|"left"
+---@field border? string
 ---@field enter boolean
 
 ---@class Fyler.Window : Fyler.Window.Options

@@ -32,7 +32,7 @@ local defaults = {
   close_on_open = true,
   default_explorer = false,
   window_config = {
-    width = 0.3,
+    width = 0.4,
     split = 'right',
   },
   window_options = {

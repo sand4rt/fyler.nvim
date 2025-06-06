@@ -47,10 +47,11 @@ function utils.get_win_config(window_instance)
     return {
       relative = 'editor',
       style = 'minimal',
-      width = math.ceil(window_instance.width * vim.o.columns),
-      height = math.ceil(window_instance.height * vim.o.lines),
-      col = math.floor(window_instance.col * vw),
-      row = math.floor(window_instance.row * vh),
+      width = math.min(math.ceil(window_instance.width * vim.o.columns) + window_instance.width_delta, vw),
+      height = math.min(math.ceil(window_instance.height * vim.o.lines) + window_instance.height_delta, vh),
+      col = math.min(math.floor(window_instance.col * vw) + window_instance.col_delta, vw),
+      row = math.min(math.floor(window_instance.row * vh) + window_instance.row_delta, vh),
+      border = window_instance.border,
     }
   end
 end
@@ -183,15 +184,39 @@ end
 ---@param text Fyler.Text
 ---@param callback function
 function utils.confirm(text, callback)
-  local window = require('fyler.lib.window').new {
+  local vw, vh = get_view_size()
+  local window_options = {
     enter = true,
-    width = config.values.window_config.width,
-    height = 1,
-    col = 1 - config.values.window_config.width,
+    width = 0,
+    height = 0,
+    width_delta = text:get_max_span() + 1,
+    height_delta = #text.lines + 1,
+    col = 0,
     row = 0,
+    border = 'rounded',
   }
-  utils.show_window(window)
+  window_options.col_delta = math.floor((vw - window_options.width_delta) * 0.5)
+  window_options.row_delta = math.floor((vh - window_options.height_delta) * 0.5)
+
+  local window = require('fyler.lib.window').new(window_options)
   local restore_cursor = utils.hide_cursor()
+  utils.show_window(window)
+  utils.set_buf_option(window, 'modifiable', false)
+
+  utils.set_win_option(
+    window,
+    'winhighlight',
+    table.concat({ 'Normal:Normal', 'FloatBorder:FloatBorder', 'FloatTitle:FloatTitle' }, ',')
+  )
+
+  utils.create_autocmd('WinClosed', {
+    buffer = window.bufnr,
+    callback = function()
+      utils.hide_window(window)
+      restore_cursor()
+    end,
+  })
+
   utils.set_keymap {
     mode = 'n',
     lhs = 'y',
@@ -216,7 +241,17 @@ function utils.confirm(text, callback)
       buffer = window.bufnr,
     },
   }
-  text:render(window.bufnr)
+
+  local button_success = '(Y)es '
+  local button_failure = ' (N)o'
+  local columns = vim.api.nvim_win_get_width(window.winid)
+  text
+    :nl()
+    :append(string.rep(' ', math.floor((columns - #(button_success .. button_failure)) * 0.5)), 'FylerBlank')
+    :append(button_success, 'FylerSuccess')
+    :append(button_failure, 'FylerFailure')
+    :append(string.rep(' ', math.floor((columns - #(button_success .. button_failure)) * 0.5)), 'FylerBlank')
+    :render(window.bufnr)
 end
 
 return utils

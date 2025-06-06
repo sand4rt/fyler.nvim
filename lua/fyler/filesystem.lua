@@ -17,14 +17,24 @@ function filesystem.synchronize_from_buffer(callback)
     return
   end
 
+  local group_hl = setmetatable({
+    create = 'FylerSuccess',
+    delete = 'FylerFailure',
+    move = 'FylerWarning',
+  }, {
+    __index = function()
+      error 'Operation type not supported'
+    end,
+  })
+
   local changes_text = Text.new {}
   for change_group, change_list in pairs(changes) do
     for _, change in ipairs(change_list) do
-      changes_text:append(string.upper(change_group), 'FylerHeading')
+      changes_text:append(' ' .. string.upper(change_group), group_hl[change_group])
       if type(change) == 'table' then
         changes_text
           :append(' ', 'FylerBlank')
-          :append(string.format('%s -> %s', change.from, change.to), 'FylerParagraph')
+          :append(string.format('%s  %s', change.from, change.to), 'FylerParagraph')
       else
         changes_text:append(' ', 'FylerBlank'):append(change, 'FylerParagraph')
       end
@@ -33,7 +43,6 @@ function filesystem.synchronize_from_buffer(callback)
     end
   end
 
-  changes_text:nl(2):append('[Y]es', 'FylerSuccess'):append('  ', 'FylerBlank'):append('[N]o', 'FylerFailure')
   utils.confirm(changes_text, function(confirmation)
     if confirmation then
       for _, change in ipairs(changes.create) do
