@@ -135,15 +135,14 @@ function RenderNode:get_equivalent_text()
 
     for _, child in ipairs(self.children or {}) do
       local icon, hl = get_node_prefix(child)
-      text
+      text = text
         :append(string.rep(' ', indentation), 'FylerBlank')
         :append(icon, hl)
         :append(' ', 'FylerBlank')
         :append(child.name, 'FylerParagraph')
         :append(' ', 'FylerBlank')
         :append(child.meta_key, 'FylerBlank')
-
-      text = text:nl() + child:get_equivalent_text()
+        :nl() .. child:get_equivalent_text()
     end
   end
 

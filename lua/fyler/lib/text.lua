@@ -13,7 +13,7 @@ local Text = {}
 function Text.new(options)
   return setmetatable({}, {
     __index = Text,
-    __add = function(t1, t2)
+    __concat = function(t1, t2)
       if #t1.lines == 0 then
         return t2
       end
