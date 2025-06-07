@@ -22,14 +22,20 @@ function M.hide()
   utils.hide_window(state.window.main)
 end
 
-function M.show()
+---@param options table
+function M.show(options)
   -- Check if already open
   if state.window.main then
     utils.hide_window(state.window.main)
   end
 
+  -- Clear state for fresh startup
+  for k, _ in pairs(state) do
+    state[k] = nil
+  end
+
   -- Check if existing render_node otherwise create new
-  local cwd = luv.cwd() or vim.fn.getcwd(0)
+  local cwd = options.cwd or luv.cwd() or vim.fn.getcwd(0)
   local render_node = vim.tbl_isempty(state.render_node[cwd])
       and RenderNode.new {
         name = vim.fn.fnamemodify(luv.cwd() or '', ':t'),
@@ -41,7 +47,7 @@ function M.show()
   local window = Window.new {
     enter = true,
     width = config.values.window_config.width,
-    split = config.values.window_config.split,
+    split = options.split or config.values.window_config.split,
   }
 
   -- Sync states
@@ -129,6 +135,7 @@ function M.setup(options)
         pcall(vim.api.nvim_clear_autocmds, { group = 'FileExplorer' })
       end,
     })
+
     vim.api.nvim_create_autocmd('BufEnter', {
       group = vim.api.nvim_create_augroup('FylerHijackNetrw', { clear = true }),
       pattern = '*',
@@ -164,7 +171,5 @@ function M.setup(options)
     })
   end
 end
-
-vim.api.nvim_create_user_command('Fyler', M.show, { nargs = 0 })
 
 return M
