@@ -136,9 +136,16 @@ function M.setup(options)
       callback = function()
         local arg_path = vim.fn.argv(0)
         local first_arg = type(arg_path) == 'string' and arg_path or arg_path[1]
-        if vim.fn.isdirectory(first_arg) then
-          require('fyler').show { cwd = arg_path }
+        if vim.fn.isdirectory(first_arg) == 0 then
+          return
         end
+
+        local current_bufnr = vim.api.nvim_get_current_buf()
+        if utils.is_valid_buf(current_bufnr) then
+          vim.api.nvim_buf_delete(current_bufnr, { force = true })
+        end
+
+        require('fyler').show { cwd = arg_path }
       end,
     })
   end

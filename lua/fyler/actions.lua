@@ -4,7 +4,6 @@ local filesystem = require 'fyler.filesystem'
 local state = require 'fyler.state'
 local utils = require 'fyler.utils'
 local actions = {}
-local uv = vim.uv or vim.loop
 
 function actions.close_current()
   local match = vim.bo.filetype:match '^[^-]+-(.+)$'

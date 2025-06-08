@@ -71,13 +71,13 @@ function filesystem.create_fs_item(path)
 
   local path_type = string.sub(path, -1) == '/' and 'directory' or 'file'
   if path_type == 'directory' then
-    if not vim.fn.mkdir(path, 'p') then
+    if vim.fn.mkdir(path, 'p') == 0 then
       error 'Unable to create directory'
     end
   else
     local parent_path = vim.fn.fnamemodify(path, ':h')
     if vim.fn.isdirectory(path) == 0 then
-      if not vim.fn.mkdir(parent_path, 'p') then
+      if vim.fn.mkdir(parent_path, 'p') == 0 then
         error 'Unable to create directory'
       end
     end

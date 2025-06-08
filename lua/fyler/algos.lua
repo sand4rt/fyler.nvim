@@ -1,6 +1,5 @@
 local state = require 'fyler.state'
 local algos = {}
-local uv = vim.uv or vim.loop
 
 ---@param line string
 ---@return integer
