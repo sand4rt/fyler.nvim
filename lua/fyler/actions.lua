@@ -18,11 +18,14 @@ function actions.toggle_reveal()
   local meta_key = algos.extract_meta_key(current_line)
   local window = state.window.main
   local user_winid = state.window_id.user
-  local render_node = state.render_node[uv.cwd() or vim.fn.getcwd(0)]
+  local render_node = state.render_node[state.cwd]
   local metadata = state.meta_data[meta_key]
   if metadata.type == 'directory' then
-    render_node:toggle_reveal(metadata.path)
-    render_node:get_equivalent_text():remove_trailing_empty_lines():render(window.bufnr)
+    local target_node = render_node:find(metadata.path)
+    if target_node then
+      target_node.revealed = not target_node.revealed
+      render_node:get_equivalent_text():remove_trailing_empty_lines():render(window.bufnr)
+    end
   else
     -- Check if the user window still exists
     if user_winid and vim.api.nvim_win_is_valid(user_winid) then
@@ -45,7 +48,7 @@ function actions.toggle_reveal()
 end
 
 function actions.synchronize()
-  local render_node = state.render_node[uv.cwd() or vim.fn.getcwd(0)]
+  local render_node = state.render_node[state.cwd]
   local window = state.window.main
   filesystem.synchronize_from_buffer(function()
     render_node:get_equivalent_text():remove_trailing_empty_lines():render(window.bufnr)

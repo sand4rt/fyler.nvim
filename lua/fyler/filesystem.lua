@@ -10,7 +10,7 @@ function filesystem.synchronize_from_buffer(callback)
   local window = state.window.main
   local buf_lines = vim.api.nvim_buf_get_lines(window.bufnr, 0, -1, false)
   local changes = algos.get_changes(
-    algos.get_snapshot_from_render_node(state.render_node[uv.cwd() or vim.fn.getcwd(0)]),
+    algos.get_snapshot_from_render_node(state.render_node[state.cwd]),
     algos.get_snapshot_from_buf_lines(buf_lines)
   )
   if vim.tbl_isempty(changes.create) and vim.tbl_isempty(changes.delete) and vim.tbl_isempty(changes.move) then

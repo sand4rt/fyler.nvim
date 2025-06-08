@@ -14,7 +14,7 @@ local algos = require 'fyler.algos'
 local config = require 'fyler.config'
 local state = require 'fyler.state'
 local utils = require 'fyler.utils'
-local luv = vim.uv or vim.loop
+local uv = vim.uv or vim.loop
 
 local M = {}
 
@@ -22,8 +22,9 @@ function M.hide()
   utils.hide_window(state.window.main)
 end
 
----@param options table
+---@param options? table
 function M.show(options)
+  options = options or {}
   -- Check if already open
   if state.window.main then
     utils.hide_window(state.window.main)
@@ -35,15 +36,15 @@ function M.show(options)
   end
 
   -- Check if existing render_node otherwise create new
-  local cwd = options.cwd or luv.cwd() or vim.fn.getcwd(0)
-  local render_node = vim.tbl_isempty(state.render_node[cwd])
+  state.cwd = options.cwd or uv.cwd() or vim.fn.getcwd(0)
+  local render_node = vim.tbl_isempty(state.render_node[state.cwd])
       and RenderNode.new {
-        name = vim.fn.fnamemodify(luv.cwd() or '', ':t'),
-        path = cwd,
+        name = vim.fn.fnamemodify(state.cwd, ':t'),
+        path = state.cwd,
         type = 'directory',
         revealed = true,
       }
-    or state.render_node[cwd]
+    or state.render_node[state.cwd]
   local window = Window.new {
     enter = true,
     width = config.values.window_config.width,
@@ -124,50 +125,21 @@ end
 function M.setup(options)
   config.set_defaults(options)
   if config.values.default_explorer then
-    local netrw_bufname
-    -- Clear FileExplorer autocmds to prevent netrw from launching
-    pcall(vim.api.nvim_clear_autocmds, { group = 'FileExplorer' })
-    -- Safety: Also clear on VimEnter
+    vim.g.loaded_netrw = 1
+    vim.g.loaded_netrwPlugin = 1
+    -- If netrw was already loaded, clear this augroup
+    if vim.fn.exists '#FileExplorer' then
+      vim.api.nvim_create_augroup('FileExplorer', { clear = true })
+    end
+
     vim.api.nvim_create_autocmd('VimEnter', {
-      pattern = '*',
-      once = true,
       callback = function()
-        pcall(vim.api.nvim_clear_autocmds, { group = 'FileExplorer' })
+        local arg_path = vim.fn.argv(0)
+        local first_arg = type(arg_path) == 'string' and arg_path or arg_path[1]
+        if vim.fn.isdirectory(first_arg) then
+          require('fyler').show { cwd = arg_path }
+        end
       end,
-    })
-
-    vim.api.nvim_create_autocmd('BufEnter', {
-      group = vim.api.nvim_create_augroup('FylerHijackNetrw', { clear = true }),
-      pattern = '*',
-      callback = function()
-        vim.schedule(function()
-          -- Don't hijack if already in netrw
-          if vim.bo[0].filetype == 'netrw' then
-            return
-          end
-
-          local bufname = vim.api.nvim_buf_get_name(0)
-          if vim.fn.isdirectory(bufname) == 0 then
-            local _, netrw_buf = pcall(vim.fn.expand, '#:p:h')
-            netrw_bufname = netrw_buf or ''
-
-            return
-          end
-
-          if netrw_bufname == bufname then
-            netrw_bufname = nil
-            return
-          else
-            netrw_bufname = bufname
-          end
-
-          -- Wipe the buffer so you don't leave a dummy buffer open
-          vim.api.nvim_buf_delete(0, {})
-          -- Launch plugin
-          require('fyler').show()
-        end)
-      end,
-      desc = 'fyler.nvim replacement for netrw',
     })
   end
 end
