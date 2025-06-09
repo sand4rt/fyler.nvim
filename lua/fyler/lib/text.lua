@@ -81,7 +81,7 @@ end
 
 ---@param bufnr integer
 function Text:render(bufnr)
-  local ns = require('fyler.config').values.namespace
+  local ns_highlights = vim.api.nvim_create_namespace 'FylerHighlights'
   local start_line = 0
   if not (bufnr and vim.api.nvim_buf_is_valid(bufnr)) then
     return
@@ -102,12 +102,12 @@ function Text:render(bufnr)
   end
 
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, virt_lines)
-  vim.api.nvim_buf_clear_namespace(bufnr, ns.highlights, 0, -1)
+  vim.api.nvim_buf_clear_namespace(bufnr, ns_highlights, 0, -1)
   for i, line in ipairs(self.lines) do
     local col = self.left_margin
     for _, segment in ipairs(line.words) do
       if segment.hl and segment.hl ~= '' then
-        vim.api.nvim_buf_set_extmark(bufnr, ns.highlights, start_line + i - 1, col, {
+        vim.api.nvim_buf_set_extmark(bufnr, ns_highlights, start_line + i - 1, col, {
           end_col = col + #segment.str,
           hl_group = segment.hl,
         })
@@ -119,6 +119,8 @@ function Text:render(bufnr)
   if not was_modifiable then
     vim.bo[bufnr].modifiable = false
   end
+
+  vim.bo[bufnr].modified = false
 end
 
 ---@return integer

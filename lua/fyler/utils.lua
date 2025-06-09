@@ -118,14 +118,6 @@ function utils.set_keymap(key_config)
   end
 end
 
----@param events string|string[]
----@param options vim.api.keyset.create_autocmd
-function utils.create_autocmd(events, options)
-  options = options or {}
-  options.group = config.values.augroup
-  vim.api.nvim_create_autocmd(events, options)
-end
-
 ---@param instance Fyler.Window
 function utils.show_window(instance)
   if instance.winid and utils.is_valid_win(instance.winid) then
@@ -183,7 +175,7 @@ end
 
 ---@param text Fyler.Text
 ---@param callback function
-function utils.confirm(text, callback)
+utils.confirm = vim.schedule_wrap(function(text, callback)
   local vw, vh = get_view_size()
   local window_options = {
     enter = true,
@@ -209,7 +201,8 @@ function utils.confirm(text, callback)
     table.concat({ 'Normal:Normal', 'FloatBorder:FloatBorder', 'FloatTitle:FloatTitle' }, ',')
   )
 
-  utils.create_autocmd('WinClosed', {
+  vim.api.nvim_create_autocmd('WinClosed', {
+    group = vim.api.nvim_create_augroup('Fyler', { clear = true }),
     buffer = window.bufnr,
     callback = function()
       utils.hide_window(window)
@@ -252,6 +245,6 @@ function utils.confirm(text, callback)
     :append(button_failure, 'FylerFailure')
     :append(string.rep(' ', math.floor((columns - #(button_success .. button_failure)) * 0.5)), 'FylerBlank')
     :render(window.bufnr)
-end
+end)
 
 return utils

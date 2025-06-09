@@ -66,8 +66,9 @@ function M.show(options)
   utils.set_win_option(window, 'cursorline', true)
   utils.set_win_option(window, 'conceallevel', 3)
   utils.set_win_option(window, 'concealcursor', 'nvic')
-  utils.create_autocmd('WinClosed', {
   vim.api.nvim_buf_set_name(window.bufnr, string.format('fyler://%s', state.cwd))
+  vim.api.nvim_create_autocmd('WinClosed', {
+    group = vim.api.nvim_create_augroup('Fyler', { clear = true }),
     buffer = window.bufnr,
     callback = function()
       -- Switch to the user's original window before hiding
@@ -80,7 +81,8 @@ function M.show(options)
   })
 
   -- Constrain cursor position
-  utils.create_autocmd('CursorMoved', {
+  vim.api.nvim_create_autocmd('CursorMoved', {
+    group = vim.api.nvim_create_augroup('Fyler', { clear = true }),
     buffer = window.bufnr,
     callback = function()
       local current_line = vim.api.nvim_get_current_line()

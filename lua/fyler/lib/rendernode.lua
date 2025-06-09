@@ -166,12 +166,4 @@ function RenderNode:find(path)
   return nil
 end
 
----@param path string
-function RenderNode:toggle_reveal(path)
-  local node = self:find(path)
-  if node then
-    node.revealed = not node.revealed
-  end
-end
-
 return RenderNode
