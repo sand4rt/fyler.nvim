@@ -31,12 +31,16 @@ function M.show(options)
   end
 
   -- Clear state for fresh startup
-  for k, _ in pairs(state) do
-    state[k] = nil
+  if options.cwd and options.cwd ~= state.cwd then
+    for k, _ in pairs(state) do
+      state[k] = nil
+    end
+
+    state.cwd = options.cwd or uv.cwd() or vim.fn.getcwd(0)
+  else
+    state.cwd = uv.cwd() or vim.fn.getcwd(0)
   end
 
-  -- Check if existing render_node otherwise create new
-  state.cwd = options.cwd or uv.cwd() or vim.fn.getcwd(0)
   local render_node = vim.tbl_isempty(state.render_node[state.cwd])
       and RenderNode.new {
         name = vim.fn.fnamemodify(state.cwd, ':t'),
