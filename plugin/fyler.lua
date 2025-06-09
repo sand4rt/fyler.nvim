@@ -20,6 +20,14 @@ for k, v in pairs(highlights) do
   vim.api.nvim_set_hl(0, k, v)
 end
 
+-- TODO: Have to research more about `BufWriteCmd`
+vim.api.nvim_create_autocmd('BufWriteCmd', {
+  pattern = 'fyler://*',
+  callback = function()
+    require('fyler.actions').synchronize()
+  end,
+})
+
 vim.api.nvim_create_user_command('Fyler', function(args)
   local options = {}
   for _, farg in ipairs(args.fargs) do

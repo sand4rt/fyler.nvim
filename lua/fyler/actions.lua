@@ -54,4 +54,14 @@ function actions.synchronize()
   end)
 end
 
+function actions._synchronize()
+  vim.notify(
+    'Save buffer with `:write` to synchronize changes, Key support will no longer be available',
+    vim.log.levels.WARN,
+    { title = 'fyler.nvim (deprecation warning)' }
+  )
+
+  actions.synchronize()
+end
+
 return require('fyler.lib.action').transform_mod(actions)

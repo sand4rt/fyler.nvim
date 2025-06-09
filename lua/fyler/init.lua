@@ -129,14 +129,6 @@ end
 function M.setup(options)
   config.set_defaults(options)
 
-  -- TODO: Have to research more about `BufWriteCmd`
-  vim.api.nvim_create_autocmd('BufWriteCmd', {
-    pattern = 'fyler://*',
-    callback = function()
-      require('fyler.actions').synchronize()
-    end,
-  })
-
   if config.values.default_explorer then
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1

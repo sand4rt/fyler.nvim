@@ -1,4 +1,3 @@
-local config = require 'fyler.config'
 local utils = {}
 
 ---@param bufnr? integer
