@@ -60,12 +60,14 @@ function M.show(options)
   -- Setup options
   utils.set_buf_option(window, 'filetype', 'fyler-main')
   utils.set_buf_option(window, 'syntax', 'fyler')
+  utils.set_buf_option(window, 'buftype', 'acwrite')
   utils.set_win_option(window, 'number', config.values.window_options.number)
   utils.set_win_option(window, 'relativenumber', config.values.window_options.relativenumber)
   utils.set_win_option(window, 'cursorline', true)
   utils.set_win_option(window, 'conceallevel', 3)
   utils.set_win_option(window, 'concealcursor', 'nvic')
   utils.create_autocmd('WinClosed', {
+  vim.api.nvim_buf_set_name(window.bufnr, string.format('fyler://%s', state.cwd))
     buffer = window.bufnr,
     callback = function()
       -- Switch to the user's original window before hiding
@@ -124,6 +126,15 @@ end
 
 function M.setup(options)
   config.set_defaults(options)
+
+  -- TODO: Have to research more about `BufWriteCmd`
+  vim.api.nvim_create_autocmd('BufWriteCmd', {
+    pattern = 'fyler://*',
+    callback = function()
+      require('fyler.actions').synchronize()
+    end,
+  })
+
   if config.values.default_explorer then
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
@@ -133,6 +144,7 @@ function M.setup(options)
     end
 
     vim.api.nvim_create_autocmd('VimEnter', {
+      group = vim.api.nvim_create_augroup('Fyler', { clear = true }),
       callback = function()
         local arg_path = vim.fn.argv(0)
         local first_arg = type(arg_path) == 'string' and arg_path or arg_path[1]
