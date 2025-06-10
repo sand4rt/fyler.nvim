@@ -11,6 +11,15 @@
 > [!WARNING]
 > This plugin is still under developement and not ready to use
 
+## Features status
+- [x] Basic file operations (CREATE, DELETE, MOVE)
+- [x] User command to change behaviour on startup
+- [x] Track current buffer
+- [x] Hijack NETRW
+- [ ] Fuzzy finding
+- [ ] LSP integration
+- [ ] SSH integration
+
 <h2>Want to try now?</h2>
 
 ```lua
