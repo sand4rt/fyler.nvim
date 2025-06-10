@@ -3,21 +3,13 @@ local utils = {}
 ---@param bufnr? integer
 ---@return boolean
 function utils.is_valid_buf(bufnr)
-  if not bufnr then
-    return false
-  end
-
-  return vim.api.nvim_buf_is_valid(bufnr)
+  return type(bufnr) == 'number' and vim.api.nvim_buf_is_valid(bufnr)
 end
 
 ---@param winid? integer
 ---@return boolean
 function utils.is_valid_win(winid)
-  if not winid then
-    return false
-  end
-
-  return vim.api.nvim_win_is_valid(winid)
+  return type(winid) == 'number' and vim.api.nvim_win_is_valid(winid)
 end
 
 ---@return integer, integer
@@ -245,5 +237,19 @@ utils.confirm = vim.schedule_wrap(function(text, callback)
     :append(string.rep(' ', math.floor((columns - #(button_success .. button_failure)) * 0.5)), 'FylerBlank')
     :render(window.bufnr)
 end)
+
+---@param bufnr integer
+---@param word string
+---@return integer?
+function utils.find_word_line_from_buffer(bufnr, word)
+  local buf_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  for index, line in ipairs(buf_lines) do
+    if line:find(word) then
+      return index
+    end
+  end
+
+  return nil
+end
 
 return utils

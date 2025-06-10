@@ -18,10 +18,6 @@ local uv = vim.uv or vim.loop
 
 local M = {}
 
-function M.hide()
-  utils.hide_window(state.window.main)
-end
-
 ---@param options? table
 function M.show(options)
   options = options or {}
@@ -78,6 +74,10 @@ function M.show(options)
       -- Switch to the user's original window before hiding
       if state.window_id.user and vim.api.nvim_win_is_valid(state.window_id.user) then
         vim.api.nvim_set_current_win(state.window_id.user)
+      end
+
+      for name, _ in ipairs(state.window) do
+        state.window[name] = nil
       end
 
       utils.hide_window(window)
