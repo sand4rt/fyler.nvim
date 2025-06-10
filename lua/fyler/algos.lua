@@ -20,12 +20,47 @@ end
 ---@param line string
 ---@return string
 function algos.extract_item_name(line)
-  if not line then
+  if not line or line == '' then
     return ''
   end
 
-  line = line:match '^%s*(.*)'
-  return line:match '^[^%s]+%s+([^%s]+)%s+/%d+$' or line:match '^[^%s]+%s+([^%s]+)$' or line:match '^([^%s]+)$' or ''
+  -- Remove leading and trailing whitespace first
+  line = line:match '^%s*(.-)%s*$' or ''
+  -- Handle case where string is only whitespace
+  if line == '' then
+    return ''
+  end
+
+  -- Remove Unicode icon at the beginning
+  -- This pattern removes any sequence of non-ASCII bytes followed by optional space
+  line = line:gsub('^[\128-\255]+%s*', '')
+  -- Remove leading whitespace again after icon removal
+  line = line:match '^%s*(.*)' or ''
+  -- Remove trailing slash-numberfunction extract_item_name(str)
+  -- Handle empty or nil input
+  if not line or line == '' then
+    return ''
+  end
+
+  -- Remove leading and trailing whitespace first
+  line = line:match '^%s*(.-)%s*$' or ''
+  -- Handle case where string is only whitespace
+  if line == '' then
+    return ''
+  end
+  -- Remove icon at the beginning (any non-ASCII character)
+  -- This handles Unicode icons like 󰘦
+  line = line:gsub('^[^\32-\126]', '')
+  -- Remove leading whitespace again after icon removal
+  line = line:match '^%s*(.*)' or ''
+  -- Remove trailing slash-number pattern (e.g., " /2", " /4")
+  line = line:gsub('%s+/%d+$', '')
+  -- Also handle case where the string is just "/number" (no leading space)
+  line = line:gsub('^/%d+$', '')
+  -- Final trim
+  line = line:match '^%s*(.-)%s*$' or ''
+
+  return line
 end
 
 ---@alias Fyler.Snapshot.Item { meta_key: string, path: string }
@@ -79,6 +114,7 @@ function algos.get_snapshot_from_buf_lines(buf_lines)
 
     local parent = stack[#stack]
     local full_path = parent.path .. '/' .. item_name
+    full_path = full_path:gsub('/+', '/'):gsub('/$', '')
     table.insert(snapshot, { meta_key = meta_key, path = full_path })
     table.insert(stack, { meta_key = meta_key, path = full_path, indentation = item_indentation })
   end
@@ -88,6 +124,10 @@ end
 
 ---@return { create: string[], delete: string[], move: { from: string, to: string }[] }
 function algos.get_changes(old_snapshot, new_snapshot)
+  local function normalize_path(path)
+    return path:gsub('/+', '/'):gsub('/$', '')
+  end
+
   local function find_snapshot_item(meta_key, snapshot)
     for _, item in ipairs(snapshot) do
       if item.meta_key == meta_key then
@@ -113,7 +153,7 @@ function algos.get_changes(old_snapshot, new_snapshot)
 
   for _, item in ipairs(old_snapshot) do
     local mirror_item = find_snapshot_item(item.meta_key, new_snapshot)
-    if mirror_item and item.path ~= mirror_item.path then
+    if mirror_item and normalize_path(item.path) ~= normalize_path(mirror_item.path) then
       table.insert(changes.move, { from = item.path, to = mirror_item.path })
     end
   end

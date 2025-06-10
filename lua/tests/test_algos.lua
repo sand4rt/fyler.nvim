@@ -9,6 +9,9 @@ T['extract_indentation'] = function()
     { str = '      󰘦 package-lock.json /9', indentation = 6 },
     { str = '        󰘦 package-lock.json /9', indentation = 8 },
     { str = '          󰘦 package-lock.json /9', indentation = 10 },
+    { str = '', indentation = 0 }, -- empty string
+    { str = 'no indentation', indentation = 0 }, -- no indentation
+    { str = '    ', indentation = 4 }, -- only spaces
   }
   for _, test_str in ipairs(test_strs) do
     test.expect.equality(algos.extract_indentation(test_str.str), test_str.indentation)
@@ -22,6 +25,9 @@ T['extract_meta_key'] = function()
     { str = '      󰘦 package-lock.json /6', meta_key = '6' },
     { str = '        󰘦 package-lock.json /8', meta_key = '8' },
     { str = '          󰘦 package-lock.json /10', meta_key = '10' },
+    { str = '  󰘦 package-lock.json', meta_key = nil }, -- no meta key
+    { str = '', meta_key = nil }, -- empty string
+    { str = 'just text', meta_key = nil }, -- no meta key pattern
   }
   for _, test_str in ipairs(test_strs) do
     test.expect.equality(algos.extract_meta_key(test_str.str), test_str.meta_key)
@@ -30,9 +36,23 @@ end
 
 T['extract_item_name'] = function()
   local test_strs = {
+    -- Basic cases
     { str = '  󰘦 package-lock.json /2', item_name = 'package-lock.json' },
-    -- TODO: { str = '    package-lock.json /4', item_name = 'package-lock.json' },
+    { str = '    package-lock.json /4', item_name = 'package-lock.json' },
     { str = '      package-lock.json', item_name = 'package-lock.json' },
+    { str = 'singleword', item_name = 'singleword' },
+
+    -- Files with spaces
+    { str = '  󰘦 my document.txt /5', item_name = 'my document.txt' },
+    { str = '    project file with spaces.md /7', item_name = 'project file with spaces.md' },
+
+    -- Edge cases
+    { str = '', item_name = '' }, -- empty string
+    { str = '    ', item_name = '' }, -- only spaces
+    { str = '  󰘦 /2', item_name = '' }, -- no filename
+
+    -- Different formats
+    { str = '  󰘦 .hidden_file /1', item_name = '.hidden_file' }, -- hidden file
   }
   for _, test_str in ipairs(test_strs) do
     test.expect.equality(algos.extract_item_name(test_str.str), test_str.item_name)
