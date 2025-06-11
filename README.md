@@ -31,3 +31,9 @@
   opts = {}
 }
 ```
+
+## Contributors
+
+<a href="https://github.com/A7Lavinraj/fyler.nvim/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=A7Lavinraj/fyler.nvim" />
+</a>
