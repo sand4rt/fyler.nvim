@@ -23,7 +23,7 @@ function filesystem.synchronize_from_buffer(callback)
     move = 'FylerWarning',
   }, {
     __index = function()
-      error 'Operation type not supported'
+      vim.notify 'Operation type not supported'
     end,
   })
 
@@ -34,7 +34,7 @@ function filesystem.synchronize_from_buffer(callback)
       if type(change) == 'table' then
         changes_text
           :append(' ', 'FylerBlank')
-          :append(string.format('%s  %s', change.from, change.to), 'FylerParagraph')
+          :append(string.format('%s > %s', change.from, change.to), 'FylerParagraph')
       else
         changes_text:append(' ', 'FylerBlank'):append(change, 'FylerParagraph')
       end
@@ -66,25 +66,25 @@ end
 function filesystem.create_fs_item(path)
   local stat = uv.fs_stat(path)
   if stat then
-    error 'Item already exist'
+    return
   end
 
   local path_type = string.sub(path, -1) == '/' and 'directory' or 'file'
   if path_type == 'directory' then
     if vim.fn.mkdir(path, 'p') == 0 then
-      error 'Unable to create directory'
+      return
     end
   else
     local parent_path = vim.fn.fnamemodify(path, ':h')
     if vim.fn.isdirectory(path) == 0 then
       if vim.fn.mkdir(parent_path, 'p') == 0 then
-        error 'Unable to create directory'
+        return
       end
     end
 
-    local fd, err, err_name = uv.fs_open(path, 'w', 438)
+    local fd, err = uv.fs_open(path, 'w', 438)
     if not fd or err then
-      error('Unable to create file: ' .. err_name .. err)
+      return
     end
 
     uv.fs_close(fd)
@@ -97,7 +97,7 @@ end
 function filesystem.delete_fs_item(path)
   local stat = uv.fs_stat(path)
   if not stat then
-    error 'Item does not exists'
+    return
   end
 
   if stat.type == 'directory' then
@@ -105,7 +105,7 @@ function filesystem.delete_fs_item(path)
   elseif stat.type == 'file' then
     vim.fn.delete(path)
   else
-    error 'Unable to delete item'
+    return
   end
 
   state.render_node[path]:delete_node()
@@ -117,7 +117,7 @@ end
 function filesystem.move_fs_item(from, to)
   local from_stat = uv.fs_stat(from)
   if not from_stat then
-    error 'Item does not exists'
+    return
   end
 
   local parent_dir = vim.fn.fnamemodify(to, ':h')
@@ -128,7 +128,7 @@ function filesystem.move_fs_item(from, to)
 
   uv.fs_rename(from, to)
   state.render_node[from]:delete_node()
-  vim.notify('MOVE: ' .. from .. ' ' .. to, vim.log.levels.INFO)
+  vim.notify('MOVE: ' .. from .. ' > ' .. to, vim.log.levels.INFO)
 end
 
 return filesystem

@@ -16,6 +16,8 @@
 - [x] User command to change behaviour on startup
 - [x] Track current buffer
 - [x] Hijack NETRW
+- [x] GIT integration (BASIC)
+- [ ] GIT integration (ADVANCE)
 - [ ] Fuzzy finding
 - [ ] LSP integration
 - [ ] SSH integration

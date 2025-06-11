@@ -21,6 +21,100 @@ for k, v in pairs(highlights) do
 end
 
 local uv = vim.uv or vim.loop
+local timer = uv.new_timer()
+local prev_status = nil
+local is_checking = false
+
+local function check_git_changes()
+  -- Prevent overlapping checks
+  if is_checking then
+    return
+  end
+
+  is_checking = true
+
+  local git = require 'fyler.git'
+  local state = require 'fyler.state'
+
+  -- Use libuv's async spawn instead of vim.fn.system
+  local stdout = uv.new_pipe(false)
+  local handle
+
+  ---@diagnostic disable-next-line: missing-fields
+  handle = uv.spawn('git', {
+    args = { 'status', '--porcelain', '-z' },
+    stdio = { nil, stdout, nil },
+  }, function(code)
+    -- Process completed callback
+    handle:close()
+    is_checking = false
+
+    if code ~= 0 then
+      if stdout then
+        stdout:close()
+      end
+      return
+    end
+
+    -- Schedule the data processing on the main thread
+    vim.schedule(function()
+      local output = ''
+
+      if stdout then
+        stdout:read_start(function(err, data)
+          if err then
+            stdout:close()
+            return
+          end
+
+          if data then
+            output = output .. data
+          else
+            -- End of stream, process the data
+            stdout:close()
+
+            if not prev_status then
+              prev_status = output
+              -- Process git status asynchronously
+              vim.schedule(function()
+                for path, status in pairs(git.status()) do
+                  state.git_status[path] = status
+                end
+              end)
+            end
+
+            if output ~= prev_status then
+              prev_status = output
+              -- Process git status asynchronously
+              vim.schedule(function()
+                for path, status in pairs(git.status()) do
+                  state.git_status[path] = status
+                end
+
+                if state.cwd and state.render_node[state.cwd] then
+                  state.render_node[state.cwd]
+                    :get_equivalent_text()
+                    :remove_trailing_empty_lines()
+                    :render(state.window.main.bufnr)
+                end
+              end)
+            end
+          end
+        end)
+      end
+    end)
+  end)
+
+  if not handle then
+    is_checking = false
+    return
+  end
+end
+
+-- Use the async version
+if timer then
+  timer:start(0, 2000, vim.schedule_wrap(check_git_changes))
+end
 
 -- TODO: Have to research more about `BufWriteCmd`
 vim.api.nvim_create_autocmd('BufWriteCmd', {

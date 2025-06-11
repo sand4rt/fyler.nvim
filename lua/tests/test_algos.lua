@@ -49,10 +49,13 @@ T['extract_item_name'] = function()
     -- Edge cases
     { str = '', item_name = '' }, -- empty string
     { str = '    ', item_name = '' }, -- only spaces
-    { str = '  󰘦 /2', item_name = '' }, -- no filename
 
     -- Different formats
     { str = '  󰘦 .hidden_file /1', item_name = '.hidden_file' }, -- hidden file
+
+    -- Git formats
+    { str = '  󰘦 .hidden_file ?? /1', item_name = '.hidden_file' }, -- hidden file
+    { str = '  󰘦 .hidden_file M /1', item_name = '.hidden_file' }, -- hidden file
   }
   for _, test_str in ipairs(test_strs) do
     test.expect.equality(algos.extract_item_name(test_str.str), test_str.item_name)

@@ -20,47 +20,13 @@ end
 ---@param line string
 ---@return string
 function algos.extract_item_name(line)
-  if not line or line == '' then
-    return ''
-  end
-
-  -- Remove leading and trailing whitespace first
-  line = line:match '^%s*(.-)%s*$' or ''
-  -- Handle case where string is only whitespace
-  if line == '' then
-    return ''
-  end
-
-  -- Remove Unicode icon at the beginning
-  -- This pattern removes any sequence of non-ASCII bytes followed by optional space
-  line = line:gsub('^[\128-\255]+%s*', '')
-  -- Remove leading whitespace again after icon removal
-  line = line:match '^%s*(.*)' or ''
-  -- Remove trailing slash-numberfunction extract_item_name(str)
-  -- Handle empty or nil input
-  if not line or line == '' then
-    return ''
-  end
-
-  -- Remove leading and trailing whitespace first
-  line = line:match '^%s*(.-)%s*$' or ''
-  -- Handle case where string is only whitespace
-  if line == '' then
-    return ''
-  end
-  -- Remove icon at the beginning (any non-ASCII character)
-  -- This handles Unicode icons like 󰘦
-  line = line:gsub('^[^\32-\126]', '')
-  -- Remove leading whitespace again after icon removal
-  line = line:match '^%s*(.*)' or ''
-  -- Remove trailing slash-number pattern (e.g., " /2", " /4")
-  line = line:gsub('%s+/%d+$', '')
-  -- Also handle case where the string is just "/number" (no leading space)
-  line = line:gsub('^/%d+$', '')
-  -- Final trim
-  line = line:match '^%s*(.-)%s*$' or ''
-
   return line
+    :gsub('^%s*', '')
+    :gsub('%s*$', '')
+    :gsub('^[\128-\255]+%s*', '')
+    :gsub('%s+[%?M]+%s*/%d+$', '')
+    :gsub('%s+/%d+$', '')
+    :match '.*'
 end
 
 ---@alias Fyler.Snapshot.Item { meta_key: string, path: string }

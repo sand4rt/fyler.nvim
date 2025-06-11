@@ -3,6 +3,15 @@ local algos = require 'fyler.algos'
 local state = require 'fyler.state'
 local luv = vim.uv or vim.loop
 local node_count = 0
+local status_highlight_group = setmetatable({
+  ['M'] = 'FylerWarning',
+  ['A'] = 'FylerSuccess',
+  ['D'] = 'FylerFailure',
+}, {
+  __index = function()
+    return 'FylerBlank'
+  end,
+})
 
 local function generate_node_meta_key()
   node_count = node_count + 1
@@ -141,8 +150,12 @@ function RenderNode:get_equivalent_text()
         :append(' ', 'FylerBlank')
         :append(child.name, 'FylerParagraph')
         :append(' ', 'FylerBlank')
-        :append(child.meta_key, 'FylerBlank')
-        :nl() .. child:get_equivalent_text()
+
+      if type(state.git_status[child.path]) == 'string' then
+        text:append(state.git_status[child.path], status_highlight_group[state.git_status[child.path]])
+      end
+
+      text = text:append(' ', 'FylerBlank'):append(child.meta_key, 'FylerBlank'):nl() .. child:get_equivalent_text()
     end
   end
 
