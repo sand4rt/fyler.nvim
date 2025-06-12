@@ -14,10 +14,10 @@
 ## Features status
 - [x] Basic file operations (CREATE, DELETE, MOVE)
 - [x] User command to change behaviour on startup
-- [x] Track current buffer
 - [x] Hijack NETRW
 - [x] GIT integration (BASIC)
 - [ ] GIT integration (ADVANCE)
+- [ ] Track current buffer
 - [ ] Fuzzy finding
 - [ ] LSP integration
 - [ ] SSH integration
@@ -29,6 +29,28 @@
   "A7Lavinraj/fyler.nvim",
   dependencies = { "echasnovski/mini.icons" },
   opts = {}
+}
+```
+
+<h2>Default options</h2>
+
+```lua
+{
+  close_on_open = true,
+  default_explorer = false,
+  window_config = {
+    width = 0.3,
+    split = 'right',
+  },
+  window_options = {
+    number = true,
+    relativenumbers = true,
+  },
+  view_config = {
+    git_status = {
+      enable = true,
+    },
+  },
 }
 ```
 
