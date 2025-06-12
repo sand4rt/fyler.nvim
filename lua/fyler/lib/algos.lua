@@ -1,9 +1,9 @@
-local state = require 'fyler.state'
-local algos = {}
+local state = require 'fyler.lib.state'
+local M = {}
 
 ---@param line string
 ---@return integer
-function algos.extract_indentation(line)
+function M.extract_indentation(line)
   if not line then
     return 0
   end
@@ -13,13 +13,13 @@ end
 
 ---@param line string
 ---@return integer?
-function algos.extract_meta_key(line)
+function M.extract_meta_key(line)
   return line:match '(%d+)$'
 end
 
 ---@param line string
 ---@return string
-function algos.extract_item_name(line)
+function M.extract_item_name(line)
   return line
     :gsub('^%s*', '')
     :gsub('%s*$', '')
@@ -31,26 +31,26 @@ end
 
 ---@alias Fyler.Snapshot.Item { meta_key: string, path: string }
 
----@param render_node Fyler.RenderNode
+---@param node Fyler.Node
 ---@return Fyler.Snapshot.Item[]
-function algos.get_snapshot_from_render_node(render_node)
-  if not render_node then
+function M.get_snapshot_from_node(node)
+  if not node then
     return {}
   end
 
   local snapshot = {}
-  if render_node.meta_key then
-    table.insert(snapshot, { meta_key = algos.extract_meta_key(render_node.meta_key), path = render_node.path })
+  if node.meta_key then
+    table.insert(snapshot, { meta_key = M.extract_meta_key(node.meta_key), path = node.path })
   end
 
-  for _, child in ipairs(render_node.children) do
+  for _, child in ipairs(node.children) do
     if child.revealed then
-      local child_entries = algos.get_snapshot_from_render_node(child)
+      local child_entries = M.get_snapshot_from_node(child)
       for _, entry in ipairs(child_entries) do
         table.insert(snapshot, entry)
       end
     else
-      table.insert(snapshot, { meta_key = algos.extract_meta_key(child.meta_key), path = child.path })
+      table.insert(snapshot, { meta_key = M.extract_meta_key(child.meta_key), path = child.path })
     end
   end
 
@@ -59,21 +59,21 @@ end
 
 ---@param buf_lines string[]
 ---@return Fyler.Snapshot.Item[]
-function algos.get_snapshot_from_buf_lines(buf_lines)
+function M.get_snapshot_from_buf_lines(buf_lines)
   local snapshot = {}
-  local root_path = state.cwd
-  local render_node = state.render_node[root_path]
-  local stack = { { meta_key = algos.extract_meta_key(render_node.meta_key), path = root_path, indentation = -1 } }
-  table.insert(snapshot, { meta_key = algos.extract_meta_key(render_node.meta_key), path = root_path })
+  local root_path = state.get { 'cwd' }
+  local node = state.get { 'node', root_path }
+  local stack = { { meta_key = M.extract_meta_key(node.meta_key), path = root_path, indentation = -1 } }
+  table.insert(snapshot, { meta_key = M.extract_meta_key(node.meta_key), path = root_path })
 
   for _, buf_line in
     ipairs(vim.tbl_filter(function(line)
       return line ~= ''
     end, buf_lines))
   do
-    local meta_key = algos.extract_meta_key(buf_line)
-    local item_name = algos.extract_item_name(buf_line)
-    local item_indentation = algos.extract_indentation(buf_line)
+    local meta_key = M.extract_meta_key(buf_line)
+    local item_name = M.extract_item_name(buf_line)
+    local item_indentation = M.extract_indentation(buf_line)
     while #stack > 1 and stack[#stack].indentation >= item_indentation do
       table.remove(stack)
     end
@@ -89,7 +89,7 @@ function algos.get_snapshot_from_buf_lines(buf_lines)
 end
 
 ---@return { create: string[], delete: string[], move: { from: string, to: string }[] }
-function algos.get_changes(old_snapshot, new_snapshot)
+function M.get_changes(old_snapshot, new_snapshot)
   local function normalize_path(path)
     return path:gsub('/+', '/'):gsub('/$', '')
   end
@@ -127,4 +127,4 @@ function algos.get_changes(old_snapshot, new_snapshot)
   return changes
 end
 
-return algos
+return M

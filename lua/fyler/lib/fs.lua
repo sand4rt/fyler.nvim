@@ -1,23 +1,22 @@
 local Text = require 'fyler.lib.text'
-local algos = require 'fyler.algos'
-local state = require 'fyler.state'
-local utils = require 'fyler.utils'
-local filesystem = {}
+local algos = require 'fyler.lib.algos'
+local component = require 'fyler.lib.ui.component'
+local state = require 'fyler.lib.state'
+local api = vim.api
 local uv = vim.uv or vim.loop
+local M = {}
 
 ---@param callback function
-function filesystem.synchronize_from_buffer(callback)
-  local window = state.window.main
-  local buf_lines = vim.api.nvim_buf_get_lines(window.bufnr, 0, -1, false)
-  local changes = algos.get_changes(
-    algos.get_snapshot_from_render_node(state.render_node[state.cwd]),
-    algos.get_snapshot_from_buf_lines(buf_lines)
-  )
+function M.synchronize_from_buffer(callback)
+  local window = state.get { 'window', 'main' }
+  local node = state.get { 'node', state.get { 'cwd' } }
+  local buf_lines = api.nvim_buf_get_lines(window.bufnr, 0, -1, false)
+  local changes = algos.get_changes(algos.get_snapshot_from_node(node), algos.get_snapshot_from_buf_lines(buf_lines))
   if vim.tbl_isempty(changes.create) and vim.tbl_isempty(changes.delete) and vim.tbl_isempty(changes.move) then
     return
   end
 
-  local group_hl = setmetatable({
+  local hl = setmetatable({
     create = 'FylerSuccess',
     delete = 'FylerFailure',
     move = 'FylerWarning',
@@ -27,34 +26,32 @@ function filesystem.synchronize_from_buffer(callback)
     end,
   })
 
-  local changes_text = Text.new {}
-  for change_group, change_list in pairs(changes) do
-    for _, change in ipairs(change_list) do
-      changes_text:append(' ' .. string.upper(change_group), group_hl[change_group])
+  local text = Text.new {}
+  for group, list in pairs(changes) do
+    for _, change in ipairs(list) do
+      text:append(string.upper(group), hl[group]):append ' '
       if type(change) == 'table' then
-        changes_text
-          :append(' ', 'FylerBlank')
-          :append(string.format('%s > %s', change.from, change.to), 'FylerParagraph')
+        text:append(string.format('%s > %s', change.from, change.to), 'FylerParagraph')
       else
-        changes_text:append(' ', 'FylerBlank'):append(change, 'FylerParagraph')
+        text:append(change, 'FylerParagraph')
       end
 
-      changes_text:nl()
+      text:nl()
     end
   end
 
-  utils.confirm(changes_text, function(confirmation)
+  component.confirm(text, function(confirmation)
     if confirmation then
       for _, change in ipairs(changes.create) do
-        filesystem.create_fs_item(change)
+        M.create_fs_item(change)
       end
 
       for _, change in ipairs(changes.delete) do
-        filesystem.delete_fs_item(change)
+        M.delete_fs_item(change)
       end
 
       for _, change in ipairs(changes.move) do
-        filesystem.move_fs_item(change.from, change.to)
+        M.move_fs_item(change.from, change.to)
       end
     end
 
@@ -63,7 +60,7 @@ function filesystem.synchronize_from_buffer(callback)
 end
 
 ---@param path string
-function filesystem.create_fs_item(path)
+function M.create_fs_item(path)
   local stat = uv.fs_stat(path)
   if stat then
     return
@@ -94,7 +91,7 @@ function filesystem.create_fs_item(path)
 end
 
 ---@param path string
-function filesystem.delete_fs_item(path)
+function M.delete_fs_item(path)
   local stat = uv.fs_stat(path)
   if not stat then
     return
@@ -108,13 +105,12 @@ function filesystem.delete_fs_item(path)
     return
   end
 
-  state.render_node[path]:delete_node()
   vim.notify('DELETE: ' .. path, vim.log.levels.INFO)
 end
 
 ---@param from string
 ---@param to string
-function filesystem.move_fs_item(from, to)
+function M.move_fs_item(from, to)
   local from_stat = uv.fs_stat(from)
   if not from_stat then
     return
@@ -123,12 +119,11 @@ function filesystem.move_fs_item(from, to)
   local parent_dir = vim.fn.fnamemodify(to, ':h')
   local parent_stat = uv.fs_stat(parent_dir)
   if not parent_stat then
-    filesystem.create_fs_item(parent_dir .. '/')
+    M.create_fs_item(parent_dir .. '/')
   end
 
   uv.fs_rename(from, to)
-  state.render_node[from]:delete_node()
   vim.notify('MOVE: ' .. from .. ' > ' .. to, vim.log.levels.INFO)
 end
 
-return filesystem
+return M

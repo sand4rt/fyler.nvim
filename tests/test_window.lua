@@ -2,11 +2,11 @@ local test = require 'mini.test'
 local T = test.new_set()
 
 T['require'] = function()
-  require 'fyler.lib.window'
+  require 'fyler.lib.ui.window'
 end
 
 T['new'] = function()
-  local window = require('fyler.lib.window').new {
+  local window = require('fyler.lib.ui.window').new {
     enter = true,
     split = 'right',
     width = 0.5,

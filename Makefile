@@ -1,8 +1,8 @@
-.PHONY: all fmt lint test
+.PHONY: check format lint test
 
-all: fmt lint test
+check: format lint test
 
-fmt:
+format:
 	stylua lua --config-path=.stylua.toml
 
 lint:
@@ -10,6 +10,3 @@ lint:
 
 test:
 	nvim -l scripts/minitest.lua
-
-docgen:
-	nvim --headless --noplugin -u scripts/minit.lua -c "luafile ./scripts/docgen.lua" -c 'qa'

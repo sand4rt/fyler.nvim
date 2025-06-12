@@ -15,7 +15,7 @@ require('lazy.minit').setup {
 require('mini.test').run {
   collect = {
     find_files = function()
-      return vim.fn.globpath('lua', '**/test_*.lua', true, true)
+      return vim.fn.globpath('tests', '**/test_*.lua', true, true)
     end,
   },
 }

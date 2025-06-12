@@ -1,6 +1,6 @@
 local test = require 'mini.test'
 local T = test.new_set()
-local algos = require 'fyler.algos'
+local algos = require 'fyler.lib.algos'
 
 T['extract_indentation'] = function()
   local test_strs = {

@@ -8,7 +8,7 @@ How it different from |oil.nvim|?
 
 
 ================================================================================
-CONFIGURATION                                                     *fyler.config*
+CONFIGURATION                                                     *fyler.lib.config*
 
 Fyler supports plenty of options to customize. Following are default values
 

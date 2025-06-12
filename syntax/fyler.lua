@@ -1,9 +1,9 @@
+if vim.b.current_syntax then
+  return
+end
+
 vim.cmd [[
-  if exists("b:current_syntax")
-  finish
-  endif
-
   syntax match FylerMetaKey / \/\d*$/ conceal
-
-  let b:current_syntax = 'fyler'
 ]]
+
+vim.b.current_syntax = 'fyler'

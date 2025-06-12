@@ -19,21 +19,6 @@ git checkout -b my-feature-branch
 ## Development
 - Add cloned repository to neovim runtime path
 
-### Setup auto generated documentation (optional)
-- Clone `tjdevries/tree-sitter-lua` above the level of fork
-- Go to `tree-sitter-lua` and run:
-
-```sh
-make build_parser
-```
-
-- Clone `nvim-lua/plenary.nvim` above the level of fork
-- To generate updated documentation run `make docgen`
-
-```sh
-make docgen
-```
-
 ## Pull Requests
 1. Keep PRs focused on a single feature/bugfix
 2. Write clear commit messages
