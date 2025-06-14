@@ -1,0 +1,71 @@
+local Win = require("fyler.lib.win")
+
+local api = vim.api
+
+---@class FylerTreeViewOpenOpts
+---@field cwd  string
+---@field kind FylerWinKind
+
+---@class FylerTreeView
+---@field win FylerWin
+---@field config FylerConfig
+local M = {}
+M.__index = M
+
+---@param config FylerConfig
+---@return FylerTreeView
+function M.new(config)
+  assert(config, "config is required")
+
+  local instance = {
+    config = config,
+  }
+
+  return setmetatable(instance, M)
+end
+
+---@param opts FylerTreeViewOpenOpts
+function M:open(opts)
+  opts = opts or {}
+
+  local view_name = "tree_view"
+  local config = self.config
+  local win = config.get_win(view_name)
+  local mappings = config.get_reverse_mappings(view_name)
+
+  self.win = Win.new({
+    enter = true,
+    name = view_name,
+    kind = opts.kind or win.kind,
+    filetype = view_name,
+    mappings = {
+      n = {
+        [mappings["CloseView"]] = self:_action("n_close_view"),
+      },
+    },
+    autocmds = {
+      ["WinClosed"] = self:_action("n_close_view"),
+    },
+    ---@param win_self FylerWin
+    render = function(win_self)
+      api.nvim_buf_set_lines(win_self.bufnr, 0, -1, false, { "Hello", "from", "fyler.nvim" })
+    end,
+  })
+
+  self.win:show()
+end
+
+function M:close()
+  self.win:hide()
+end
+
+---@param name string
+function M:_action(name)
+  local action = require("fyler.views.tree.actions")[name]
+
+  assert(action, ("action(%s)"):format(name))
+
+  return action(self)
+end
+
+return M

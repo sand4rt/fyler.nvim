@@ -1,0 +1,57 @@
+---@class FylerConfig
+local M = {}
+
+local defaults = {
+  wins = {
+    tree_view = {
+      width = 0.8,
+      height = 0.8,
+      kind = "float",
+      border = "single",
+    },
+  },
+  mappings = {
+    tree_view = {
+      n = {
+        ["q"] = "CloseView",
+      },
+    },
+  },
+}
+
+---@param name string
+function M.get_win(name)
+  assert(name, "name is required")
+
+  return M.values.wins[name]
+end
+
+---@param name string
+function M.get_mappings(name)
+  assert(name, "name is required")
+
+  return M.values.mappings[name]
+end
+
+---@param name string
+function M.get_reverse_mappings(name)
+  assert(name, "name is required")
+
+  local mappings = M.get_mappings(name)
+  local reverse_mappings = {}
+
+  for _, map in pairs(mappings) do
+    for key, val in pairs(map) do
+      reverse_mappings[val] = key
+    end
+  end
+
+  return reverse_mappings
+end
+
+function M.setup(opts)
+  opts = opts or {}
+  M.values = vim.tbl_deep_extend("force", defaults, opts)
+end
+
+return M
