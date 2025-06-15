@@ -40,7 +40,6 @@ function Ui:_render(lines)
     table.insert(buf_lines, buf_line)
   end
 
-  vim.print(buf_lines)
   api.nvim_buf_set_lines(self.win.bufnr, 0, -1, false, buf_lines)
 
   if not was_modifiable then

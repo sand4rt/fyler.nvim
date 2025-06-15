@@ -8,8 +8,18 @@ function M.setup(opts)
     return
   end
 
-  M.config = require("fyler.config")
+  local config = require("fyler.config")
+  local autocmds = require("fyler.autocmds")
+  local colors = require("fyler.lib.hls")
+
+  M.augroup = vim.api.nvim_create_augroup("Fyler", { clear = true })
+  M.config = config
+  M.colors = colors
+  M.aucmds = autocmds
+
   M.config.setup(opts)
+  M.colors.setup()
+  M.aucmds.setup()
 
   did_setup = true
 end
