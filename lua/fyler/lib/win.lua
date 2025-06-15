@@ -1,3 +1,4 @@
+local Ui = require("fyler.lib.ui")
 local config = require("fyler.config")
 
 local api = vim.api
@@ -10,6 +11,7 @@ local api = vim.api
 ---| "split:below"
 
 ---@class FylerWin
+---@field ui        FylerUi
 ---@field open      boolean
 ---@field name      string
 ---@field kind      FylerWinKind
@@ -17,7 +19,7 @@ local api = vim.api
 ---@field bufnr?    integer
 ---@field winid?    integer
 ---@field border    string|string[]
----@field render?   fun(self: FylerWin)
+---@field render?   fun(): FylerUi
 ---@field augroup   string
 ---@field filetype  string
 ---@field mappings  table
@@ -40,7 +42,7 @@ end
 ---@field name      string
 ---@field kind      FylerWinKind
 ---@field enter     boolean
----@field render?   fun(self: FylerWin)
+---@field render?   fun(): FylerUiLine[]
 ---@field mappings? table
 ---@field autocmds? table
 
@@ -68,6 +70,7 @@ function Win.new(opts)
   }
   -- stylua: ignore end
 
+  instance.ui = Ui.new(instance)
   setmetatable(instance, Win)
 
   return instance
@@ -129,7 +132,7 @@ function Win:show()
 
   -- Call render as soon as window open
   if self.render then
-    self:render()
+    self.ui:render(self.render())
   end
 
   -- Setup keyamps

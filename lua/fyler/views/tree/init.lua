@@ -1,6 +1,5 @@
 local Win = require("fyler.lib.win")
-
-local api = vim.api
+local ui = require("fyler.views.tree.ui")
 
 ---@class FylerTreeViewOpenOpts
 ---@field cwd  string
@@ -33,7 +32,7 @@ function M:open(opts)
   local win = config.get_win(view_name)
   local mappings = config.get_reverse_mappings(view_name)
 
-  self.win = Win.new({
+  self.win = Win.new {
     enter = true,
     name = view_name,
     kind = opts.kind or win.kind,
@@ -46,11 +45,10 @@ function M:open(opts)
     autocmds = {
       ["WinClosed"] = self:_action("n_close_view"),
     },
-    ---@param win_self FylerWin
-    render = function(win_self)
-      api.nvim_buf_set_lines(win_self.bufnr, 0, -1, false, { "Hello", "from", "fyler.nvim" })
+    render = function()
+      return ui.Tree()
     end,
-  })
+  }
 
   self.win:show()
 end
