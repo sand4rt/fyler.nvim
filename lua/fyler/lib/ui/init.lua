@@ -41,6 +41,20 @@ function Ui:_render(lines)
   end
 
   api.nvim_buf_set_lines(self.win.bufnr, 0, -1, false, buf_lines)
+  api.nvim_buf_clear_namespace(self.win.bufnr, self.win.namespace, 0, -1)
+
+  for i, line in ipairs(lines) do
+    local offset = 0
+
+    for _, word in ipairs(line.words) do
+      api.nvim_buf_set_extmark(self.win.bufnr, self.win.namespace, i - 1, offset, {
+        end_col = offset + #word.str,
+        hl_group = word.hl,
+      })
+
+      offset = offset + #word.str
+    end
+  end
 
   if not was_modifiable then
     vim.bo[self.win.bufnr].modifiable = false
