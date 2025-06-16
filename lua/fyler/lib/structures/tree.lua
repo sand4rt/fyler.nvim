@@ -84,4 +84,23 @@ function Tree:add(key, val, data)
   end
 end
 
+--- Converts the tree structure into a table representation
+---@return table
+function Tree:totable()
+  local function build_table(node)
+    local result = vim.deepcopy(node.data) or {}
+
+    if node.children then
+      result.children = {}
+      node.children:each(function(_, child)
+        table.insert(result.children, build_table(child))
+      end)
+    end
+
+    return result
+  end
+
+  return build_table(self.root)
+end
+
 return M
