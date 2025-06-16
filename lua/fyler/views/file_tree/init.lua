@@ -1,5 +1,7 @@
+local Tree = require("fyler.lib.structures.tree")
 local Win = require("fyler.lib.win")
-local ui = require("fyler.views.tree.ui")
+local fs = require("fyler.lib.fs")
+local ui = require("fyler.views.file_tree.ui")
 
 ---@class FylerTreeViewOpenOpts
 ---@field cwd  string
@@ -46,7 +48,7 @@ function M:open(opts)
       ["WinClosed"] = self:_action("n_close_view"),
     },
     render = function()
-      return ui.Tree()
+      return ui.FileTree()
     end,
   }
 
@@ -59,7 +61,7 @@ end
 
 ---@param name string
 function M:_action(name)
-  local action = require("fyler.views.tree.actions")[name]
+  local action = require("fyler.views.file_tree.actions")[name]
 
   assert(action, ("action(%s)"):format(name))
 

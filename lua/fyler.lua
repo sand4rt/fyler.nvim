@@ -26,7 +26,7 @@ end
 
 ---@param opts FylerTreeViewOpenOpts
 function M.open(opts)
-  require("fyler.views.tree").new(M.config):open(opts)
+  require("fyler.views.file_tree").new(M.config):open(opts)
 end
 
 function M.complete(arglead, cmdline)

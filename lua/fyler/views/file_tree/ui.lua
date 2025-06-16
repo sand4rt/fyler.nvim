@@ -5,7 +5,7 @@ local Word = components.Word
 
 local M = {}
 
-function M.Tree()
+function M.FileTree()
   return {
     Line.new {
       Word.new("Hello from fyler.nvim"),
