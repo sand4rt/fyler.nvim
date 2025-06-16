@@ -8,9 +8,6 @@ T["can hold items in sorted order"] = function()
     __lt = function(a, b)
       return a.name < b.name
     end,
-    __le = function(a, b)
-      return a.name <= b.name
-    end,
     __eq = function(a, b)
       return a.name == b.name
     end,
