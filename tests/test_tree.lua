@@ -66,17 +66,29 @@ end
 
 T["can build tree from random file structure"] = function()
   local Tree = require("fyler.lib.structures.tree")
-  local meta = {
+  local tree_mt = {
     __lt = function(a, b)
-      return a.name < b.name
+      local ad = a.data
+      local bd = b.data
+
+      if ad.type == "directory" and bd.type == "file" then
+        return true
+      elseif ad.type == "file" and bd.type == "directory" then
+        return false
+      else
+        return ad.name < bd.name
+      end
     end,
     __eq = function(a, b)
-      return a.name == b.name
+      local ad = a.data
+      local bd = b.data
+
+      return ad.name == bd.name and ad.type == bd.type and ad.path == bd.path
     end,
   }
 
   local root_data = { name = "project", type = "directory", path = "/" }
-  local tree = Tree.new(meta, root_data)
+  local tree = Tree.new(tree_mt, root_data)
 
   local structure = generate_file_structure()
   insert_structure(tree, "project", structure)

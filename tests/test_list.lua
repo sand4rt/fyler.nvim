@@ -31,7 +31,7 @@ T["can hold items in sorted order"] = function()
 
   local dummy_list = gen_list(math.random(1, 100))
   for _, item in ipairs(dummy_list) do
-    list:add(create_list_item(item))
+    list:insert(create_list_item(item))
   end
 
   table.sort(dummy_list)

@@ -28,7 +28,7 @@ function TreeNode:add(mt, data)
     self.children = List.new()
   end
 
-  self.children:add(new_node(mt, data))
+  self.children:insert(new_node(mt, data))
 end
 
 ---@class FylerTree

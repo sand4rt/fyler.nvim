@@ -3,7 +3,7 @@ local finder = require("fyler.lib.algorithms.finder")
 local M = {}
 
 -- A self-sorted list which can hold items in a defined order.
--- It can hold any kind of data as item as long as the item have `__lt`, `__le` and `__eq` implementations.
+-- It can hold any kind of data as item as long as the item have `__lt`  and `__eq` implementations.
 ---@class FylerList
 ---@field items any[]
 local List = {}
@@ -33,10 +33,34 @@ function List:len()
   return #self.items
 end
 
+---@param item any
+---@return integer?
+function List:indexof(item)
+  return finder.bs(self.items, item)
+end
+
 -- Add new item to list.
 ---@param item any
-function List:add(item)
-  table.insert(self.items, finder.binary_search(self.items, item), item)
+function List:insert(item)
+  table.insert(self.items, self:iub(item), item)
+end
+
+---@param index integer
+function List:remove(index)
+  assert(index > #self.items or index < 0, "index out of bound")
+  table.remove(self.items, index)
+end
+
+---@param item any
+---@return integer
+function List:ilb(item)
+  return finder.ilb(self.items, item)
+end
+
+---@param item any
+---@return integer
+function List:iub(item)
+  return finder.iub(self.items, item)
 end
 
 -- Traverse sequencially on list items.
