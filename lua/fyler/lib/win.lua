@@ -20,8 +20,9 @@ local api = vim.api
 ---@field winid?    integer
 ---@field border    string|string[]
 ---@field render?   fun(): FylerUi
+---@field bufopts   table
+---@field winopts   table
 ---@field augroup   string
----@field filetype  string
 ---@field mappings  table
 ---@field autocmds  table
 ---@field namespace integer
@@ -43,6 +44,8 @@ end
 ---@field kind      FylerWinKind
 ---@field enter     boolean
 ---@field render?   fun(): FylerUiLine[]
+---@field bufopts?  table
+---@field winopts?  table
 ---@field mappings? table
 ---@field autocmds? table
 
@@ -63,9 +66,10 @@ function Win.new(opts)
     enter     = opts.enter,
     render    = opts.render,
     augroup   = get_augroup(opts.name),
-    filetype  = opts.name,
     mappings  = opts.mappings or {},
     autocmds  = opts.autocmds or {},
+    bufopts   = opts.bufopts or {},
+    winopts   = opts.winopts or {},
     namespace = get_namespace(opts.name),
   }
   -- stylua: ignore end
@@ -140,6 +144,15 @@ function Win:show()
     for key, val in pairs(map) do
       vim.keymap.set(mode, key, val, { buffer = self.bufnr, silent = true, noremap = true })
     end
+  end
+
+  -- Setup buffer and window options
+  for key, val in pairs(self.winopts) do
+    vim.wo[self.winid][key] = val
+  end
+
+  for key, val in pairs(self.bufopts) do
+    vim.bo[self.bufnr][key] = val
   end
 
   -- Setup autocommands
