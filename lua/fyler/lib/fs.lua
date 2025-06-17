@@ -50,17 +50,14 @@ function M.touch(path, callback)
 end
 
 ---@param path string
+---@return table, string?
 function M.listdir(path)
   assert(path, "path is required")
 
-  if not path then
-    return {}
-  end
-
   local items = {}
-  local fs = uv.fs_scandir(path)
+  local fs, err = uv.fs_scandir(path)
   if not fs then
-    return {}
+    return {}, err
   end
 
   while true do
@@ -76,7 +73,7 @@ function M.listdir(path)
     })
   end
 
-  return items
+  return items, nil
 end
 
 return M
