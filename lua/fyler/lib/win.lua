@@ -11,21 +11,22 @@ local api = vim.api
 ---| "split:below"
 
 ---@class FylerWin
----@field ui        FylerUi
----@field open      boolean
----@field name      string
----@field kind      FylerWinKind
----@field enter     boolean
----@field bufnr?    integer
----@field winid?    integer
----@field border    string|string[]
----@field render?   fun(): FylerUi
----@field bufopts   table
----@field winopts   table
----@field augroup   string
----@field mappings  table
----@field autocmds  table
----@field namespace integer
+---@field ui            FylerUi
+---@field open          boolean
+---@field name          string
+---@field kind          FylerWinKind
+---@field enter         boolean
+---@field bufnr?        integer
+---@field winid?        integer
+---@field border        string|string[]
+---@field render?       fun(): FylerUi
+---@field bufopts       table
+---@field winopts       table
+---@field augroup       string
+---@field mappings      table
+---@field autocmds      table
+---@field namespace     integer
+---@field user_autocmds table
 local Win = {}
 Win.__index = Win
 
@@ -40,14 +41,15 @@ local function get_augroup(name)
 end
 
 ---@class FylerWinOpts
----@field name      string
----@field kind      FylerWinKind
----@field enter     boolean
----@field render?   fun(): FylerUiLine[]
----@field bufopts?  table
----@field winopts?  table
----@field mappings? table
----@field autocmds? table
+---@field name           string
+---@field kind           FylerWinKind
+---@field enter          boolean
+---@field render?        fun(): FylerUiLine[]
+---@field bufopts?       table
+---@field winopts?       table
+---@field mappings?      table
+---@field autocmds?      table
+---@field user_autocmds? table
 
 ---@param opts FylerWinOpts
 ---@return FylerWin
@@ -60,17 +62,18 @@ function Win.new(opts)
 
   -- stylua: ignore start
   local instance = {
-    open      = false,
-    name      = opts.name,
-    kind      = opts.kind,
-    enter     = opts.enter,
-    render    = opts.render,
-    augroup   = get_augroup(opts.name),
-    mappings  = opts.mappings or {},
-    autocmds  = opts.autocmds or {},
-    bufopts   = opts.bufopts or {},
-    winopts   = opts.winopts or {},
-    namespace = get_namespace(opts.name),
+    open           = false,
+    name           = opts.name,
+    kind           = opts.kind,
+    enter          = opts.enter,
+    render         = opts.render,
+    augroup        = get_augroup(opts.name),
+    mappings       = opts.mappings or {},
+    autocmds       = opts.autocmds or {},
+    bufopts        = opts.bufopts or {},
+    winopts        = opts.winopts or {},
+    namespace      = get_namespace(opts.name),
+    user_autocmds  = opts.user_autocmds or {},
   }
   -- stylua: ignore end
 
@@ -160,6 +163,14 @@ function Win:show()
     api.nvim_create_autocmd(ev, {
       group = self.augroup,
       buffer = self.bufnr,
+      callback = cb,
+    })
+  end
+
+  for ev, cb in pairs(self.user_autocmds) do
+    api.nvim_create_autocmd("User", {
+      pattern = ev,
+      group = self.augroup,
       callback = cb,
     })
   end
