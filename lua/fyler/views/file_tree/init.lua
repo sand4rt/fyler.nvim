@@ -1,163 +1,61 @@
-local Tree = require("fyler.lib.structures.tree")
+local TreeNode = require("fyler.views.file_tree.struct")
 local Win = require("fyler.lib.win")
+local config = require("fyler.config")
 local fs = require("fyler.lib.fs")
+local store = require("fyler.views.file_tree.store")
 local ui = require("fyler.views.file_tree.ui")
 
-local M = {
-  count = 0,
-  store = {},
-  instances = {}, ---@type FylerTreeView[]
-}
-
 local fn = vim.fn
-local uv = vim.uv or vim.loop
-
-local view_name = "tree_view"
 
 ---@class FylerTreeView
----@field cwd    string
----@field win    FylerWin
----@field tree   FylerTree
----@field config FylerConfig
+---@field cwd       string
+---@field win       FylerWin
+---@field tree_node FylerTreeNode
 local FileTreeView = {}
 FileTreeView.__index = FileTreeView
 
-local view_mt = {
-  ---@param a FylerTreeView
-  ---@param b FylerTreeView
-  __lt = function(a, b)
-    return a.cwd < b.cwd
-  end,
-  ---@param a FylerTreeView
-  ---@param b FylerTreeView
-  __eq = function(a, b)
-    return a.cwd == b.cwd
-  end,
-}
-
-local tree_mt = {
-  ---@param a FylerTreeNode
-  ---@param b FylerTreeNode
-  __lt = function(a, b)
-    local ad = a.data
-    local bd = b.data
-
-    if ad.type == "directory" and bd.type == "file" then
-      return true
-    elseif ad.type == "file" and bd.type == "directory" then
-      return false
-    else
-      return ad.name < bd.name
-    end
-  end,
-  ---@param a FylerTreeNode
-  ---@param b FylerTreeNode
-  __eq = function(a, b)
-    local ad = a.data
-    local bd = b.data
-
-    return ad.name == bd.name and ad.type == bd.type and ad.path == bd.path
-  end,
-}
-
 ---@class FylerTreeViewOpenOpts
----@field cwd   string
----@field kind  FylerWinKind
-
----@class FylerTreeViewCreateOpts
----@field cwd?   string
+---@field cwd    string
 ---@field kind?  FylerWinKind
----@field config FylerConfig
 
----@param opts FylerTreeViewCreateOpts
----@return FylerTreeView
-local function create_view(opts)
+---@param opts FylerTreeViewOpenOpts
+function FileTreeView.new(opts)
+  local tree_node = TreeNode.new(store.set {
+    name = fn.fnamemodify(opts.cwd, ":t"),
+    type = "directory",
+    path = opts.cwd,
+  })
+
+  tree_node:toggle_open()
+
   local instance = {
     cwd = opts.cwd,
-    count = M.count,
-    store = M.store,
-    config = opts.config,
+    kind = opts.kind,
+    tree_node = tree_node,
   }
 
-  setmetatable(instance, vim.tbl_deep_extend("force", FileTreeView, view_mt))
+  setmetatable(instance, FileTreeView)
 
   return instance
 end
 
----@param opts FylerTreeViewCreateOpts
-function M.open(opts)
-  assert(opts, "opts is required")
-  assert(opts.config, "config is required")
-
-  local win = opts.config.get_win(view_name)
-  local cwd = opts.cwd or fs.getcwd()
-  local kind = opts.kind or win.kind
-
-  local existing_instance = vim.iter(M.instances):find(function(instance)
-    return instance.cwd == cwd
-  end)
-
-  if existing_instance then
-    existing_instance:open(opts)
-  else
-    local instance = create_view(opts)
-    table.insert(M.instances, instance)
-    instance:open { cwd = cwd, kind = kind }
-  end
-end
-
----@param cwd string
----@return FylerTree?
-local function build_tree(cwd)
-  assert(cwd, "cwd is required")
-
-  local stats = uv.fs_stat(cwd) or {}
-  if stats.type ~= "directory" then
-    return nil
-  end
-
-  M.count = M.count + 1
-
-  local tree = Tree.new(tree_mt, {
-    key = M.count,
-    open = true,
-    name = fn.fnamemodify(cwd, ":t"),
-    type = "directory",
-    path = cwd,
-  })
-
-  M.store[M.count] = cwd
-
-  local items, err = fs.listdir(cwd)
-  if err then
-    return tree
-  end
-
-  for _, item in ipairs(items) do
-    M.count = M.count + 1
-    M.store[M.count] = item.path
-    tree:add("path", cwd, vim.tbl_deep_extend("force", item, { key = M.count }))
-  end
-
-  return tree
-end
-
 ---@param opts FylerTreeViewOpenOpts
 function FileTreeView:open(opts)
-  local config = self.config
-  local mappings = config.get_reverse_mappings(view_name)
+  local mappings = config.get_reverse_mappings("tree_view")
 
-  self.tree = self.tree or build_tree(opts.cwd)
+  self:update()
 
   self.win = Win.new {
     enter = true,
-    name = view_name,
+    name = "tree_view",
     kind = opts.kind,
     bufopts = {
       syntax = "fyler",
       filetype = "fyler",
     },
     winopts = {
+      number = true,
+      relativenumber = true,
       conceallevel = 3,
       concealcursor = "nvic",
     },
@@ -173,11 +71,7 @@ function FileTreeView:open(opts)
       ["WinClosed"] = self:_action("n_close_view"),
     },
     render = function()
-      if self.tree then
-        return ui.FileTree(self.tree:totable().children)
-      else
-        return {}
-      end
+      return ui.FileTree(self:totable().children)
     end,
   }
 
@@ -192,9 +86,97 @@ end
 function FileTreeView:_action(name)
   local action = require("fyler.views.file_tree.actions")[name]
 
-  assert(action, ("action(%s)"):format(name))
+  assert(action, string.format("%s action is not available", name))
 
   return action(self)
+end
+
+function FileTreeView:update()
+  ---@param tree_node FylerTreeNode
+  local function dfs(tree_node)
+    if not tree_node.open then
+      return
+    end
+
+    local meta_data = store.get(tree_node.data)
+    local items, err = fs.listdir(meta_data.path)
+    if err then
+      return
+    end
+
+    tree_node.children = vim
+      .iter(tree_node.children)
+      :filter(function(child) ---@param child FylerTreeNode
+        return not vim.iter(items):any(function(item)
+          return item.path == store.get(child.data).path and item.type == store.get(child.data).type
+        end)
+      end)
+      :totable()
+
+    for _, item in ipairs(items) do
+      if
+        not vim.iter(tree_node.children):any(function(child) ---@param child FylerTreeNode
+          return store.get(child.data).path == item.path and store.get(child.data).type == item.type
+        end)
+      then
+        tree_node:add_child(tree_node.data, store.set(item))
+      end
+    end
+  end
+
+  dfs(self.tree_node)
+end
+
+---@return table
+function FileTreeView:totable()
+  ---@param tree_node FylerTreeNode
+  local function get_tbl(tree_node)
+    local sub_tbl = store.get(tree_node.data)
+    sub_tbl.key = tree_node.data
+
+    if not tree_node.open then
+      return sub_tbl
+    end
+
+    sub_tbl.children = {}
+    for _, child in ipairs(tree_node.children) do
+      table.insert(sub_tbl.children, get_tbl(child))
+    end
+
+    table.sort(sub_tbl.children, function(a, b)
+      if a.type == "directory" and b.type == "file" then
+        return true
+      elseif a.type == "file" and b.type == "directory" then
+        return false
+      else
+        return a.name < b.name
+      end
+    end)
+
+    return sub_tbl
+  end
+
+  return get_tbl(self.tree_node)
+end
+
+local M = {
+  instance = {},
+}
+
+---@param opts { cwd?: string, kind?: FylerWinKind }
+function M.open(opts)
+  opts = opts or {}
+  opts.cwd = opts.cwd or fs.getcwd()
+  opts.kind = opts.kind or config.get_win("tree_view").kind
+
+  if M.instance.cwd ~= opts.cwd then
+    M.instance = FileTreeView.new {
+      cwd = opts.cwd,
+      kind = opts.kind,
+    }
+  end
+
+  M.instance:open(opts)
 end
 
 return M

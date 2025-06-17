@@ -19,10 +19,10 @@ local function rmkey(str)
 end
 
 ---@param str string
----@return integer?
+---@return number?
 function M.getkey(str)
   assert(str, "str is required")
-  return tonumber((trim(str)):match("/(%d+)$"))
+  return tonumber(trim(str):match("/(%d+)$"))
 end
 
 ---@param str string
