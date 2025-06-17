@@ -24,9 +24,15 @@ function M.setup(opts)
   did_setup = true
 end
 
----@param opts FylerTreeViewOpenOpts
+---@param opts? FylerTreeViewOpenOpts
 function M.open(opts)
-  require("fyler.views.file_tree").new(M.config):open(opts)
+  opts = opts or {}
+
+  require("fyler.views.file_tree").open {
+    cwd = opts.cwd,
+    kind = opts.kind,
+    config = M.config,
+  }
 end
 
 function M.complete(arglead, cmdline)
