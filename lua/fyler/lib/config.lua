@@ -15,7 +15,7 @@
 
 ---@class Fyler.Config.WindowOptions
 ---@field number boolean
----@field relativenumbers boolean
+---@field relativenumber boolean
 
 ---@class Fyler.Config.ViewConfig
 ---@field git_status { enable: boolean }
@@ -30,7 +30,7 @@ local defaults = {
   },
   window_options = {
     number = true,
-    relativenumbers = true,
+    relativenumber = true,
   },
   view_config = {
     git_status = {

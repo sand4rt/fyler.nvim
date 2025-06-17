@@ -44,7 +44,7 @@
   },
   window_options = {
     number = true,
-    relativenumbers = true,
+    relativenumber = true,
   },
   view_config = {
     git_status = {
