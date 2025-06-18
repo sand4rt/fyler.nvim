@@ -101,7 +101,6 @@ function Win:config()
   local winconfig = {
     -- Shared options common for most usecases
     style = "minimal",
-    focusable = false,
     noautocmd = true,
   }
 
@@ -141,6 +140,8 @@ function Win:show()
   if self.render then
     self.ui:render(self.render())
   end
+
+  api.nvim_buf_set_name(self.bufnr, self.name)
 
   -- Setup keyamps
   for mode, map in pairs(self.mappings) do
