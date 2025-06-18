@@ -10,14 +10,15 @@ jobs:
       - name: Checkout codebase
         uses: actions/checkout@v4
 
-      - name: Lint with stylua
-        uses: JohnnyMorganz/stylua-action@v3
+      - name: Format with stylua
+        uses: JohnnyMorganz/stylua-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: latest
           args: false
+
       - run: |
-          stylua lua --config-path=.stylua.toml 
+          stylua lua --config-path=.stylua.toml
   luacheck:
     name: Luacheck
     runs-on: ubuntu-latest
