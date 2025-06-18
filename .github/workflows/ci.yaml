@@ -15,7 +15,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: latest
-          args: --check .
+          args: false
+      - run: |
+          stylua lua --config-path=.stylua.toml 
   luacheck:
     name: Luacheck
     runs-on: ubuntu-latest

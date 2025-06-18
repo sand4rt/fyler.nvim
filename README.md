@@ -11,50 +11,97 @@
 > [!WARNING]
 > This plugin is still under developement and not ready to use
 
-## Features status
+## Installtion
+
+### Stable version
+
+<details open>
+  <summary><a href="https://github.com/folke/lazy.nvim">lazy.nvim</a> (recommended)</summary>
+
+  ```lua
+    {
+      "A7Lavinraj/fyler.nvim",
+      dependencies = { "echasnovski/mini.icons" },
+      commit = "d87e4281e18712361f82a07f9fca71957244ef33",
+      opts = {} -- check the default options in the README.md
+    }
+  ```
+</details>
+
+### Latest version
+
+<details open>
+  <summary><a href="https://github.com/folke/lazy.nvim">lazy.nvim</a> (recommended)</summary>
+
+  ```lua
+    {
+      "A7Lavinraj/fyler.nvim",
+      dependencies = { "echasnovski/mini.icons" },
+      opts = {} -- check the default options in the README.md
+    }
+  ```
+</details>
+
+<details>
+  <summary><a href="https://github.com/echasnovski/mini.deps">mini.deps</a></summary>
+
+  ```lua
+    add({
+      source = 'A7Lavinraj/fyler.nvim',
+      depends = { 'echasnovski/mini.icons' },
+    })
+  ```
+</details>
+
+<details>
+  <summary>(Default configuration)</summary>
+
+  ```lua
+    {
+      default_explorer = false,
+      close_on_select = true,
+      views = {
+        file_tree = {
+          width = 0.8,
+          height = 0.8,
+          kind = "float",
+          border = "single",
+        },
+      },
+      mappings = {
+        file_tree = {
+          n = {
+            ["q"] = "CloseView",
+            ["<CR>"] = "Select",
+          },
+        },
+      },
+    }
+  ```
+</details>
+
+## TODOS
+
 - [x] Basic file operations (CREATE, DELETE, MOVE)
 - [x] User command to change behaviour on startup
 - [x] Hijack NETRW
-- [x] GIT integration (BASIC)
+- [ ] GIT integration (BASIC)
 - [ ] GIT integration (ADVANCE)
 - [ ] Track current buffer
 - [ ] Fuzzy finding
 - [ ] LSP integration
 - [ ] SSH integration
 
-<h2>Want to try now?</h2>
+## Similar plugins
 
-```lua
-{
-  "A7Lavinraj/fyler.nvim",
-  dependencies = { "echasnovski/mini.icons" },
-  opts = {}
-}
-```
+- [oil.nvim](https://github.com/stevearc/oil.nvim)
+- [mini.files](https://github.com/echasnovski/mini.files)
 
-<h2>Default options</h2>
+## Codebase inspiration
 
-```lua
-{
-  close_on_open = true,
-  default_explorer = false,
-  window_config = {
-    width = 0.3,
-    split = 'right',
-  },
-  window_options = {
-    number = true,
-    relativenumbers = true,
-  },
-  view_config = {
-    git_status = {
-      enable = true,
-    },
-  },
-}
-```
+- [neogit](https://github.com/NeogitOrg/neogit)
 
-## Contributors
+## Special thanks to all contributors!
 
 <a href="https://github.com/A7Lavinraj/fyler.nvim/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=A7Lavinraj/fyler.nvim" />
