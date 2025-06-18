@@ -36,7 +36,7 @@ end
 ---@return string
 function M.getindent(str)
   assert(str, "str is required")
-  return str:match("(^%s*)")
+  return str:match("^(%s*)") or ""
 end
 
 return M
