@@ -56,6 +56,7 @@ function FileTreeView:open(opts)
       buftype = "acwrite",
     },
     winopts = {
+      wrap = false,
       number = true,
       relativenumber = true,
       conceallevel = 3,
