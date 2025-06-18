@@ -2,6 +2,7 @@
 local M = {}
 
 local defaults = {
+  default_explorer = false,
   close_on_select = true,
   views = {
     file_tree = {
