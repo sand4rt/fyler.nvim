@@ -48,16 +48,19 @@ function FileTreeView:open(opts)
   self.win = Win.new {
     enter = true,
     name = "file_tree",
+    -- bufname = string.format("fyler://%s", self.cwd),
     kind = opts.kind,
     bufopts = {
       syntax = "fyler",
       filetype = "fyler",
+      buftype = "acwrite",
     },
     winopts = {
       number = true,
       relativenumber = true,
       conceallevel = 3,
       concealcursor = "nvic",
+      cursorline = true,
     },
     -- stylua: ignore start
     mappings = {
@@ -69,6 +72,10 @@ function FileTreeView:open(opts)
     -- stylua: ignore end
     autocmds = {
       ["WinClosed"] = self:_action("n_close_view"),
+    },
+    user_autocmds = {
+      ["Synchronize"] = self:_action("n_synchronize"),
+      ["RefreshView"] = self:_action("n_refreshview"),
     },
     render = function()
       return ui.FileTree(self:update_tree():tree_table_from_node().children)
@@ -161,10 +168,10 @@ function FileTreeView:tree_table_from_node()
   return get_tbl(self.tree_node)
 end
 
----@return table?
+---@return table
 function FileTreeView:tree_table_from_buffer()
   if not self.win:has_valid_bufnr() then
-    return nil
+    return {}
   end
 
   local buf_lines = vim
@@ -175,7 +182,7 @@ function FileTreeView:tree_table_from_buffer()
     :totable()
 
   if #buf_lines == 0 then
-    return nil
+    return {}
   end
 
   local root = vim.tbl_deep_extend("force", store.get(self.tree_node.data), {
@@ -210,6 +217,53 @@ function FileTreeView:tree_table_from_buffer()
   end
 
   return root
+end
+
+---@return table
+function FileTreeView:get_diff()
+  local recent_tree_hash = {}
+
+  local function save_hash(root)
+    recent_tree_hash[root.key] = root.path
+
+    for _, child in ipairs(root.children or {}) do
+      save_hash(child)
+    end
+  end
+
+  save_hash(self:tree_table_from_node())
+
+  local ops_tbl = {
+    create = {},
+    delete = {},
+    move = {},
+  }
+
+  local function calculate_ops(root)
+    if not root.key then
+      table.insert(ops_tbl.create, root.path)
+    else
+      if recent_tree_hash[root.key] ~= root.path then
+        table.insert(ops_tbl.move, { from = recent_tree_hash[root.key], to = root.path })
+      end
+
+      recent_tree_hash[root.key] = nil
+    end
+
+    for _, child in ipairs(root.children or {}) do
+      calculate_ops(child)
+    end
+  end
+
+  calculate_ops(self:tree_table_from_buffer())
+
+  for _, v in pairs(recent_tree_hash) do
+    if v then
+      table.insert(ops_tbl.delete, v)
+    end
+  end
+
+  return ops_tbl
 end
 
 function FileTreeView:refresh()
