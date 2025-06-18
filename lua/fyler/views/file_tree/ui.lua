@@ -10,7 +10,7 @@ local M = {}
 function M.get_icon(type, name)
   local has_icons, minicons = pcall(require, "mini.icons")
   if not has_icons then
-    return nil, nil
+    return " ", ""
   end
 
   local status, icon, hl = pcall(minicons.get, type, name)
@@ -23,7 +23,9 @@ end
 
 ---@param tbl table
 ---@return FylerUiLine[]
-local function TREE_STRUCTURE(tbl)
+local function TREE_STRUCTURE(tbl, depth)
+  depth = depth or 0
+
   if not tbl then
     return {}
   end
@@ -31,23 +33,20 @@ local function TREE_STRUCTURE(tbl)
   local lines = {}
   for _, item in ipairs(tbl) do
     local icon, hl = M.get_icon(item.type, item.name)
-    if icon and hl then
-      table.insert(
-        lines,
-        Line.new {
-          Word.new(icon, hl),
-          Word.new(string.format(" %s", item.name), item.type == "directory" and "FylerBlue" or ""),
-          Word.new(string.format(" /%d", item.key)),
-        }
-      )
-    else
-      table.insert(
-        lines,
-        Line.new {
-          Word.new(item.name, item.type == "directory" and "FylerBlue" or ""),
-          Word.new(string.format(" /%d", item.key)),
-        }
-      )
+    table.insert(
+      lines,
+      Line.new {
+        Word.new(string.rep(" ", depth * 2)),
+        Word.new(icon, item.type == "directory" and "FylerBlue" or hl),
+        Word.new(string.format(" %s", item.name), item.type == "directory" and "FylerBlue" or ""),
+        Word.new(string.format(" /%d", item.key)),
+      }
+    )
+
+    if item.children then
+      for _, line in ipairs(TREE_STRUCTURE(item.children, depth + 1)) do
+        table.insert(lines, line)
+      end
     end
   end
 

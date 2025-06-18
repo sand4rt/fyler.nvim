@@ -34,7 +34,7 @@ T['can show and hide'] = function()
   }
 
   local win = require('fyler.lib.win').new {
-    name = 'tree_view',
+    name = 'file_tree',
     kind = kinds[math.random(1, 5)],
     enter = true,
     mappings = {},

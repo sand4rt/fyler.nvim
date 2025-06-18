@@ -6,6 +6,7 @@ local store = require("fyler.views.file_tree.store")
 local ui = require("fyler.views.file_tree.ui")
 
 local fn = vim.fn
+local api = vim.api
 
 ---@class FylerTreeView
 ---@field cwd       string
@@ -26,7 +27,7 @@ function FileTreeView.new(opts)
     path = opts.cwd,
   })
 
-  tree_node:toggle_open()
+  tree_node:toggle()
 
   local instance = {
     cwd = opts.cwd,
@@ -41,13 +42,11 @@ end
 
 ---@param opts FylerTreeViewOpenOpts
 function FileTreeView:open(opts)
-  local mappings = config.get_reverse_mappings("tree_view")
-
-  self:update()
+  local mappings = config.get_reverse_mappings("file_tree")
 
   self.win = Win.new {
     enter = true,
-    name = "tree_view",
+    name = "file_tree",
     kind = opts.kind,
     bufopts = {
       syntax = "fyler",
@@ -63,7 +62,7 @@ function FileTreeView:open(opts)
     mappings = {
       n = {
         [mappings["CloseView"]]  = self:_action("n_close_view"),
-        [mappings["ToggleOpen"]] = self:_action("n_toggle_open"),
+        [mappings["Select"]]     = self:_action("n_select"),
       },
     },
     -- stylua: ignore end
@@ -71,9 +70,11 @@ function FileTreeView:open(opts)
       ["WinClosed"] = self:_action("n_close_view"),
     },
     render = function()
-      return ui.FileTree(self:totable().children)
+      return ui.FileTree(self:update_tree():to_table().children)
     end,
   }
+
+  require("fyler.cache").set_entry("recent_win", api.nvim_get_current_win())
 
   self.win:show()
 end
@@ -91,7 +92,8 @@ function FileTreeView:_action(name)
   return action(self)
 end
 
-function FileTreeView:update()
+---@return FylerTreeView
+function FileTreeView:update_tree()
   ---@param tree_node FylerTreeNode
   local function dfs(tree_node)
     if not tree_node.open then
@@ -107,7 +109,7 @@ function FileTreeView:update()
     tree_node.children = vim
       .iter(tree_node.children)
       :filter(function(child) ---@param child FylerTreeNode
-        return not vim.iter(items):any(function(item)
+        return vim.iter(items):any(function(item)
           return item.path == store.get(child.data).path and item.type == store.get(child.data).type
         end)
       end)
@@ -122,13 +124,19 @@ function FileTreeView:update()
         tree_node:add_child(tree_node.data, store.set(item))
       end
     end
+
+    for _, child in ipairs(tree_node.children) do
+      dfs(child)
+    end
   end
 
   dfs(self.tree_node)
+
+  return self
 end
 
 ---@return table
-function FileTreeView:totable()
+function FileTreeView:to_table()
   ---@param tree_node FylerTreeNode
   local function get_tbl(tree_node)
     local sub_tbl = store.get(tree_node.data)
@@ -159,6 +167,10 @@ function FileTreeView:totable()
   return get_tbl(self.tree_node)
 end
 
+function FileTreeView:refresh()
+  self.win.ui:render(ui.FileTree(self:update_tree():to_table().children))
+end
+
 local M = {
   instance = {},
 }
@@ -167,7 +179,7 @@ local M = {
 function M.open(opts)
   opts = opts or {}
   opts.cwd = opts.cwd or fs.getcwd()
-  opts.kind = opts.kind or config.get_win("tree_view").kind
+  opts.kind = opts.kind or config.get_view("file_tree").kind
 
   if M.instance.cwd ~= opts.cwd then
     M.instance = FileTreeView.new {

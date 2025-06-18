@@ -110,7 +110,7 @@ function Win:config()
     winconfig.split = self.kind:match("^split:(.*)")
   end
 
-  local win = config.get_win(self.name)
+  local win = config.get_view(self.name)
 
   -- Float specific options
   if self.kind == "float" then

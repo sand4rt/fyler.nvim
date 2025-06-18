@@ -13,20 +13,34 @@ function M.new(data)
   return setmetatable({ data = data, open = false, children = {} }, TreeNode)
 end
 
-function TreeNode:toggle_open()
+function TreeNode:toggle()
   self.open = not self.open
 end
 
 ---@param addr integer
 ---@param data integer
 function TreeNode:add_child(addr, data)
+  local target_node = self:find(addr)
+  if target_node then
+    table.insert(target_node.children, M.new(data))
+  end
+end
+
+---@param addr integer
+---@return FylerTreeNode?
+function TreeNode:find(addr)
   if self.data == addr then
-    table.insert(self.children, M.new(data))
-  else
-    for _, child in ipairs(self.children) do
-      child:add_child(addr, data)
+    return self
+  end
+
+  for _, child in ipairs(self.children) do
+    local found = child:find(addr)
+    if found then
+      return found
     end
   end
+
+  return nil
 end
 
 return M
