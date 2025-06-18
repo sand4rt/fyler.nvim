@@ -2,6 +2,7 @@ local TreeNode = require("fyler.views.file_tree.struct")
 local Win = require("fyler.lib.win")
 local config = require("fyler.config")
 local fs = require("fyler.lib.fs")
+local regex = require("fyler.views.file_tree.regex")
 local store = require("fyler.views.file_tree.store")
 local ui = require("fyler.views.file_tree.ui")
 
@@ -70,7 +71,7 @@ function FileTreeView:open(opts)
       ["WinClosed"] = self:_action("n_close_view"),
     },
     render = function()
-      return ui.FileTree(self:update_tree():to_table().children)
+      return ui.FileTree(self:update_tree():tree_table_from_node().children)
     end,
   }
 
@@ -136,30 +137,23 @@ function FileTreeView:update_tree()
 end
 
 ---@return table
-function FileTreeView:to_table()
+function FileTreeView:tree_table_from_node()
   ---@param tree_node FylerTreeNode
   local function get_tbl(tree_node)
     local sub_tbl = store.get(tree_node.data)
     sub_tbl.key = tree_node.data
 
+    if sub_tbl.type == "directory" then
+      sub_tbl.children = {}
+    end
+
     if not tree_node.open then
       return sub_tbl
     end
 
-    sub_tbl.children = {}
     for _, child in ipairs(tree_node.children) do
       table.insert(sub_tbl.children, get_tbl(child))
     end
-
-    table.sort(sub_tbl.children, function(a, b)
-      if a.type == "directory" and b.type == "file" then
-        return true
-      elseif a.type == "file" and b.type == "directory" then
-        return false
-      else
-        return a.name < b.name
-      end
-    end)
 
     return sub_tbl
   end
@@ -167,8 +161,59 @@ function FileTreeView:to_table()
   return get_tbl(self.tree_node)
 end
 
+---@return table?
+function FileTreeView:tree_table_from_buffer()
+  if not self.win:has_valid_bufnr() then
+    return nil
+  end
+
+  local buf_lines = vim
+    .iter(api.nvim_buf_get_lines(self.win.bufnr, 0, -1, false))
+    :filter(function(buf_line)
+      return buf_line ~= ""
+    end)
+    :totable()
+
+  if #buf_lines == 0 then
+    return nil
+  end
+
+  local root = vim.tbl_deep_extend("force", store.get(self.tree_node.data), {
+    key = self.tree_node.data,
+    children = {},
+  })
+
+  local stack = {
+    { node = root, indent = -1 },
+  }
+
+  for _, buf_line in ipairs(buf_lines) do
+    local key = regex.getkey(buf_line)
+    local name = regex.getname(buf_line)
+    local indent = regex.getindent(buf_line)
+    local type = key and store.get(key).type or ""
+
+    while #stack > 1 and #stack[#stack].indent >= #indent do
+      table.remove(stack)
+    end
+
+    local parent = stack[#stack].node
+    local path = fs.joinpath(parent.path, name)
+    local new_node = { key = key, name = name, type = type, path = path }
+
+    table.insert(parent.children, new_node)
+
+    if type == "directory" then
+      new_node.children = {}
+      table.insert(stack, { node = new_node, indent = indent })
+    end
+  end
+
+  return root
+end
+
 function FileTreeView:refresh()
-  self.win.ui:render(ui.FileTree(self:update_tree():to_table().children))
+  self.win.ui:render(ui.FileTree(self:update_tree():tree_table_from_node().children))
 end
 
 local M = {

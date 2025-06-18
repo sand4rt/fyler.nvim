@@ -21,6 +21,20 @@ function M.get_icon(type, name)
   return icon, hl
 end
 
+local function get_sorted(tbl)
+  table.sort(tbl, function(a, b)
+    if a.type == "directory" and b.type == "file" then
+      return true
+    elseif a.type == "file" and b.type == "directory" then
+      return false
+    else
+      return a.name < b.name
+    end
+  end)
+
+  return tbl
+end
+
 ---@param tbl table
 ---@return FylerUiLine[]
 local function TREE_STRUCTURE(tbl, depth)
@@ -31,7 +45,7 @@ local function TREE_STRUCTURE(tbl, depth)
   end
 
   local lines = {}
-  for _, item in ipairs(tbl) do
+  for _, item in ipairs(get_sorted(tbl)) do
     local icon, hl = M.get_icon(item.type, item.name)
     table.insert(
       lines,

@@ -38,16 +38,16 @@ end
 function M.complete(arglead, cmdline)
   if arglead:find("^kind=") then
     return {
-      "kind=split:left",
-      "kind=split:above",
-      "kind=split:right",
-      "kind=split:below",
+      "split:left",
+      "split:above",
+      "split:right",
+      "split:below",
     }
   end
 
   if arglead:find("^cwd=") then
     return {
-      "cwd=" .. (vim.uv or vim.loop).cwd(),
+      (vim.uv or vim.loop).cwd(),
     }
   end
 
