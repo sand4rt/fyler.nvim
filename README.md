@@ -80,6 +80,25 @@
   ```
 </details>
 
+## Usage
+
+There is user command `Fyler` is optionally accepts two options:
+
+- kind
+- cwd
+
+```lua
+-- Open fyler with specific window kind
+:Fyler kind=split:left
+:Fyler kind=split:right
+:Fyler kind=split:above
+:Fyler kind=split:below
+
+-- Open fyler with specific directory
+:Fyler cwd=/home/user/.config/nvim
+```
+
+
 ## TODOS
 
 - [x] Basic file operations (CREATE, DELETE, MOVE)
