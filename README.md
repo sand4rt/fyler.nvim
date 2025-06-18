@@ -19,12 +19,12 @@
   <summary><a href="https://github.com/folke/lazy.nvim">lazy.nvim</a> (recommended)</summary>
 
   ```lua
-    {
-      "A7Lavinraj/fyler.nvim",
-      dependencies = { "echasnovski/mini.icons" },
-      commit = "d87e4281e18712361f82a07f9fca71957244ef33",
-      opts = {} -- check the default options in the README.md
-    }
+  {
+    "A7Lavinraj/fyler.nvim",
+    dependencies = { "echasnovski/mini.icons" },
+    commit = "d87e4281e18712361f82a07f9fca71957244ef33",
+    opts = {} -- check the default options in the README.md
+  }
   ```
 </details>
 
@@ -34,11 +34,11 @@
   <summary><a href="https://github.com/folke/lazy.nvim">lazy.nvim</a> (recommended)</summary>
 
   ```lua
-    {
-      "A7Lavinraj/fyler.nvim",
-      dependencies = { "echasnovski/mini.icons" },
-      opts = {} -- check the default options in the README.md
-    }
+  {
+    "A7Lavinraj/fyler.nvim",
+    dependencies = { "echasnovski/mini.icons" },
+    opts = {} -- check the default options in the README.md
+  }
   ```
 </details>
 
@@ -46,10 +46,10 @@
   <summary><a href="https://github.com/echasnovski/mini.deps">mini.deps</a></summary>
 
   ```lua
-    add({
-      source = 'A7Lavinraj/fyler.nvim',
-      depends = { 'echasnovski/mini.icons' },
-    })
+  add({
+    source = 'A7Lavinraj/fyler.nvim',
+    depends = { 'echasnovski/mini.icons' },
+  })
   ```
 </details>
 
@@ -57,26 +57,44 @@
   <summary>(Default configuration)</summary>
 
   ```lua
-    {
-      default_explorer = false,
-      close_on_select = true,
-      views = {
-        file_tree = {
-          width = 0.8,
-          height = 0.8,
-          kind = "float",
-          border = "single",
+  local defaults = {
+    -- NETRW Hijacking:
+    -- The plugin will replace most of the netrw command
+    -- By default this option is disable to avoid any incompatibility
+    default_explorer = false,
+
+    -- Close open file:
+    -- This enable user to close fyler window on opening a file
+    close_on_select = true,
+
+    -- Views configuration:
+    -- Every view config contains following options to be customized
+    -- `width` a number in [0, 1]
+    -- `height` a number in [0, 1]
+    -- `kind` could be 'float', 'split:left', 'split:above', 'split:right', 'split:below'
+    -- `border` could be 'bold', 'double', 'none', 'rounded', 'shadow', 'single', 'solid'
+    views = {
+      file_tree = {
+        width = 0.8,
+        height = 0.8,
+        kind = "float",
+        border = "single",
+      },
+    },
+
+    -- Mappings:
+    -- mappings can be customized by action names which are local to thier view
+    mappings = {
+      -- For `file_tree` actions checkout following link:
+      -- https://github.com/A7Lavinraj/fyler.nvim/blob/main/lua/fyler/views/file_tree/actions.lua
+      file_tree = {
+        n = {
+          ["q"] = "CloseView",
+          ["<CR>"] = "Select",
         },
       },
-      mappings = {
-        file_tree = {
-          n = {
-            ["q"] = "CloseView",
-            ["<CR>"] = "Select",
-          },
-        },
-      },
-    }
+    },
+  }
   ```
 </details>
 
@@ -97,7 +115,6 @@ There is user command `Fyler` is optionally accepts two options:
 -- Open fyler with specific directory
 :Fyler cwd=/home/user/.config/nvim
 ```
-
 
 ## TODOS
 
