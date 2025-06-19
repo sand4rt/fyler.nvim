@@ -12,6 +12,7 @@ T['can create instance'] = function()
 
   local opts = {
     name = 'FylerTest',
+    bufname = 'fyler://foo',
     kind = kinds[math.random(1, 5)],
     enter = true,
     mappings = {},
@@ -35,6 +36,7 @@ T['can show and hide'] = function()
 
   local win = require('fyler.lib.win').new {
     name = 'file_tree',
+    bufname = 'fyler://foo',
     kind = kinds[math.random(1, 5)],
     enter = true,
     mappings = {},
