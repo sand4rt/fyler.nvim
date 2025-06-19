@@ -281,6 +281,10 @@ function M.open(opts)
   opts.cwd = opts.cwd or fs.getcwd()
   opts.kind = opts.kind or config.get_view("file_tree").kind
 
+  if M.instance.close then
+    M.instance:close()
+  end
+
   if M.instance.cwd ~= opts.cwd then
     M.instance = FileTreeView.new {
       cwd = opts.cwd,
