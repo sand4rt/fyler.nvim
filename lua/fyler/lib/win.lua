@@ -14,6 +14,7 @@ local api = vim.api
 ---@field ui            FylerUi
 ---@field open          boolean
 ---@field name          string
+---@field bufname       string
 ---@field kind          FylerWinKind
 ---@field enter         boolean
 ---@field bufnr?        integer
@@ -42,6 +43,7 @@ end
 
 ---@class FylerWinOpts
 ---@field name           string
+---@field bufname        string
 ---@field kind           FylerWinKind
 ---@field enter          boolean
 ---@field render?        fun(): FylerUiLine[]
@@ -57,6 +59,7 @@ function Win.new(opts)
   opts = opts or {}
 
   assert(opts.name, "name is required field")
+  assert(opts.bufname, "bufname is required field")
   assert(opts.kind, "kind is required field")
   assert(opts.mappings, "mappings is required field")
 
@@ -64,6 +67,7 @@ function Win.new(opts)
   local instance = {
     open           = false,
     name           = opts.name,
+    bufname        = opts.bufname,
     kind           = opts.kind,
     enter          = opts.enter,
     render         = opts.render,
@@ -141,7 +145,7 @@ function Win:show()
     self.ui:render(self.render())
   end
 
-  api.nvim_buf_set_name(self.bufnr, self.name)
+  api.nvim_buf_set_name(self.bufnr, self.bufname)
 
   -- Setup keyamps
   for mode, map in pairs(self.mappings) do

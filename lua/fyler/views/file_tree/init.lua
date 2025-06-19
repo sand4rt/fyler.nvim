@@ -48,7 +48,7 @@ function FileTreeView:open(opts)
   self.win = Win.new {
     enter = true,
     name = "file_tree",
-    -- bufname = string.format("fyler://%s", self.cwd),
+    bufname = string.format("fyler://%s", self.cwd),
     kind = opts.kind,
     bufopts = {
       syntax = "fyler",
