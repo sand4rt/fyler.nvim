@@ -1,12 +1,14 @@
 <div  align="center">
   <h1>Fyler.nvim</h1>
-  <p>A flowless neovim file manager</p>
+  <p>A modern neovim file tree which can edit your file system like a buffer</p>
 </div>
 
 <p align="center">
   <img alt="License" src="https://img.shields.io/github/license/A7Lavinraj/fyler.nvim?style=for-the-badge&logo=starship&color=ee999f&logoColor=D9E0EE&labelColor=302D41" />
   <img alt="Stars" src="https://img.shields.io/github/stars/A7Lavinraj/fyler.nvim?style=for-the-badge&logo=starship&color=c69ff5&logoColor=D9E0EE&labelColor=302D41" />
 </p>
+
+![Image](https://github.com/user-attachments/assets/cf3d7904-d5dd-4c15-94cd-eaecd38ddc1e)
 
 > [!WARNING]
 > This plugin is still under developement and not ready to use
@@ -100,6 +102,8 @@
 
 ## Usage
 
+https://github.com/user-attachments/assets/ea71ff58-1c5c-4cda-b54e-f845d70f5184
+
 There is user command `Fyler` is optionally accepts two options:
 
 - kind
@@ -127,6 +131,15 @@ There is user command `Fyler` is optionally accepts two options:
 - [ ] Fuzzy finding
 - [ ] LSP integration
 - [ ] SSH integration
+
+## Have problems with fyler.nvim?
+
+1. Search for existing [issues](https://github.com/A7Lavinraj/fyler.nvim/issues)
+2. If related issue is not there then open a new one
+
+## Want to contribute to this project?
+
+- Please read the [CONTRIBUTING.md](https://github.com/A7Lavinraj/fyler.nvim/blob/main/CONTRIBUTING.md) to start
 
 ## Similar plugins
 
