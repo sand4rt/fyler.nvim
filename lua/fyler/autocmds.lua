@@ -12,7 +12,7 @@ function M.setup()
   })
 
   api.nvim_create_autocmd("BufWriteCmd", {
-    pattern = "file_tree",
+    pattern = "fyler://*",
     group = require("fyler").augroup,
     callback = function(arg)
       api.nvim_exec_autocmds("User", { pattern = "Synchronize" })
@@ -22,7 +22,7 @@ function M.setup()
   })
 
   api.nvim_create_autocmd("BufReadCmd", {
-    pattern = "file_tree",
+    pattern = "fyler://*",
     group = require("fyler").augroup,
     callback = function(arg)
       api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
