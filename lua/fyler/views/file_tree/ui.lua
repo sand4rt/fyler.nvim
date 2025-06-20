@@ -10,12 +10,12 @@ local M = {}
 function M.get_icon(type, name)
   local has_icons, minicons = pcall(require, "mini.icons")
   if not has_icons then
-    return "*", ""
+    return "", ""
   end
 
   local status, icon, hl = pcall(minicons.get, type, name)
   if not status then
-    return "*", ""
+    return "", ""
   end
 
   return icon, hl
