@@ -50,10 +50,12 @@ local function TREE_STRUCTURE(tbl, depth)
     table.insert(
       lines,
       Line.new {
-        Word.new(string.rep(" ", depth * 2)),
-        Word.new(icon, item.type == "directory" and "FylerBlue" or hl),
-        Word.new(string.format(" %s", item.name), item.type == "directory" and "FylerBlue" or ""),
-        Word.new(string.format(" /%d", item.key)),
+        words = {
+          Word.new(string.rep(" ", depth * 2)),
+          Word.new(icon, item.type == "directory" and "FylerBlue" or hl),
+          Word.new(string.format(" %s", item.name), item.type == "directory" and "FylerBlue" or ""),
+          Word.new(string.format(" /%d", item.key)),
+        },
       }
     )
 
@@ -68,9 +70,7 @@ local function TREE_STRUCTURE(tbl, depth)
 end
 
 function M.FileTree(tbl)
-  return {
-    unpack(TREE_STRUCTURE(tbl)),
-  }
+  return TREE_STRUCTURE(tbl)
 end
 
 return M

@@ -11,15 +11,21 @@ function Word.new(str, hl)
   return setmetatable({ str = str, hl = hl or "FylerBlank" }, Word)
 end
 
+---@alias FylerUiLineAlign
+---| "end"
+---| "start"
+---| "center"
+
 ---@class FylerUiLine
+---@field align FylerUiLineAlign
 ---@field words FylerUiWord[]
 local Line = {}
 Line.__index = Line
 
----@param words? FylerUiWord[]
+---@param opts { words: FylerUiWord[], align?: FylerUiLineAlign }
 ---@return FylerUiLine
-function Line.new(words)
-  local instance = { words = words or {} }
+function Line.new(opts)
+  local instance = { words = opts.words or {}, align = opts.align or "start" }
 
   setmetatable(instance, Line)
 
