@@ -66,18 +66,20 @@ function FileTreeView:open(opts)
     -- stylua: ignore start
     mappings = {
       n = {
-        [mappings["CloseView"]]  = self:_action("n_close_view"),
         [mappings["Select"]]     = self:_action("n_select"),
+        [mappings["CloseView"]]  = self:_action("n_close_view"),
       },
     },
-    -- stylua: ignore end
     autocmds = {
-      ["WinClosed"] = self:_action("n_close_view"),
+      ["WinClosed"]   = self:_action("n_close_view"),
+      ["BufReadCmd"]  = self:_action("n_refreshview"),
+      ["BufWriteCmd"] = self:_action("n_synchronize"),
     },
     user_autocmds = {
-      ["Synchronize"] = self:_action("n_synchronize"),
       ["RefreshView"] = self:_action("n_refreshview"),
+      ["Synchronize"] = self:_action("n_synchronize"),
     },
+    -- stylua: ignore end
     render = function()
       return ui.FileTree(self:update_tree():tree_table_from_node().children)
     end,
@@ -269,6 +271,8 @@ end
 
 function FileTreeView:refresh()
   self.win.ui:render(ui.FileTree(self:update_tree():tree_table_from_node().children))
+  vim.bo[self.win.bufnr].syntax = "fyler"
+  vim.bo[self.win.bufnr].filetype = "fyler"
 end
 
 local M = {

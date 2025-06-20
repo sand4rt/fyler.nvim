@@ -26,7 +26,6 @@ function Ui:_render(lines)
 
   -- Check the `modifiable` porperty to restore it after completion of render
   local was_modifiable = vim.bo[self.win.bufnr].modifiable
-  local was_modified = vim.bo[self.win.bufnr].modified
   local buf_lines = {}
 
   vim.bo[self.win.bufnr].modifiable = true
@@ -63,9 +62,7 @@ function Ui:_render(lines)
     vim.bo[self.win.bufnr].modifiable = false
   end
 
-  if not was_modified then
-    vim.bo[self.win.bufnr].modified = false
-  end
+  vim.bo[self.win.bufnr].modified = false
 end
 
 ---@param lines FylerUiLine[]

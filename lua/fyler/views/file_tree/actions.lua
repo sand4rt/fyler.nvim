@@ -88,9 +88,7 @@ end
 
 function M.n_refreshview(view)
   return function()
-    view.win.ui:render(
-      require("fyler.views.file_tree.ui").FileTree(view:update_tree():tree_table_from_node().children)
-    )
+    view:refresh()
   end
 end
 
