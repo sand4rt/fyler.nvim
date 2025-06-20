@@ -5,6 +5,12 @@ local defaults = {
   default_explorer = false,
   close_on_select = true,
   views = {
+    confirm = {
+      width = 0.5,
+      height = 0.4,
+      kind = "float",
+      border = "single",
+    },
     file_tree = {
       width = 0.8,
       height = 0.8,
@@ -13,6 +19,12 @@ local defaults = {
     },
   },
   mappings = {
+    confirm = {
+      n = {
+        ["y"] = "Confirm",
+        ["n"] = "Discard",
+      },
+    },
     file_tree = {
       n = {
         ["q"] = "CloseView",

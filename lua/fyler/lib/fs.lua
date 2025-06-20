@@ -31,6 +31,12 @@ function M.toabspath(path)
 end
 
 ---@param path string
+---@return string
+function M.torelpath(path)
+  return path:gsub(string.format("^%s/", M.getcwd():gsub("([^%w])", "%%%1")), ""):match(".*")
+end
+
+---@param path string
 ---@return table, string?
 function M.listdir(path)
   assert(path, "path is required")

@@ -12,14 +12,17 @@ local api = vim.api
 
 ---@class FylerWin
 ---@field ui            FylerUi
----@field open          boolean
 ---@field name          string
----@field bufname       string
 ---@field kind          FylerWinKind
 ---@field enter         boolean
+---@field title?        any
+---@field title_pos?    string
+---@field footer?       any
+---@field footer_pos?   string
 ---@field bufnr?        integer
 ---@field winid?        integer
 ---@field border        string|string[]
+---@field bufname       string
 ---@field render?       fun(): FylerUi
 ---@field bufopts       table
 ---@field winopts       table
@@ -42,11 +45,15 @@ local function get_augroup(name)
 end
 
 ---@class FylerWinOpts
----@field name           string
+---@field name?          string
 ---@field bufname        string
----@field kind           FylerWinKind
----@field enter          boolean
+---@field kind?          FylerWinKind
+---@field enter?         boolean
 ---@field render?        fun(): FylerUiLine[]
+---@field title?         any
+---@field title_pos?     string
+---@field footer?        any
+---@field footer_pos?    string
 ---@field bufopts?       table
 ---@field winopts?       table
 ---@field mappings?      table
@@ -58,18 +65,20 @@ end
 function Win.new(opts)
   opts = opts or {}
 
-  assert(opts.kind, "kind is required field")
   assert(opts.name, "name is required field")
   assert(opts.bufname, "bufname is required field")
 
   -- stylua: ignore start
   local instance = {
-    open           = false,
-    name           = opts.name,
+    name           = opts.name or "",
     bufname        = opts.bufname,
-    kind           = opts.kind,
+    kind           = opts.kind or "float",
     enter          = opts.enter or false,
     render         = opts.render,
+    title          = opts.title,
+    title_pos      = opts.title_pos,
+    footer         = opts.footer,
+    footer_pos     = opts.footer_pos,
     augroup        = get_augroup(opts.name),
     mappings       = opts.mappings or {},
     autocmds       = opts.autocmds or {},
@@ -105,6 +114,10 @@ function Win:config()
     -- Shared options common for most usecases
     style = "minimal",
     noautocmd = true,
+    title = self.title,
+    title_pos = self.title_pos,
+    footer = self.footer,
+    footer_pos = self.footer_pos,
   }
 
   -- Split specific options

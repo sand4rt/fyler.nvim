@@ -44,6 +44,10 @@ local function make_palette()
     blue   = get_fg("Directory"),
     green  = get_fg("String"),
     yellow = get_fg("WarningMsg"),
+    grey   = get_fg("Whitespace"),
+
+    black  = "#000000",
+    white  = "#ffffff"
   }
   -- stylua: ignore end
 end
@@ -53,12 +57,17 @@ function M.setup()
 
   -- stylua: ignore start
   local hl_groups = {
-    FylerRed       = { fg = palette.red },
-    FylerGreen     = { fg = palette.green },
-    FylerBlue      = { fg = palette.blue },
+    FylerRed         = { fg = palette.red },
+    FylerGreen       = { fg = palette.green },
+    FylerBlue        = { fg = palette.blue },
     FylerYellow      = { fg = palette.yellow },
-    FylerHeading   = { fg = palette.blue, bold = true },
-    FylerParagraph = { fg = palette.white },
+    FylerHeading     = { fg = palette.blue, bold = true },
+    FylerParagraph   = { fg = palette.white },
+    FylerLabelRed    = { fg = palette.black, bg = palette.red },
+    FylerLabelGreen  = { fg = palette.black, bg = palette.green },
+    FylerLabelBlue   = { fg = palette.black, bg = palette.blue },
+    FylerLabelYellow = { fg = palette.black, bg = palette.yellow },
+    FylerLabelGrey   = { fg = palette.black, bg = palette.grey }
   }
   -- stylua: ignore end
 

@@ -1,4 +1,5 @@
 local config = require("fyler.config")
+local confirm_view = require("fyler.views.confirm")
 local fs = require("fyler.lib.fs")
 local regex = require("fyler.views.file_tree.regex")
 local store = require("fyler.views.file_tree.store")
@@ -43,46 +44,72 @@ function M.n_select(view)
 end
 
 ---@param tbl table
----@return string
-local function get_changes_str(tbl)
-  local str = ""
+---@return table
+local function get_tbl(tbl)
+  local lines = {}
 
-  for change_type, changes in pairs(tbl) do
-    for _, change in ipairs(changes) do
-      if change_type == "move" then
-        str = str .. string.upper(change_type) .. " " .. change.from .. " > " .. change.to .. "\n"
-      else
-        str = str .. string.upper(change_type) .. " " .. change .. "\n"
-      end
+  if not vim.tbl_isempty(tbl.create) then
+    table.insert(lines, { { str = "# Creation", hl = "FylerGreen" } })
+    for _, change in ipairs(tbl.create) do
+      table.insert(lines, {
+        { str = "  - " },
+        { str = fs.torelpath(change), hl = "Conceal" },
+      })
     end
 
-    str = str .. "\n"
+    table.insert(lines, { { str = "" } })
   end
 
-  return str
+  if not vim.tbl_isempty(tbl.delete) then
+    table.insert(lines, { { str = "# Deletetion", hl = "FylerRed" } })
+    for _, change in ipairs(tbl.delete) do
+      table.insert(lines, {
+        { str = "  - " },
+        { str = fs.torelpath(change), hl = "Conceal" },
+      })
+    end
+
+    table.insert(lines, { { str = "" } })
+  end
+
+  if not vim.tbl_isempty(tbl.move) then
+    table.insert(lines, { { str = "# Migration", hl = "FylerYellow" } })
+    for _, change in ipairs(tbl.move) do
+      table.insert(lines, {
+        { str = "  - " },
+        { str = fs.torelpath(change.from), hl = "Conceal" },
+        { str = " > " },
+        { str = fs.torelpath(change.to), hl = "Conceal" },
+      })
+    end
+
+    table.insert(lines, { { str = "" } })
+  end
+
+  return lines
 end
 
 ---@param view FylerTreeView
 function M.n_synchronize(view)
   return function()
     local changes = view:get_diff()
-    local choice = vim.fn.confirm(get_changes_str(changes), "&YConfirm\n&NDiscard")
+    confirm_view.open(get_tbl(changes), " [Y]Confirm [N]Discard ", function(c)
+      if c then
+        for _, change in ipairs(changes.create) do
+          fs.create_fs_item(change)
+        end
 
-    if choice == 1 then
-      for _, change in ipairs(changes.create) do
-        fs.create_fs_item(change)
+        for _, change in ipairs(changes.delete) do
+          fs.delete_fs_item(change)
+        end
+
+        for _, change in ipairs(changes.move) do
+          fs.move_fs_item(change.from, change.to)
+        end
       end
 
-      for _, change in ipairs(changes.delete) do
-        fs.delete_fs_item(change)
-      end
-
-      for _, change in ipairs(changes.move) do
-        fs.move_fs_item(change.from, change.to)
-      end
-    end
-
-    view:refresh()
+      view:refresh()
+    end)
   end
 end
 
