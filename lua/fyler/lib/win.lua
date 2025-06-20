@@ -58,10 +58,9 @@ end
 function Win.new(opts)
   opts = opts or {}
 
+  assert(opts.kind, "kind is required field")
   assert(opts.name, "name is required field")
   assert(opts.bufname, "bufname is required field")
-  assert(opts.kind, "kind is required field")
-  assert(opts.mappings, "mappings is required field")
 
   -- stylua: ignore start
   local instance = {
@@ -69,7 +68,7 @@ function Win.new(opts)
     name           = opts.name,
     bufname        = opts.bufname,
     kind           = opts.kind,
-    enter          = opts.enter,
+    enter          = opts.enter or false,
     render         = opts.render,
     augroup        = get_augroup(opts.name),
     mappings       = opts.mappings or {},
@@ -113,7 +112,7 @@ function Win:config()
     winconfig.split = self.kind:match("^split:(.*)")
   end
 
-  local win = config.get_view(self.name)
+  local win = config.get_view(self.name) or { width = 0.5, height = 0.5 }
 
   -- Float specific options
   if self.kind == "float" then
