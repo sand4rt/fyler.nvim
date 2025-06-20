@@ -26,7 +26,7 @@ local defaults = {
   default_explorer = false,
   window_config = {
     width = 0.3,
-    split = 'right',
+    split = "right",
   },
   window_options = {
     number = true,
@@ -41,7 +41,7 @@ local defaults = {
 
 ---@param options Fyler.Config
 function M.set_defaults(options)
-  M.values = vim.tbl_deep_extend('force', defaults, options or {})
+  M.values = vim.tbl_deep_extend("force", defaults, options or {})
 end
 
 return M

@@ -49,12 +49,12 @@ local function TREE_STRUCTURE(tbl, depth)
     local icon, hl = M.get_icon(item.type, item.name)
     table.insert(
       lines,
-      Line.new {
+      Line {
         words = {
-          Word.new(string.rep(" ", depth * 2)),
-          Word.new(icon, item.type == "directory" and "FylerBlue" or hl),
-          Word.new(string.format(" %s", item.name), item.type == "directory" and "FylerBlue" or ""),
-          Word.new(string.format(" /%d", item.key)),
+          Word(string.rep(" ", depth * 2)),
+          Word(icon, item.type == "directory" and "FylerBlue" or hl),
+          Word(string.format(" %s", item.name), item.type == "directory" and "FylerBlue" or ""),
+          Word(string.format(" /%d", item.key)),
         },
       }
     )

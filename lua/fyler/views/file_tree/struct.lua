@@ -7,11 +7,13 @@ local M = {}
 local TreeNode = {}
 TreeNode.__index = TreeNode
 
----@param data integer
----@return FylerTreeNode
-function M.new(data)
-  return setmetatable({ data = data, open = false, children = {} }, TreeNode)
-end
+setmetatable(M, {
+  ---@param data integer
+  ---@return FylerTreeNode
+  __call = function(_, data)
+    return setmetatable({ data = data, open = false, children = {} }, TreeNode)
+  end,
+})
 
 function TreeNode:toggle()
   self.open = not self.open
@@ -22,7 +24,7 @@ end
 function TreeNode:add_child(addr, data)
   local target_node = self:find(addr)
   if target_node then
-    table.insert(target_node.children, M.new(data))
+    table.insert(target_node.children, M(data))
   end
 end
 

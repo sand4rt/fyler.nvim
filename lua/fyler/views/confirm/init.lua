@@ -13,7 +13,7 @@ FylerConfirmView.__index = FylerConfirmView
 function FylerConfirmView:open(msg, chs, cb)
   local mappings = config.get_reverse_mappings("confirm")
 
-  self.win = Win.new {
+  self.win = Win {
     name = "confirm",
     bufname = "confirm",
     title = { { " Confirmation dialog ", "FylerLabelYellow" } },
@@ -59,17 +59,8 @@ function FylerConfirmView:_action(name, ...)
   return action(self, ...)
 end
 
-local M = {}
-
----@param msg { str: string, hl: string }[]
----@param chs string
----@param cb fun(c: boolean)
-M.open = vim.schedule_wrap(function(msg, chs, cb)
-  if not M.instance then
-    M.instance = setmetatable({}, FylerConfirmView)
-  end
-
-  M.instance:open(msg, chs, cb)
-end)
-
-return M
+return setmetatable({}, {
+  __call = vim.schedule_wrap(function(_, ...)
+    setmetatable({}, FylerConfirmView):open(...)
+  end),
+})

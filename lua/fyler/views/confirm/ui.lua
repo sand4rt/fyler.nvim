@@ -8,9 +8,9 @@ local function MESSAGE(tbl)
   for _, line in ipairs(tbl or {}) do
     table.insert(
       lines,
-      Line.new {
+      Line {
         words = vim.tbl_map(function(word)
-          return Word.new(word.str, word.hl)
+          return Word(word.str, word.hl)
         end, line),
       }
     )

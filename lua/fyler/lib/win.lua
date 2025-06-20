@@ -44,57 +44,6 @@ local function get_augroup(name)
   return api.nvim_create_augroup("Fyler" .. name, { clear = true })
 end
 
----@class FylerWinOpts
----@field name?          string
----@field bufname        string
----@field kind?          FylerWinKind
----@field enter?         boolean
----@field render?        fun(): FylerUiLine[]
----@field title?         any
----@field title_pos?     string
----@field footer?        any
----@field footer_pos?    string
----@field bufopts?       table
----@field winopts?       table
----@field mappings?      table
----@field autocmds?      table
----@field user_autocmds? table
-
----@param opts FylerWinOpts
----@return FylerWin
-function Win.new(opts)
-  opts = opts or {}
-
-  assert(opts.name, "name is required field")
-  assert(opts.bufname, "bufname is required field")
-
-  -- stylua: ignore start
-  local instance = {
-    name           = opts.name or "",
-    bufname        = opts.bufname,
-    kind           = opts.kind or "float",
-    enter          = opts.enter or false,
-    render         = opts.render,
-    title          = opts.title,
-    title_pos      = opts.title_pos,
-    footer         = opts.footer,
-    footer_pos     = opts.footer_pos,
-    augroup        = get_augroup(opts.name),
-    mappings       = opts.mappings or {},
-    autocmds       = opts.autocmds or {},
-    bufopts        = opts.bufopts or {},
-    winopts        = opts.winopts or {},
-    namespace      = get_namespace(opts.name),
-    user_autocmds  = opts.user_autocmds or {},
-  }
-  -- stylua: ignore end
-
-  instance.ui = Ui.new(instance)
-  setmetatable(instance, Win)
-
-  return instance
-end
-
 -- Determine whether the `Win` has valid buffer
 ---@return boolean
 function Win:has_valid_bufnr()
@@ -205,4 +154,55 @@ function Win:hide()
   end
 end
 
-return Win
+---@class FylerWinOpts
+---@field name?          string
+---@field bufname        string
+---@field kind?          FylerWinKind
+---@field enter?         boolean
+---@field render?        fun(): FylerUiLine[]
+---@field title?         any
+---@field title_pos?     string
+---@field footer?        any
+---@field footer_pos?    string
+---@field bufopts?       table
+---@field winopts?       table
+---@field mappings?      table
+---@field autocmds?      table
+---@field user_autocmds? table
+
+return setmetatable({}, {
+  ---@param opts FylerWinOpts
+  ---@return FylerWin
+  __call = function(_, opts)
+    opts = opts or {}
+
+    assert(opts.name, "name is required field")
+    assert(opts.bufname, "bufname is required field")
+
+    -- stylua: ignore start
+    local instance = {
+      name           = opts.name or "",
+      bufname        = opts.bufname,
+      kind           = opts.kind or "float",
+      enter          = opts.enter or false,
+      render         = opts.render,
+      title          = opts.title,
+      title_pos      = opts.title_pos,
+      footer         = opts.footer,
+      footer_pos     = opts.footer_pos,
+      augroup        = get_augroup(opts.name),
+      mappings       = opts.mappings or {},
+      autocmds       = opts.autocmds or {},
+      bufopts        = opts.bufopts or {},
+      winopts        = opts.winopts or {},
+      namespace      = get_namespace(opts.name),
+      user_autocmds  = opts.user_autocmds or {},
+    }
+    -- stylua: ignore end
+
+    instance.ui = Ui.new(instance)
+    setmetatable(instance, Win)
+
+    return instance
+  end,
+})

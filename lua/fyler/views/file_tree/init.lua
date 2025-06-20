@@ -22,7 +22,7 @@ FileTreeView.__index = FileTreeView
 
 ---@param opts FylerTreeViewOpenOpts
 function FileTreeView.new(opts)
-  local tree_node = TreeNode.new(store.set {
+  local tree_node = TreeNode(store.set {
     name = fn.fnamemodify(opts.cwd, ":t"),
     type = "directory",
     path = opts.cwd,
@@ -45,7 +45,7 @@ end
 function FileTreeView:open(opts)
   local mappings = config.get_reverse_mappings("file_tree")
 
-  self.win = Win.new {
+  self.win = Win {
     enter = true,
     name = "file_tree",
     bufname = string.format("fyler://%s", self.cwd),

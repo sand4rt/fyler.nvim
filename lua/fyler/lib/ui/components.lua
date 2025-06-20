@@ -4,13 +4,6 @@
 local Word = {}
 Word.__index = Word
 
----@param str string
----@param hl? string
----@return FylerUiWord
-function Word.new(str, hl)
-  return setmetatable({ str = str, hl = hl or "FylerBlank" }, Word)
-end
-
 ---@alias FylerUiLineAlign
 ---| "end"
 ---| "start"
@@ -22,17 +15,24 @@ end
 local Line = {}
 Line.__index = Line
 
----@param opts { words: FylerUiWord[], align?: FylerUiLineAlign }
----@return FylerUiLine
-function Line.new(opts)
-  local instance = { words = opts.words or {}, align = opts.align or "start" }
-
-  setmetatable(instance, Line)
-
-  return instance
-end
-
 return {
-  Line = Line,
-  Word = Word,
+  Line = setmetatable({}, {
+    ---@param opts { words: FylerUiWord[], align?: FylerUiLineAlign }
+    ---@return FylerUiLine
+    __call = function(_, opts)
+      local instance = { words = opts.words or {}, align = opts.align or "start" }
+
+      setmetatable(instance, Line)
+
+      return instance
+    end,
+  }),
+  Word = setmetatable({}, {
+    ---@param str string
+    ---@param hl? string
+    ---@return FylerUiWord
+    __call = function(_, str, hl)
+      return setmetatable({ str = str, hl = hl or "FylerBlank" }, Word)
+    end,
+  }),
 }
