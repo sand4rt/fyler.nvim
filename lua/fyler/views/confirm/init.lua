@@ -59,8 +59,21 @@ function FylerConfirmView:_action(name, ...)
   return action(self, ...)
 end
 
-return setmetatable({}, {
-  __call = vim.schedule_wrap(function(_, ...)
-    setmetatable({}, FylerConfirmView):open(...)
-  end),
-})
+local M = {}
+
+---@param msg { str: string, hl: string }[]
+---@param chs string
+---@param cb fun(c: boolean)
+M.open = vim.schedule_wrap(function(msg, chs, cb)
+  if not M.instance then
+    M.instance = setmetatable({}, FylerConfirmView)
+  end
+
+  if M.instance.win and M.instance.win:has_valid_winid() then
+    M.instance:close()
+  end
+
+  M.instance:open(msg, chs, cb)
+end)
+
+return M

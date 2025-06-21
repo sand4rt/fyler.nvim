@@ -93,7 +93,7 @@ end
 function M.n_synchronize(view)
   return function()
     local changes = view:get_diff()
-    confirm_view(get_tbl(changes), " [Y]Confirm [N]Discard ", function(c)
+    confirm_view.open(get_tbl(changes), " [Y]Confirm [N]Discard ", function(c)
       if c then
         for _, change in ipairs(changes.create) do
           fs.create_fs_item(change)
