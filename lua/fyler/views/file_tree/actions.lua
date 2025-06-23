@@ -1,8 +1,10 @@
+local algos = require("fyler.views.file_tree.algos")
 local config = require("fyler.config")
 local confirm_view = require("fyler.views.confirm")
 local fs = require("fyler.lib.fs")
 local regex = require("fyler.views.file_tree.regex")
 local store = require("fyler.views.file_tree.store")
+local ui = require("fyler.views.file_tree.ui")
 
 local M = {}
 
@@ -28,7 +30,7 @@ function M.n_select(view)
     local meta_data = store.get(key)
     if meta_data:is_directory() then
       view.tree_node:find(key):toggle()
-      view:refresh()
+      api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
     else
       local recent_win = require("fyler.cache").get_entry("recent_win")
       if recent_win and api.nvim_win_is_valid(recent_win) then
@@ -108,7 +110,7 @@ end
 ---@param view FylerTreeView
 function M.n_synchronize(view)
   return function()
-    local changes = view:get_diff()
+    local changes = algos.get_diff(view)
     confirm_view.open(get_tbl(changes), " [Y]Confirm [N]Discard ", function(c)
       if c then
         for _, change in ipairs(changes.create) do
@@ -124,14 +126,18 @@ function M.n_synchronize(view)
         end
       end
 
-      view:refresh()
+      api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
     end)
   end
 end
 
+---@param view FylerTreeView
 function M.n_refreshview(view)
   return function()
-    view:refresh()
+    view.tree_node:update()
+    view.win.ui:render(ui.FileTree(algos.tree_table_from_node(view).children))
+    vim.bo[view.win.bufnr].syntax = "fyler"
+    vim.bo[view.win.bufnr].filetype = "fyler"
   end
 end
 
