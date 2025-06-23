@@ -88,8 +88,9 @@ function FileTreeView:open(opts)
     -- stylua: ignore start
     mappings = {
       n = {
-        [mappings["Select"]]     = self:_action("n_select"),
-        [mappings["CloseView"]]  = self:_action("n_close_view"),
+        [mappings["Select"]]          = self:_action("n_select"),
+        [mappings["SelectRecursive"]] = self:_action("n_select_recursive"),
+        [mappings["CloseView"]]       = self:_action("n_close_view"),
       },
     },
     autocmds = {
