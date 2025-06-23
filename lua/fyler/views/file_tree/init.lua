@@ -145,7 +145,7 @@ function FileTreeView:tree_table_from_node()
     local sub_tbl = store.get(tree_node.data)
     sub_tbl.key = tree_node.data
 
-    if sub_tbl.type == "directory" then
+    if sub_tbl:is_directory() then
       sub_tbl.children = {}
     end
 
@@ -193,7 +193,7 @@ function FileTreeView:tree_table_from_buffer()
     local key = regex.getkey(buf_line)
     local name = regex.getname(buf_line)
     local indent = regex.getindent(buf_line)
-    local type = key and store.get(key).type or ""
+    local metadata = key and store.get(key)
 
     while #stack > 1 and #stack[#stack].indent >= #indent do
       table.remove(stack)
@@ -201,11 +201,11 @@ function FileTreeView:tree_table_from_buffer()
 
     local parent = stack[#stack].node
     local path = fs.joinpath(parent.path, name)
-    local new_node = { key = key, name = name, type = type, path = path }
+    local new_node = { key = key, name = name, type = (metadata or {}).type or "", path = path }
 
     table.insert(parent.children, new_node)
 
-    if type == "directory" then
+    if metadata and metadata:is_directory() then
       new_node.children = {}
       table.insert(stack, { node = new_node, indent = indent })
     end

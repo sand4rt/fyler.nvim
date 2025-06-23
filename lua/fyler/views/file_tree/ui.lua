@@ -21,11 +21,13 @@ function M.get_icon(type, name)
   return icon, hl
 end
 
+local BrokenLinkIcon = M.get_icon("default", "default")
+
 local function get_sorted(tbl)
   table.sort(tbl, function(a, b)
-    if a.type == "directory" and b.type == "file" then
+    if a:is_directory() and not b:is_directory() then
       return true
-    elseif a.type == "file" and b.type == "directory" then
+    elseif not a:is_directory() and b:is_directory() then
       return false
     else
       return a.name < b.name
@@ -46,7 +48,22 @@ local function TREE_STRUCTURE(tbl, depth)
 
   local lines = {}
   for _, item in ipairs(get_sorted(tbl)) do
-    local icon, hl = M.get_icon(item.type, item.name)
+    local icon, hl
+
+    if item.type == "directory" then
+      icon = M.get_icon(item.type, item.name)
+      hl = "FylerBlue"
+    elseif item.type == "link" and item.links_to.type == nil then
+      -- This is a broken link
+      icon = BrokenLinkIcon
+      hl = "FylerRed"
+    elseif item.type == "link" then
+      icon = M.get_icon(item.links_to.type, item.name)
+      hl = "FylerGreen"
+    else
+      icon, hl = M.get_icon(item.type, item.name)
+    end
+
     table.insert(
       lines,
       Line {

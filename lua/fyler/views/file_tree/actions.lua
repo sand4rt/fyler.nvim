@@ -17,7 +17,6 @@ function M.n_close_view(view)
   end
 end
 
--- TODO: Should extend this action to handle symbolic links
 ---@param view FylerTreeView
 function M.n_select(view)
   return function()
@@ -27,13 +26,13 @@ function M.n_select(view)
     end
 
     local meta_data = store.get(key)
-    if meta_data.type == "directory" then
+    if meta_data:is_directory() then
       view.tree_node:find(key):toggle()
       view:refresh()
     else
       local recent_win = require("fyler.cache").get_entry("recent_win")
       if recent_win and api.nvim_win_is_valid(recent_win) then
-        fn.win_execute(recent_win, string.format("edit %s", meta_data.path))
+        fn.win_execute(recent_win, string.format("edit %s", meta_data:resolved_path()))
         fn.win_gotoid(recent_win)
         if config.values.close_on_select then
           view:close()
@@ -51,7 +50,7 @@ function M.n_select_recursive(view)
     end
 
     local meta_data = store.get(key)
-    if meta_data.type == "directory" then
+    if meta_data:is_directory() then
       view.tree_node:find(key):toggle_recursive()
       view:refresh()
     else

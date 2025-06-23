@@ -20,7 +20,7 @@ return {
     ---@param opts { words: FylerUiWord[], align?: FylerUiLineAlign }
     ---@return FylerUiLine
     __call = function(_, opts)
-      local instance = { words = opts.words or {}, align = opts.align or "start" }
+      local instance = { words = opts.words or {}, align = opts.align or "start", opts.marks or {} }
 
       setmetatable(instance, Line)
 
