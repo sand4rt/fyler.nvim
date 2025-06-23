@@ -46,7 +46,7 @@ end
 function FileTreeView:open(opts)
   local mappings = config.get_reverse_mappings("file_tree")
 
-  self:update_tree()
+  self.tree_node:update()
 
   local rel = vim.fs.relpath(opts.cwd, opts.focused_path or "")
   local parts = {}
@@ -130,12 +130,6 @@ function FileTreeView:_action(name)
   assert(action, string.format("%s action is not available", name))
 
   return action(self)
-end
-
----@return FylerTreeView
-function FileTreeView:update_tree()
-  self.tree_node:update()
-  return self
 end
 
 ---@return table
