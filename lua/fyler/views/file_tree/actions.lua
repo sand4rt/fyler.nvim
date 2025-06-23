@@ -147,7 +147,7 @@ function M.constrain_cursor(view)
       end
 
       local row, col = unpack(api.nvim_win_get_cursor(view.win.winid))
-      local lb, ub = cline:find(item_name)
+      local lb, ub = cline:find(item_name, 1, true)
       lb = lb - 1
       ub = ub - 1
 
