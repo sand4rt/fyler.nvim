@@ -126,9 +126,9 @@ There is user command `Fyler` is optionally accepts two options:
 - [x] Basic file operations (CREATE, DELETE, MOVE)
 - [x] User command to change behaviour on startup
 - [x] Hijack NETRW
+- [x] Track current buffer
 - [ ] GIT integration (BASIC)
 - [ ] GIT integration (ADVANCE)
-- [ ] Track current buffer
 - [ ] Fuzzy finding
 - [ ] LSP integration
 - [ ] SSH integration
