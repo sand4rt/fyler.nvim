@@ -1,6 +1,8 @@
 local fs = require("fyler.lib.fs")
 local store = require("fyler.views.file_tree.store")
 
+local DEFAULT_RECURSION_LIMIT = 32
+
 local M = {}
 
 ---@class FylerTreeNode
@@ -83,20 +85,35 @@ function TreeNode:update()
   end
 end
 
-function TreeNode:open_recursive()
+---@param max_depth number?
+function TreeNode:open_recursive(max_depth)
+  if max_depth ~= nil and max_depth <= 0 then
+    vim.notify("Reached recursion limit on directory.", vim.log.levels.WARN)
+    return
+  end
+
+  max_depth = max_depth or DEFAULT_RECURSION_LIMIT
+
   self.open = true
   self:update()
   for _, child in pairs(self.children) do
-    if store.get(child.data).type == "directory" then
-      child:open_recursive()
+    if store.get(child.data):is_directory() then
+      child:open_recursive(max_depth - 1)
     end
   end
 end
 
-function TreeNode:close_recursive()
+---@param max_depth number?
+function TreeNode:close_recursive(max_depth)
+  if max_depth ~= nil and max_depth <= 0 then
+    vim.notify("Reached recursion limit on directory.", vim.log.levels.WARN)
+    return
+  end
+
+  max_depth = max_depth or DEFAULT_RECURSION_LIMIT
   for _, child in pairs(self.children) do
-    if store.get(child.data).type == "directory" and child.open then
-      child:close_recursive()
+    if store.get(child.data):is_directory() and child.open then
+      child:close_recursive(max_depth - 1)
     end
   end
   self.open = false
