@@ -29,6 +29,7 @@ local defaults = {
       n = {
         ["q"] = "CloseView",
         ["<CR>"] = "Select",
+        ["<C-CR>"] = "SelectRecursive",
       },
     },
   },

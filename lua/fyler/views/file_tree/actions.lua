@@ -43,6 +43,23 @@ function M.n_select(view)
   end
 end
 
+function M.n_select_recursive(view)
+  return function()
+    local key = regex.getkey(api.nvim_get_current_line())
+    if not key then
+      return
+    end
+
+    local meta_data = store.get(key)
+    if meta_data.type == "directory" then
+      view.tree_node:find(key):toggle_recursive()
+      view:refresh()
+    else
+      M.n_select(view)
+    end
+  end
+end
+
 ---@param tbl table
 ---@return table
 local function get_tbl(tbl)

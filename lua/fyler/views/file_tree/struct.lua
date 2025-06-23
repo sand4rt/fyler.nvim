@@ -83,4 +83,31 @@ function TreeNode:update()
   end
 end
 
+function TreeNode:open_recursive()
+  self.open = true
+  self:update()
+  for _, child in pairs(self.children) do
+    if store.get(child.data).type == "directory" then
+      child:open_recursive()
+    end
+  end
+end
+
+function TreeNode:close_recursive()
+  for _, child in pairs(self.children) do
+    if store.get(child.data).type == "directory" and child.open then
+      child:close_recursive()
+    end
+  end
+  self.open = false
+end
+
+function TreeNode:toggle_recursive()
+  if self.open then
+    self:close_recursive()
+  else
+    self:open_recursive()
+  end
+end
+
 return M

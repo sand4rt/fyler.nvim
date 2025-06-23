@@ -93,6 +93,7 @@
         n = {
           ["q"] = "CloseView",
           ["<CR>"] = "Select",
+          ["<C-CR>"] = "SelectRecursive",
         },
       },
     },
