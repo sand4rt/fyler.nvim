@@ -2,6 +2,7 @@ local components = require("fyler.lib.ui.components")
 
 local Line = components.Line
 local Word = components.Word
+local Mark = components.Mark
 
 local M = {}
 
@@ -73,6 +74,9 @@ local function TREE_STRUCTURE(tbl, depth)
           Word(string.format(" %s", item.name), item.type == "directory" and "FylerBlue" or ""),
           Word(string.format(" /%d", item.key)),
         },
+        marks = item.type == "link" and {
+          Mark("--> " .. item.links_to.path, "FylerYellow", item.key),
+        } or {},
       }
     )
 

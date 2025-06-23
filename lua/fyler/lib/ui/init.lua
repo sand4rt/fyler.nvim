@@ -73,6 +73,15 @@ function Ui:_render(lines)
 
       offset = offset + #word.str
     end
+
+    for _, mark in pairs(line.marks) do
+      api.nvim_buf_set_extmark(self.win.bufnr, self.win.namespace, i - 1, 1, {
+        id = mark.id,
+        virt_text = { { mark.str, mark.hl } },
+        virt_text_pos = "eol",
+        hl_group = mark.hl,
+      })
+    end
   end
 
   if not was_modifiable then
