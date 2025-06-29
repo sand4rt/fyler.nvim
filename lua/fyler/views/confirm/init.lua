@@ -16,9 +16,9 @@ function FylerConfirmView:open(msg, chs, cb)
   self.win = Win {
     name = "confirm",
     bufname = "confirm",
-    title = { { " Confirmation dialog ", "FylerLabelYellow" } },
+    title = " Confirm ",
     title_pos = "center",
-    footer = { { chs, "FylerLabelGrey" } },
+    footer = chs,
     footer_pos = "center",
     enter = true,
     bufopts = {
