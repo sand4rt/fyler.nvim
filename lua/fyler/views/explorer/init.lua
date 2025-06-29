@@ -16,12 +16,6 @@ local api = vim.api
 local FileTreeView = {}
 FileTreeView.__index = FileTreeView
 
----@class FylerTreeViewOpenOpts
----@field cwd           string
----@field focused_path? string
----@field kind?         FylerWinKind
-
----@param opts FylerTreeViewOpenOpts
 function FileTreeView.new(opts)
   local tree_node = TreeNode(store.set {
     name = fn.fnamemodify(opts.cwd, ":t"),
@@ -42,7 +36,6 @@ function FileTreeView.new(opts)
   return instance
 end
 
----@param opts FylerTreeViewOpenOpts
 function FileTreeView:open(opts)
   local mappings = config.get_reverse_mappings("explorer")
 
@@ -107,8 +100,8 @@ function FileTreeView:open(opts)
       return {
         lines = ui.FileTree(algos.tree_table_from_node(self).children),
         cb = function()
-          vim.fn.search(string.format("/%s$", focused_node.data), "w")
-          vim.cmd(":normal _")
+          vim.fn.search(focused_node.meta, "w")
+          vim.cmd(":normal w")
         end,
       }
     end,
