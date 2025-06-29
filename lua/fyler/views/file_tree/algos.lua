@@ -59,9 +59,9 @@ function M.tree_table_from_buffer(view)
   }
 
   for _, buf_line in ipairs(buf_lines) do
-    local key = regex.getkey(buf_line)
-    local name = regex.getname(buf_line)
-    local indent = regex.getindent(buf_line)
+    local key = regex.match_meta(buf_line)
+    local name = regex.match_name(buf_line)
+    local indent = regex.match_indent(buf_line)
     local metadata = key and store.get(key)
 
     while #stack > 1 and #stack[#stack].indent >= #indent do

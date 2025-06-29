@@ -2,39 +2,21 @@ local M = {}
 
 ---@param str string
 ---@return string
-local function trim(str)
-  return str:gsub("^%s*", ""):gsub("%s*$", ""):match(".*")
-end
-
----@param str string
----@return string
-local function rmicon(str)
-  return str:gsub("[\238\160\128-\238\163\191\243\176\128\128-\243\191\191\189]", ""):match(".*")
-end
-
----@param str string
----@return string
-local function rmkey(str)
-  return str:gsub("/%d+$", ""):match(".*")
-end
-
----@param str string
----@return number?
-function M.getkey(str)
+function M.match_meta(str)
   assert(str, "str is required")
-  return tonumber(trim(str):match("/(%d+)$"))
+  return str:match(" /(%d%d%d%d%d)")
 end
 
 ---@param str string
 ---@return string
-function M.getname(str)
+function M.match_name(str)
   assert(str, "str is required")
-  return trim(rmicon(rmkey(trim(str))))
+  return str:gsub(".*/%d%d%d%d%d ", ""):match(".*")
 end
 
 ---@param str string
 ---@return string
-function M.getindent(str)
+function M.match_indent(str)
   assert(str, "str is required")
   return str:match("^(%s*)") or ""
 end

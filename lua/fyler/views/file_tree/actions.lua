@@ -22,7 +22,7 @@ end
 ---@param view FylerTreeView
 function M.n_select(view)
   return function()
-    local key = regex.getkey(api.nvim_get_current_line())
+    local key = regex.match_meta(api.nvim_get_current_line())
     if not key then
       return
     end
@@ -46,7 +46,7 @@ end
 
 function M.n_select_recursive(view)
   return function()
-    local key = regex.getkey(api.nvim_get_current_line())
+    local key = regex.match_meta(api.nvim_get_current_line())
     if not key then
       return
     end
@@ -138,32 +138,6 @@ function M.n_refreshview(view)
     view.win.ui:render(ui.FileTree(algos.tree_table_from_node(view).children))
     vim.bo[view.win.bufnr].syntax = "fyler"
     vim.bo[view.win.bufnr].filetype = "fyler"
-  end
-end
-
-function M.constrain_cursor(view)
-  return function(arg)
-    local cline = api.nvim_get_current_line()
-    local key = regex.getkey(cline)
-    if key then
-      local item_name = regex.getname(cline)
-      if item_name == "" then
-        return
-      end
-
-      local row, col = unpack(api.nvim_win_get_cursor(view.win.winid))
-      local lb, ub = cline:find(item_name, 1, true)
-      lb = lb - 1
-      ub = ub - 1
-
-      if col < lb then
-        api.nvim_win_set_cursor(view.win.winid, { row, lb })
-      end
-
-      if col > ub then
-        api.nvim_win_set_cursor(view.win.winid, { row, ub + (arg.event == "CursorMovedI" and 1 or 0) })
-      end
-    end
   end
 end
 

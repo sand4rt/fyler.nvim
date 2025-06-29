@@ -14,17 +14,18 @@ function Metadata:resolved_path()
   return self.type == "link" and self.links_to.path or self.path
 end
 
----@param key integer
+---@param key string
 function M.get(key)
   return setmetatable(vim.deepcopy(store[key]), Metadata)
 end
 
 ---@param tbl table
----@return integer
+---@return string
 function M.set(tbl)
   count = count + 1
-  store[count] = tbl
-  return count
+  local meta = string.format("%05d", count)
+  store[meta] = tbl
+  return meta
 end
 
 function M.debug()

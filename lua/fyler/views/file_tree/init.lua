@@ -97,8 +97,6 @@ function FileTreeView:open(opts)
       ["WinClosed"]   = self:_action("n_close_view"),
       ["BufReadCmd"]  = self:_action("n_refreshview"),
       ["BufWriteCmd"] = self:_action("n_synchronize"),
-      ["CursorMoved"] = self:_action("constrain_cursor"),
-      ["CursorMovedI"] = self:_action("constrain_cursor"),
     },
     user_autocmds = {
       ["RefreshView"] = self:_action("n_refreshview"),

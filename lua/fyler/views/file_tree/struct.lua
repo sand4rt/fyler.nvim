@@ -6,14 +6,14 @@ local DEFAULT_RECURSION_LIMIT = 32
 local M = {}
 
 ---@class FylerTreeNode
----@field data integer
+---@field data string
 ---@field open boolean
 ---@field children FylerTreeNode[]
 local TreeNode = {}
 TreeNode.__index = TreeNode
 
 setmetatable(M, {
-  ---@param data integer
+  ---@param data string
   ---@return FylerTreeNode
   __call = function(_, data)
     return setmetatable({ data = data, open = false, children = {} }, TreeNode)
@@ -24,8 +24,8 @@ function TreeNode:toggle()
   self.open = not self.open
 end
 
----@param addr integer
----@param data integer
+---@param addr string
+---@param data string
 function TreeNode:add_child(addr, data)
   local target_node = self:find(addr)
   if target_node then
@@ -33,7 +33,7 @@ function TreeNode:add_child(addr, data)
   end
 end
 
----@param addr integer
+---@param addr string
 ---@return FylerTreeNode?
 function TreeNode:find(addr)
   if self.data == addr then

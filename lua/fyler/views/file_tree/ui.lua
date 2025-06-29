@@ -71,8 +71,8 @@ local function TREE_STRUCTURE(tbl, depth)
         words = {
           Word(string.rep(" ", depth * 2)),
           Word(icon, item.type == "directory" and "FylerBlue" or hl),
+          Word(string.format(" /%s", item.key)),
           Word(string.format(" %s", item.name), item.type == "directory" and "FylerBlue" or ""),
-          Word(string.format(" /%d", item.key)),
         },
         marks = item.type == "link" and {
           Mark("--> " .. item.links_to.path, "FylerYellow", item.key),
