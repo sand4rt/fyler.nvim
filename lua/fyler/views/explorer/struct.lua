@@ -14,7 +14,13 @@ local M = setmetatable({}, {
   ---@param meta string
   ---@return FylerTreeNode
   __call = function(_, meta)
-    return setmetatable({ meta = meta, open = false, children = {} }, FSItem)
+    local instance = {
+      meta = meta,
+      open = false,
+      children = {},
+    }
+
+    return setmetatable(instance, FSItem)
   end,
 })
 

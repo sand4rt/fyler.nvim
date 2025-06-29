@@ -141,4 +141,20 @@ function M.n_refreshview(view)
   end
 end
 
+function M.constrain_cursor(view)
+  return function()
+    local cur = api.nvim_get_current_line()
+    local meta = regex.match_meta(cur)
+    if not meta then
+      return
+    end
+
+    local _, ub = string.find(cur, meta)
+    local row, col = unpack(api.nvim_win_get_cursor(view.win.winid))
+    if col <= ub then
+      api.nvim_win_set_cursor(view.win.winid, { row, ub + 1 })
+    end
+  end
+end
+
 return M
