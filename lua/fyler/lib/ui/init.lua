@@ -5,18 +5,15 @@ local api = vim.api
 local Ui = {}
 Ui.__index = Ui
 
----@param win FylerWin
----@return FylerUi
-function Ui.new(win)
-  assert(win, "win is required")
+local M = setmetatable({}, {
+  ---@param win FylerWin
+  ---@return FylerUi
+  __call = function(_, win)
+    assert(win, "win is required")
 
-  local instance = {
-    win = win,
-  }
-
-  setmetatable(instance, Ui)
-  return instance
-end
+    return setmetatable({ win = win }, Ui)
+  end,
+})
 
 ---@param align FylerUiLineAlign
 ---@param line string
@@ -37,14 +34,12 @@ function Ui:_render(lines)
     return
   end
 
-  -- Check the `modifiable` porperty to restore it after completion of render
   local was_modifiable = vim.bo[self.win.bufnr].modifiable
   local win_width = api.nvim_win_get_width(self.win.winid)
   local buf_lines = {}
 
   vim.bo[self.win.bufnr].modifiable = true
 
-  -- Going through each line
   for _, line in ipairs(lines) do
     local line_text = table.concat(vim.tbl_map(function(word)
       return word.str
@@ -91,15 +86,14 @@ function Ui:_render(lines)
   vim.bo[self.win.bufnr].modified = false
 end
 
----@param lines FylerUiLine[]
----@param cb? function(): nil
-function Ui:render(lines, cb)
+function Ui:render(opts)
+  opts = opts or {}
   vim.schedule(function()
-    self:_render(lines)
-    if cb then
-      cb()
+    self:_render(opts.lines)
+    if opts.cb then
+      opts.cb()
     end
   end)
 end
 
-return Ui
+return M

@@ -10,8 +10,8 @@ local api = vim.api
 function M.tree_table_from_node(view)
   ---@param node FylerTreeNode
   local function get_tbl(node)
-    local sub_tbl = store.get(node.data)
-    sub_tbl.key = node.data
+    local sub_tbl = store.get(node.meta)
+    sub_tbl.key = node.meta
 
     if sub_tbl:is_directory() then
       sub_tbl.children = {}
@@ -49,8 +49,8 @@ function M.tree_table_from_buffer(view)
     return {}
   end
 
-  local root = vim.tbl_deep_extend("force", store.get(view.tree_node.data), {
-    key = view.tree_node.data,
+  local root = vim.tbl_deep_extend("force", store.get(view.tree_node.meta), {
+    key = view.tree_node.meta,
     children = {},
   })
 

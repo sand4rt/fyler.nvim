@@ -11,39 +11,76 @@ local api = vim.api
 ---| "split:below"
 
 ---@class FylerWin
----@field ui            FylerUi
----@field name          string
----@field kind          FylerWinKind
----@field enter         boolean
----@field title?        any
----@field title_pos?    string
----@field footer?       any
----@field footer_pos?   string
----@field bufnr?        integer
----@field winid?        integer
----@field border        string|string[]
----@field bufname       string
----@field render?       fun(): FylerUi
----@field on_open?      fun(): nil
----@field bufopts       table
----@field winopts       table
----@field augroup       string
----@field mappings      table
----@field autocmds      table
----@field namespace     integer
----@field user_autocmds table
+---@field augroup       string          - Autogroup associated with window instance
+---@field autocmds      table           - Autocommands locally associated with window instance
+---@field border        string|string[] - Border format - read ':winborder' for more info
+---@field bufname       string          - Builtin way to name neovim buffers
+---@field bufnr?        integer         - Buffer number associated with window instance
+---@field bufopts       table           - Buffer local options
+---@field enter         boolean         - whether to enter in the window on open
+---@field footer?       any             - Footer content
+---@field footer_pos?   string          - Footer alignment
+---@field kind          FylerWinKind    - Decides launch behaviour of window instance
+---@field mappings      table           - Kemaps local to the window instance
+---@field name          string          - Also know as `view_name` which helps to get specific config from user end
+---@field namespace     integer         - Namespace associated with window instance
+---@field render?       function        - Defines what to render on the screen on open
+---@field title?        any             - Title content
+---@field title_pos?    string          - Title alignment
+---@field ui            FylerUi         - Ui responsible to render lines return from corresponding render function
+---@field user_autocmds table           - User autocommands associated with window instance
+---@field winid?        integer         - Window id associated with window instance
+---@field winopts       table           - Window local options
 local Win = {}
 Win.__index = Win
 
+-- Prepares namespace ID by attaching buffer's given name
 ---@param name string
 local function get_namespace(name)
   return api.nvim_create_namespace("Fyler" .. name)
 end
 
+-- Prepares autogroup ID by attaching buffer's given name
 ---@param name string
 local function get_augroup(name)
   return api.nvim_create_augroup("Fyler" .. name, { clear = true })
 end
+
+local M = setmetatable({}, {
+  ---@return FylerWin
+  __call = function(_, opts)
+    opts = opts or {}
+
+    assert(opts.name, "name is required field")
+    assert(opts.bufname, "bufname is required field")
+
+    -- stylua: ignore start
+    local instance = {
+      augroup        = get_augroup(opts.name),
+      autocmds       = opts.autocmds or {},
+      bufname        = opts.bufname,
+      bufopts        = opts.bufopts or {},
+      enter          = opts.enter or false,
+      footer         = opts.footer,
+      footer_pos     = opts.footer_pos,
+      kind           = opts.kind or "float",
+      mappings       = opts.mappings or {},
+      name           = opts.name or "",
+      namespace      = get_namespace(opts.name),
+      render         = opts.render,
+      title          = opts.title,
+      title_pos      = opts.title_pos,
+      user_autocmds  = opts.user_autocmds or {},
+      winopts        = opts.winopts or {},
+    }
+    -- stylua: ignore end
+
+    instance.ui = Ui(instance)
+    setmetatable(instance, Win)
+
+    return instance
+  end,
+})
 
 -- Determine whether the `Win` has valid buffer
 ---@return boolean
@@ -61,7 +98,6 @@ end
 ---@return vim.api.keyset.win_config
 function Win:config()
   local winconfig = {
-    -- Shared options common for most usecases
     style = "minimal",
     noautocmd = true,
     title = self.title,
@@ -70,16 +106,13 @@ function Win:config()
     footer_pos = self.footer_pos,
   }
 
-  -- Split specific options
   if self.kind:match("^split:*") then
     winconfig.split = self.kind:match("^split:(.*)")
   end
 
   local win = config.get_view(self.name) or { width = 0.5, height = 0.5 }
 
-  -- Float specific options
   if self.kind == "float" then
-    -- `relative` field is necessary for float window
     winconfig.relative = "editor"
     winconfig.border = win.border
     winconfig.col = math.floor((1 - win.width) * 0.5 * vim.o.columns)
@@ -93,30 +126,25 @@ function Win:config()
 end
 
 function Win:show()
-  -- Check if window is already open
   if self:has_valid_winid() then
     return
   end
 
-  -- Create a new buffer and open with window
   self.bufnr = api.nvim_create_buf(false, true)
   self.winid = api.nvim_open_win(self.bufnr, self.enter, self:config())
 
-  -- Call render as soon as window open
   if self.render then
-    self.ui:render(self.render(), self.on_open)
+    self.ui:render(self.render())
   end
 
   api.nvim_buf_set_name(self.bufnr, self.bufname)
 
-  -- Setup keyamps
   for mode, map in pairs(self.mappings) do
     for key, val in pairs(map) do
       vim.keymap.set(mode, key, val, { buffer = self.bufnr, silent = true, noremap = true })
     end
   end
 
-  -- Setup buffer and window options
   for key, val in pairs(self.winopts) do
     vim.wo[self.winid][key] = val
   end
@@ -125,7 +153,6 @@ function Win:show()
     vim.bo[self.bufnr][key] = val
   end
 
-  -- Setup autocommands
   for ev, cb in pairs(self.autocmds) do
     api.nvim_create_autocmd(ev, {
       group = self.augroup,
@@ -144,68 +171,13 @@ function Win:show()
 end
 
 function Win:hide()
-  -- check before closing window
   if self:has_valid_winid() then
     api.nvim_win_close(self.winid, true)
   end
 
-  -- check before deleting buffer
   if self:has_valid_bufnr() then
     api.nvim_buf_delete(self.bufnr, { force = true })
   end
 end
 
----@class FylerWinOpts
----@field name?          string
----@field bufname        string
----@field kind?          FylerWinKind
----@field enter?         boolean
----@field render?        fun(): FylerUiLine[]
----@field on_open?       fun(): nil
----@field title?         any
----@field title_pos?     string
----@field footer?        any
----@field footer_pos?    string
----@field bufopts?       table
----@field winopts?       table
----@field mappings?      table
----@field autocmds?      table
----@field user_autocmds? table
-
-return setmetatable({}, {
-  ---@param opts FylerWinOpts
-  ---@return FylerWin
-  __call = function(_, opts)
-    opts = opts or {}
-
-    assert(opts.name, "name is required field")
-    assert(opts.bufname, "bufname is required field")
-
-    -- stylua: ignore start
-    local instance = {
-      name           = opts.name or "",
-      bufname        = opts.bufname,
-      kind           = opts.kind or "float",
-      enter          = opts.enter or false,
-      render         = opts.render,
-      on_open = opts.on_open,
-      title          = opts.title,
-      title_pos      = opts.title_pos,
-      footer         = opts.footer,
-      footer_pos     = opts.footer_pos,
-      augroup        = get_augroup(opts.name),
-      mappings       = opts.mappings or {},
-      autocmds       = opts.autocmds or {},
-      bufopts        = opts.bufopts or {},
-      winopts        = opts.winopts or {},
-      namespace      = get_namespace(opts.name),
-      user_autocmds  = opts.user_autocmds or {},
-    }
-    -- stylua: ignore end
-
-    instance.ui = Ui.new(instance)
-    setmetatable(instance, Win)
-
-    return instance
-  end,
-})
+return M

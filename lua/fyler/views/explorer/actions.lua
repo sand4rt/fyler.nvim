@@ -135,7 +135,7 @@ end
 function M.n_refreshview(view)
   return function()
     view.tree_node:update()
-    view.win.ui:render(ui.FileTree(algos.tree_table_from_node(view).children))
+    view.win.ui:render { lines = ui.FileTree(algos.tree_table_from_node(view).children) }
     vim.bo[view.win.bufnr].syntax = "fyler"
     vim.bo[view.win.bufnr].filetype = "fyler"
   end

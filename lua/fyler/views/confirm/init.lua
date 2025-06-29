@@ -39,7 +39,7 @@ function FylerConfirmView:open(msg, chs, cb)
       ["QuitPre"] = self:_action("n_close_view", cb),
     },
     render = function()
-      return ui.Confirm(msg)
+      return { lines = ui.Confirm(msg) }
     end,
   }
 

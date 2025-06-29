@@ -57,7 +57,7 @@ function FileTreeView:open(opts)
   local focused_node = self.tree_node
   for _, part in pairs(parts) do
     local child = vim.iter(focused_node.children):find(function(child)
-      return store.get(child.data).name == part
+      return store.get(child.meta).name == part
     end)
     if not child then
       break
@@ -104,11 +104,13 @@ function FileTreeView:open(opts)
     },
     -- stylua: ignore end
     render = function()
-      return ui.FileTree(algos.tree_table_from_node(self).children)
-    end,
-    on_open = function()
-      vim.fn.search(string.format("/%s$", focused_node.data), "w")
-      vim.cmd(":normal _")
+      return {
+        lines = ui.FileTree(algos.tree_table_from_node(self).children),
+        cb = function()
+          vim.fn.search(string.format("/%s$", focused_node.data), "w")
+          vim.cmd(":normal _")
+        end,
+      }
     end,
   }
 
