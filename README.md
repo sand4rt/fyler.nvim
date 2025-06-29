@@ -76,7 +76,7 @@
     -- `kind` could be 'float', 'split:left', 'split:above', 'split:right', 'split:below'
     -- `border` could be 'bold', 'double', 'none', 'rounded', 'shadow', 'single', 'solid'
     views = {
-      file_tree = {
+      explorer = {
         width = 0.8,
         height = 0.8,
         kind = "float",
@@ -87,9 +87,9 @@
     -- Mappings:
     -- mappings can be customized by action names which are local to thier view
     mappings = {
-      -- For `file_tree` actions checkout following link:
-      -- https://github.com/A7Lavinraj/fyler.nvim/blob/main/lua/fyler/views/file_tree/actions.lua
-      file_tree = {
+      -- For `explorer` actions checkout following link:
+      -- https://github.com/A7Lavinraj/fyler.nvim/blob/main/lua/fyler/views/explorer/actions.lua
+      explorer = {
         n = {
           ["q"] = "CloseView",
           ["<CR>"] = "Select",

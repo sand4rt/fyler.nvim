@@ -1,10 +1,10 @@
-local algos = require("fyler.views.file_tree.algos")
+local algos = require("fyler.views.explorer.algos")
 local config = require("fyler.config")
 local confirm_view = require("fyler.views.confirm")
 local fs = require("fyler.lib.fs")
-local regex = require("fyler.views.file_tree.regex")
-local store = require("fyler.views.file_tree.store")
-local ui = require("fyler.views.file_tree.ui")
+local regex = require("fyler.views.explorer.regex")
+local store = require("fyler.views.explorer.store")
+local ui = require("fyler.views.explorer.ui")
 
 local M = {}
 

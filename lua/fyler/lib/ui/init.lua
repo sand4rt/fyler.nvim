@@ -68,7 +68,7 @@ function Ui:_render(lines)
     for _, word in ipairs(line.words) do
       api.nvim_buf_set_extmark(self.win.bufnr, self.win.namespace, i - 1, offset, {
         end_col = offset + #word.str,
-        hl_group = word.hl,
+        hl_group = word.hl or "",
       })
 
       offset = offset + #word.str
@@ -76,10 +76,10 @@ function Ui:_render(lines)
 
     for _, mark in pairs(line.marks) do
       api.nvim_buf_set_extmark(self.win.bufnr, self.win.namespace, i - 1, 1, {
-        id = mark.id,
-        virt_text = { { mark.str, mark.hl } },
+        id = tonumber(mark.id),
+        virt_text = { { mark.str, mark.hl or "" } },
         virt_text_pos = "eol",
-        hl_group = mark.hl,
+        hl_group = mark.hl or "",
       })
     end
   end

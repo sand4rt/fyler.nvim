@@ -1,10 +1,10 @@
-local TreeNode = require("fyler.views.file_tree.struct")
+local TreeNode = require("fyler.views.explorer.struct")
 local Win = require("fyler.lib.win")
-local algos = require("fyler.views.file_tree.algos")
+local algos = require("fyler.views.explorer.algos")
 local config = require("fyler.config")
 local fs = require("fyler.lib.fs")
-local store = require("fyler.views.file_tree.store")
-local ui = require("fyler.views.file_tree.ui")
+local store = require("fyler.views.explorer.store")
+local ui = require("fyler.views.explorer.ui")
 
 local fn = vim.fn
 local api = vim.api
@@ -44,7 +44,7 @@ end
 
 ---@param opts FylerTreeViewOpenOpts
 function FileTreeView:open(opts)
-  local mappings = config.get_reverse_mappings("file_tree")
+  local mappings = config.get_reverse_mappings("explorer")
 
   self.tree_node:update()
 
@@ -69,7 +69,7 @@ function FileTreeView:open(opts)
 
   self.win = Win {
     enter = true,
-    name = "file_tree",
+    name = "explorer",
     bufname = string.format("fyler://%s", self.cwd),
     kind = opts.kind,
     bufopts = {
@@ -123,7 +123,7 @@ end
 
 ---@param name string
 function FileTreeView:_action(name)
-  local action = require("fyler.views.file_tree.actions")[name]
+  local action = require("fyler.views.explorer.actions")[name]
 
   assert(action, string.format("%s action is not available", name))
 
@@ -139,7 +139,7 @@ function M.open(opts)
   opts = opts or {}
   opts.cwd = opts.cwd or fs.getcwd()
   opts.focused_path = opts.focused_path or api.nvim_buf_get_name(0)
-  opts.kind = opts.kind or config.get_view("file_tree").kind
+  opts.kind = opts.kind or config.get_view("explorer").kind
 
   if M.instance.close then
     M.instance:close()

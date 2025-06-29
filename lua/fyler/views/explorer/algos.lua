@@ -1,6 +1,6 @@
 local fs = require("fyler.lib.fs")
-local regex = require("fyler.views.file_tree.regex")
-local store = require("fyler.views.file_tree.store")
+local regex = require("fyler.views.explorer.regex")
+local store = require("fyler.views.explorer.store")
 local M = {}
 
 local api = vim.api

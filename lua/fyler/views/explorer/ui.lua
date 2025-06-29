@@ -1,8 +1,6 @@
 local components = require("fyler.lib.ui.components")
 
 local Line = components.Line
-local Word = components.Word
-local Mark = components.Mark
 
 local M = {}
 
@@ -53,14 +51,10 @@ local function TREE_STRUCTURE(tbl, depth)
 
     if item.type == "directory" then
       icon = M.get_icon(item.type, item.name)
-      hl = "FylerBlue"
     elseif item.type == "link" and item.links_to.type == nil then
-      -- This is a broken link
       icon = BrokenLinkIcon
-      hl = "FylerRed"
     elseif item.type == "link" then
       icon = M.get_icon(item.links_to.type, item.name)
-      hl = "FylerGreen"
     else
       icon, hl = M.get_icon(item.type, item.name)
     end
@@ -69,13 +63,27 @@ local function TREE_STRUCTURE(tbl, depth)
       lines,
       Line {
         words = {
-          Word(string.rep(" ", depth * 2)),
-          Word(icon, item.type == "directory" and "FylerBlue" or hl),
-          Word(string.format(" /%s", item.key)),
-          Word(string.format(" %s", item.name), item.type == "directory" and "FylerBlue" or ""),
+          {
+            str = string.rep("\t", depth),
+          },
+          {
+            str = icon,
+            hl = item.type == "directory" and "FylerBlue" or hl,
+          },
+          {
+            str = string.format(" /%s", item.key),
+          },
+          {
+            str = string.format(" %s", item.name),
+            hl = item.type == "directory" and "FylerBlue" or "FylerWhite",
+          },
         },
         marks = item.type == "link" and {
-          Mark("--> " .. item.links_to.path, "FylerYellow", item.key),
+          {
+            str = string.format("@ %s", item.links_to.path),
+            hl = "FylerYellow",
+            id = item.key,
+          },
         } or {},
       }
     )

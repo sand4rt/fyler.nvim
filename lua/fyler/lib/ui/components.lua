@@ -1,20 +1,10 @@
----@class FylerUiWord
----@field str string
----@field hl  string
-local Word = {}
-Word.__index = Word
-
----@class FylerUiMark
----@field str string
----@field hl  string
----@field id  number
-local Mark = {}
-Mark.__index = Mark
-
 ---@alias FylerUiLineAlign
 ---| "end"
 ---| "start"
 ---| "center"
+
+---@alias FylerUiWord { str: string, hl?: string }
+---@alias FylerUiMark { str: string, hl?: string, id: string }
 
 ---@class FylerUiLine
 ---@field align FylerUiLineAlign
@@ -37,23 +27,6 @@ return {
       setmetatable(instance, Line)
 
       return instance
-    end,
-  }),
-  Word = setmetatable({}, {
-    ---@param str string
-    ---@param hl? string
-    ---@return FylerUiWord
-    __call = function(_, str, hl)
-      return setmetatable({ str = str, hl = hl or "FylerBlank" }, Word)
-    end,
-  }),
-  Mark = setmetatable({}, {
-    ---@param str string
-    ---@param hl  string
-    ---@param id  number
-    ---@return FylerUiMark
-    __call = function(_, str, hl, id)
-      return setmetatable({ str = str, hl = hl or "FylerBlank", id = id }, Mark)
     end,
   }),
 }

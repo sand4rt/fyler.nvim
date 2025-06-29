@@ -55,7 +55,7 @@ end
 function M.open(opts)
   opts = opts or {}
 
-  require("fyler.views.file_tree").open {
+  require("fyler.views.explorer").open {
     cwd = opts.cwd,
     kind = opts.kind,
     config = M.config,

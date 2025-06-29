@@ -35,7 +35,7 @@ T["can show and hide"] = function()
   }
 
   local win = require("fyler.lib.win") {
-    name = "file_tree",
+    name = "explorer",
     bufname = "fyler://foo",
     kind = kinds[math.random(1, 5)],
     enter = true,

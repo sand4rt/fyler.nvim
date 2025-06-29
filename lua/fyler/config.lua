@@ -11,7 +11,7 @@ local defaults = {
       kind = "float",
       border = "single",
     },
-    file_tree = {
+    explorer = {
       width = 0.8,
       height = 0.8,
       kind = "float",
@@ -25,7 +25,7 @@ local defaults = {
         ["n"] = "Discard",
       },
     },
-    file_tree = {
+    explorer = {
       n = {
         ["q"] = "CloseView",
         ["<CR>"] = "Select",

@@ -1,5 +1,5 @@
 local fs = require("fyler.lib.fs")
-local store = require("fyler.views.file_tree.store")
+local store = require("fyler.views.explorer.store")
 
 local DEFAULT_RECURSION_LIMIT = 32
 
