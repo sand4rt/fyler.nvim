@@ -1,4 +1,4 @@
-local TreeNode = require("fyler.views.explorer.struct")
+local FSItem = require("fyler.views.explorer.struct")
 local Win = require("fyler.lib.win")
 local algos = require("fyler.views.explorer.algos")
 local config = require("fyler.config")
@@ -9,56 +9,37 @@ local ui = require("fyler.views.explorer.ui")
 local fn = vim.fn
 local api = vim.api
 
----@class FylerTreeView
+---@class FylerExplorerView
 ---@field cwd       string
 ---@field win       FylerWin
----@field tree_node FylerTreeNode
-local FileTreeView = {}
-FileTreeView.__index = FileTreeView
+---@field fs_root   FylerFSItem
+local ExplorerView = {}
+ExplorerView.__index = ExplorerView
 
-function FileTreeView.new(opts)
-  local tree_node = TreeNode(store.set {
+function ExplorerView.new(opts)
+  local fs_root = FSItem(store.set {
     name = fn.fnamemodify(opts.cwd, ":t"),
     type = "directory",
     path = opts.cwd,
   })
 
-  tree_node:toggle()
+  fs_root:toggle()
 
   local instance = {
     cwd = opts.cwd,
     kind = opts.kind,
-    tree_node = tree_node,
+    fs_root = fs_root,
   }
 
-  setmetatable(instance, FileTreeView)
+  setmetatable(instance, ExplorerView)
 
   return instance
 end
 
-function FileTreeView:open(opts)
+function ExplorerView:open(opts)
   local mappings = config.get_reverse_mappings("explorer")
 
-  self.tree_node:update()
-
-  local rel = vim.fs.relpath(opts.cwd, opts.focused_path or "")
-  local parts = {}
-  if rel then
-    parts = vim.split(rel, "/")
-  end
-
-  local focused_node = self.tree_node
-  for _, part in pairs(parts) do
-    local child = vim.iter(focused_node.children):find(function(child)
-      return store.get(child.meta).name == part
-    end)
-    if not child then
-      break
-    end
-    child.open = true
-    child:update()
-    focused_node = child
-  end
+  self.fs_root:update()
 
   self.win = Win {
     enter = true,
@@ -87,11 +68,11 @@ function FileTreeView:open(opts)
       },
     },
     autocmds = {
-      ["WinClosed"]   = self:_action("n_close_view"),
-      ["BufReadCmd"]  = self:_action("n_refreshview"),
-      ["BufWriteCmd"] = self:_action("n_synchronize"),
-      ["CursorMoved"] = self:_action("constrain_cursor"),
+      ["BufReadCmd"]   = self:_action("n_refreshview"),
+      ["BufWriteCmd"]  = self:_action("n_synchronize"),
+      ["CursorMoved"]  = self:_action("constrain_cursor"),
       ["CursorMovedI"] = self:_action("constrain_cursor"),
+      ["WinClosed"]    = self:_action("n_close_view"),
     },
     user_autocmds = {
       ["RefreshView"] = self:_action("n_refreshview"),
@@ -100,11 +81,7 @@ function FileTreeView:open(opts)
     -- stylua: ignore end
     render = function()
       return {
-        lines = ui.FileTree(algos.tree_table_from_node(self).children),
-        cb = function()
-          vim.fn.search(focused_node.meta, "w")
-          vim.cmd(":normal w")
-        end,
+        lines = ui.Explorer(algos.tree_table_from_node(self).children),
       }
     end,
   }
@@ -112,14 +89,18 @@ function FileTreeView:open(opts)
   require("fyler.cache").set_entry("recent_win", api.nvim_get_current_win())
 
   self.win:show()
+
+  self:_action("try_focus_buffer")()
 end
 
-function FileTreeView:close()
-  self.win:hide()
+function ExplorerView:close()
+  if self.win then
+    self.win:hide()
+  end
 end
 
 ---@param name string
-function FileTreeView:_action(name)
+function ExplorerView:_action(name)
   local action = require("fyler.views.explorer.actions")[name]
 
   assert(action, string.format("%s action is not available", name))
@@ -128,28 +109,37 @@ function FileTreeView:_action(name)
 end
 
 local M = {
-  instance = {},
+  instances = {},
+  root_dir = nil,
 }
 
----@param opts { cwd?: string, kind?: FylerWinKind, focused_path?: string }
+---@return FylerExplorerView?
+function M.cur_instance()
+  return M.instances[M.root_dir]
+end
+
+---@param opts { cwd?: string, kind?: FylerWinKind }
 function M.open(opts)
   opts = opts or {}
   opts.cwd = opts.cwd or fs.getcwd()
-  opts.focused_path = opts.focused_path or api.nvim_buf_get_name(0)
   opts.kind = opts.kind or config.get_view("explorer").kind
 
-  if M.instance.close then
-    M.instance:close()
-  end
-
-  if M.instance.cwd ~= opts.cwd then
-    M.instance = FileTreeView.new {
+  local cur_instance = M.cur_instance()
+  if not cur_instance then
+    cur_instance = ExplorerView.new {
       cwd = opts.cwd,
       kind = opts.kind,
     }
+
+    M.instances[opts.cwd] = cur_instance
+    M.root_dir = opts.cwd
   end
 
-  M.instance:open(opts)
+  if cur_instance.close then
+    cur_instance:close()
+  end
+
+  cur_instance:open(opts)
 end
 
 return M

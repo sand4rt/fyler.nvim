@@ -3,16 +3,16 @@ local store = require("fyler.views.explorer.store")
 
 local DEFAULT_RECURSION_LIMIT = 32
 
----@class FylerTreeNode
+---@class FylerFSItem
 ---@field meta string
 ---@field open boolean
----@field children FylerTreeNode[]
+---@field children FylerFSItem[]
 local FSItem = {}
 FSItem.__index = FSItem
 
 local M = setmetatable({}, {
   ---@param meta string
-  ---@return FylerTreeNode
+  ---@return FylerFSItem
   __call = function(_, meta)
     local instance = {
       meta = meta,
@@ -38,7 +38,7 @@ function FSItem:add_child(addr, meta)
 end
 
 ---@param addr string
----@return FylerTreeNode?
+---@return FylerFSItem?
 function FSItem:find(addr)
   if self.meta == addr then
     return self
@@ -67,7 +67,7 @@ function FSItem:update()
 
   self.children = vim
     .iter(self.children)
-    :filter(function(child) ---@param child FylerTreeNode
+    :filter(function(child) ---@param child FylerFSItem
       return vim.iter(items):any(function(item)
         return item.path == store.get(child.meta).path and item.type == store.get(child.meta).type
       end)
@@ -76,7 +76,7 @@ function FSItem:update()
 
   for _, item in ipairs(items) do
     if
-      not vim.iter(self.children):any(function(child) ---@param child FylerTreeNode
+      not vim.iter(self.children):any(function(child) ---@param child FylerFSItem
         return store.get(child.meta).path == item.path and store.get(child.meta).type == item.type
       end)
     then

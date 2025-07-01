@@ -1,52 +1,30 @@
 local M = {}
 
-local DEFAULT_SYMLINK_RECURSION_LIMIT = 10
-
 local uv = vim.uv or vim.loop
 local fn = vim.fn
 
----Given the path to a symlink, find the first thing it points to that is not another symlink
----@param root_path string Path the link will be relative to
----@param link_path string
----@param max_depth number If depth is above this threshold, consider the link broken.
----@return string? path Path the link points to
----@return string? type File type
-local function follow_symlink_recursive(root_path, link_path, max_depth)
-  if max_depth ~= nil and max_depth <= 0 then
-    -- If recursion limit is hit, the link is considered broken
-    return link_path, nil
-  end
-
-  max_depth = max_depth or DEFAULT_SYMLINK_RECURSION_LIMIT
-
-  local function resolve_path()
-    local points_to = uv.fs_readlink(link_path)
-    local is_abs_path = points_to:sub(1, 1) == "/"
-    local normalized_path
-    if is_abs_path then
-      -- Do not change absolute paths
-      normalized_path = points_to
-    else
-      -- Resolve path the link points to based on its own path
-      -- E.g. symlink /foo/bar/baz --> ../../beat will resolve to /beat
-      normalized_path = vim.fs.normalize(vim.fs.joinpath(vim.fs.dirname(link_path), points_to))
+---@param path string
+---@return string?, string?
+function M.linkpath(path)
+  local res_path = nil
+  local res_type = nil
+  while true do
+    local stat = uv.fs_stat(path)
+    if not stat then
+      break
     end
-    return vim.fs.relpath(root_path, normalized_path) or normalized_path
+
+    local linkdata = uv.fs_readlink(path)
+    if not linkdata then
+      res_path = path
+      res_type = stat.type
+      break
+    end
+
+    path = linkdata
   end
 
-  link_path = resolve_path(root_path, link_path)
-
-  local stat = uv.fs_stat(link_path)
-  -- Check if broken link
-  if not stat then
-    return link_path, nil
-  end
-
-  if stat.type ~= "link" then
-    return link_path, stat.type
-  else
-    return follow_symlink_recursive(root_path, link_path, max_depth - 1)
-  end
+  return res_path, res_type
 end
 
 ---@return string
@@ -56,30 +34,20 @@ end
 
 ---@param a string
 ---@param b string
+---@return string
 function M.joinpath(a, b)
-  assert(a and b, "path is required")
-
-  if vim.endswith(a, "/") then
-    a = a:sub(1, -2)
-  end
-
-  if vim.startswith(b, "/") then
-    b = b:sub(2)
-  end
-
-  return ("%s/%s"):format(a, b)
+  return vim.fs.joinpath(a, b)
 end
 
 ---@param path string
 ---@return string
-function M.toabspath(path)
-  return M.joinpath(M.getcwd(), path)
+function M.abspath(path)
+  return vim.fs.abspath(path)
 end
 
 ---@param path string
----@return string
-function M.torelpath(path)
-  return path:gsub(string.format("^%s/", M.getcwd():gsub("([^%w])", "%%%1")), ""):match(".*")
+function M.relpath(path)
+  return vim.fs.relpath(M.getcwd(), path) or M.joinpath(M.getcwd(), path)
 end
 
 ---@param path string
@@ -95,23 +63,27 @@ function M.listdir(path)
 
   while true do
     local name, type = uv.fs_scandir_next(fs)
-    local links_to = nil
 
     if not name then
       break
     end
 
     if type == "link" then
-      local link_path, link_type = follow_symlink_recursive(uv.cwd(), vim.fs.joinpath(path, name))
-      links_to = { path = link_path, type = link_type }
+      local link_path, link_type = M.linkpath(M.joinpath(path, name))
+      table.insert(items, {
+        name = name,
+        type = type,
+        path = M.joinpath(path, name),
+        link_path = link_path,
+        link_type = link_type,
+      })
+    else
+      table.insert(items, {
+        name = name,
+        type = type,
+        path = M.joinpath(path, name),
+      })
     end
-
-    table.insert(items, {
-      name = name,
-      type = type,
-      links_to = links_to,
-      path = M.joinpath(path, name),
-    })
   end
 
   return items, nil

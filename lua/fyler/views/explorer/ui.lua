@@ -51,10 +51,13 @@ local function TREE_STRUCTURE(tbl, depth)
 
     if item.type == "directory" then
       icon = M.get_icon(item.type, item.name)
-    elseif item.type == "link" and item.links_to.type == nil then
-      icon = BrokenLinkIcon
     elseif item.type == "link" then
-      icon = M.get_icon(item.links_to.type, item.name)
+      -- print(vim.inspect(item))
+      if item.link_path and item.link_type then
+        icon = M.get_icon(item.link_type, item.name)
+      else
+        icon = BrokenLinkIcon
+      end
     else
       icon, hl = M.get_icon(item.type, item.name)
     end
@@ -80,7 +83,7 @@ local function TREE_STRUCTURE(tbl, depth)
         },
         marks = item.type == "link" and {
           {
-            str = string.format("@ %s", item.links_to.path),
+            str = string.format("@%s", item.link_path),
             hl = "FylerYellow",
             id = item.key,
           },
@@ -98,7 +101,7 @@ local function TREE_STRUCTURE(tbl, depth)
   return lines
 end
 
-function M.FileTree(tbl)
+function M.Explorer(tbl)
   return TREE_STRUCTURE(tbl)
 end
 

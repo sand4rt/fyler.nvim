@@ -5,10 +5,10 @@ local M = {}
 
 local api = vim.api
 
----@param view FylerTreeView
+---@param view FylerExplorerView
 ---@return table
 function M.tree_table_from_node(view)
-  ---@param node FylerTreeNode
+  ---@param node FylerFSItem
   local function get_tbl(node)
     local sub_tbl = store.get(node.meta)
     sub_tbl.key = node.meta
@@ -28,10 +28,10 @@ function M.tree_table_from_node(view)
     return sub_tbl
   end
 
-  return get_tbl(view.tree_node)
+  return get_tbl(view.fs_root)
 end
 
----@param view FylerTreeView
+---@param view FylerExplorerView
 ---@return table
 function M.tree_table_from_buffer(view)
   if not view.win:has_valid_bufnr() then
@@ -49,8 +49,8 @@ function M.tree_table_from_buffer(view)
     return {}
   end
 
-  local root = vim.tbl_deep_extend("force", store.get(view.tree_node.meta), {
-    key = view.tree_node.meta,
+  local root = vim.tbl_deep_extend("force", store.get(view.fs_root.meta), {
+    key = view.fs_root.meta,
     children = {},
   })
 
@@ -83,7 +83,7 @@ function M.tree_table_from_buffer(view)
   return root
 end
 
----@param view FylerTreeView
+---@param view FylerExplorerView
 ---@return table
 function M.get_diff(view)
   local recent_tree_hash = {}

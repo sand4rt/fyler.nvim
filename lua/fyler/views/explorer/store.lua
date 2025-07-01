@@ -7,11 +7,11 @@ local Metadata = {}
 Metadata.__index = Metadata
 
 function Metadata:is_directory()
-  return self.type == "directory" or (self.type == "link" and self.links_to.type == "directory")
+  return self.type == "directory" or (self.type == "link" and self.link_type == "directory")
 end
 
 function Metadata:resolved_path()
-  return self.type == "link" and self.links_to.path or self.path
+  return self.type == "link" and self.link_path or self.path
 end
 
 ---@param key string
