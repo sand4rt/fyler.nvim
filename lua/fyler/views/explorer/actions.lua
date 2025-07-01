@@ -198,6 +198,10 @@ function M.try_focus_buffer(view)
     end
 
     M.n_refreshview(view, function()
+      if not view.win:is_visible() then
+        return
+      end
+
       local buf_lines = api.nvim_buf_get_lines(view.win.bufnr, 0, -1, false)
       for ln, buf_line in ipairs(buf_lines) do
         if buf_line:find(focused_node.meta) then
