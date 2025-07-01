@@ -19,7 +19,7 @@ function M.n_close_view(view)
   end
 end
 
----@param view FylerTreeView
+---@param view FylerExplorerView
 function M.n_select(view)
   return function()
     local key = regex.match_meta(api.nvim_get_current_line())
@@ -29,7 +29,7 @@ function M.n_select(view)
 
     local meta_data = store.get(key)
     if meta_data:is_directory() then
-      view.tree_node:find(key):toggle()
+      view.fs_root:find(key):toggle()
       api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
     else
       local recent_win = require("fyler.cache").get_entry("recent_win")
@@ -44,6 +44,7 @@ function M.n_select(view)
   end
 end
 
+---@param view FylerExplorerView
 function M.n_select_recursive(view)
   return function()
     local key = regex.match_meta(api.nvim_get_current_line())
@@ -53,8 +54,7 @@ function M.n_select_recursive(view)
 
     local meta_data = store.get(key)
     if meta_data:is_directory() then
-      view.tree_node:find(key):toggle_recursive()
-      view:refresh()
+      view.fs_root:find(key):toggle_recursive()
     else
       M.n_select(view)
     end
@@ -71,7 +71,7 @@ local function get_tbl(tbl)
     for _, change in ipairs(tbl.create) do
       table.insert(lines, {
         { str = "  - " },
-        { str = fs.torelpath(change), hl = "Conceal" },
+        { str = fs.relpath(change), hl = "Conceal" },
       })
     end
 
@@ -83,7 +83,7 @@ local function get_tbl(tbl)
     for _, change in ipairs(tbl.delete) do
       table.insert(lines, {
         { str = "  - " },
-        { str = fs.torelpath(change), hl = "Conceal" },
+        { str = fs.relpath(change), hl = "Conceal" },
       })
     end
 
@@ -95,9 +95,9 @@ local function get_tbl(tbl)
     for _, change in ipairs(tbl.move) do
       table.insert(lines, {
         { str = "  - " },
-        { str = fs.torelpath(change.from), hl = "Conceal" },
+        { str = fs.relpath(change.from), hl = "Conceal" },
         { str = " > " },
-        { str = fs.torelpath(change.to), hl = "Conceal" },
+        { str = fs.relpath(change.to), hl = "Conceal" },
       })
     end
 
@@ -107,7 +107,7 @@ local function get_tbl(tbl)
   return lines
 end
 
----@param view FylerTreeView
+---@param view FylerExplorerView
 function M.n_synchronize(view)
   return function()
     local changes = algos.get_diff(view)
@@ -131,11 +131,16 @@ function M.n_synchronize(view)
   end
 end
 
----@param view FylerTreeView
-function M.n_refreshview(view)
+---@param view FylerExplorerView
+---@param cb function
+function M.n_refreshview(view, cb)
   return function()
-    view.tree_node:update()
-    view.win.ui:render { lines = ui.FileTree(algos.tree_table_from_node(view).children) }
+    view.fs_root:update()
+    view.win.ui:render {
+      lines = ui.Explorer(algos.tree_table_from_node(view).children),
+      cb = cb,
+    }
+
     vim.bo[view.win.bufnr].syntax = "fyler"
     vim.bo[view.win.bufnr].filetype = "fyler"
   end
@@ -154,6 +159,53 @@ function M.constrain_cursor(view)
     if col <= ub then
       api.nvim_win_set_cursor(view.win.winid, { row, ub + 1 })
     end
+  end
+end
+
+---@param view FylerExplorerView
+function M.try_focus_buffer(view)
+  return function()
+    if not view.win:is_visible() then
+      return
+    end
+
+    local focused_path = api.nvim_buf_get_name(fn.bufnr("%") == view.win.bufnr and fn.bufnr("#") or 0)
+    local rel = fs.relpath(focused_path)
+    local parts = {}
+    if rel then
+      parts = vim.split(rel, "/")
+    end
+
+    local focused_node = view.fs_root
+    local focused_part
+    for i, part in ipairs(parts) do
+      local child = vim.iter(focused_node.children):find(function(child)
+        return store.get(child.meta).name == part
+      end)
+
+      if not child then
+        break
+      end
+
+      child.open = true
+      child:update()
+      focused_node = child
+      focused_part = i
+    end
+
+    if focused_part ~= #parts then
+      return
+    end
+
+    M.n_refreshview(view, function()
+      local buf_lines = api.nvim_buf_get_lines(view.win.bufnr, 0, -1, false)
+      for ln, buf_line in ipairs(buf_lines) do
+        if buf_line:find(focused_node.meta) then
+          api.nvim_win_set_cursor(view.win.winid, { ln, 0 })
+          return
+        end
+      end
+    end)()
   end
 end
 

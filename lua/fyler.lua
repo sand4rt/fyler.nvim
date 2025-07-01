@@ -51,7 +51,7 @@ function M.setup(opts)
   did_setup = true
 end
 
----@param opts? FylerTreeViewOpenOpts
+---@param opts? FylerExplorerViewOpenOpts
 function M.open(opts)
   opts = opts or {}
 

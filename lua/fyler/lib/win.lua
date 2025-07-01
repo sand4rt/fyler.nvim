@@ -94,6 +94,11 @@ function Win:has_valid_winid()
   return type(self.winid) == "number" and api.nvim_win_is_valid(self.winid)
 end
 
+---@return boolean
+function Win:is_visible()
+  return self:has_valid_bufnr() and self:has_valid_winid()
+end
+
 -- Construct respective window config in vim understandable format
 ---@return vim.api.keyset.win_config
 function Win:config()
