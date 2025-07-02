@@ -9,16 +9,20 @@ end
 
 ---@param str string
 ---@return string
-function M.match_name(str)
+function M.match_indent(str)
   assert(str, "str is required")
-  return str:gsub(".*/%d%d%d%d%d ", ""):match(".*")
+  return str:match("^(%s*)")
 end
 
 ---@param str string
 ---@return string
-function M.match_indent(str)
+function M.match_name(str)
   assert(str, "str is required")
-  return str:match("^(%s*)") or ""
+  if str:match("/%d%d%d%d%d") then
+    return str:match("/%d%d%d%d%d (.*)$")
+  else
+    return str:gsub("^%s*", ""):match(".*")
+  end
 end
 
 return M

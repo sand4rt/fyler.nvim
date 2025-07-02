@@ -52,7 +52,6 @@ local function TREE_STRUCTURE(tbl, depth)
     if item.type == "directory" then
       icon = M.get_icon(item.type, item.name)
     elseif item.type == "link" then
-      -- print(vim.inspect(item))
       if item.link_path and item.link_type then
         icon = M.get_icon(item.link_type, item.name)
       else
@@ -67,7 +66,7 @@ local function TREE_STRUCTURE(tbl, depth)
       Line {
         words = {
           {
-            str = string.rep("\t", depth),
+            str = string.rep("  ", depth),
           },
           {
             str = icon,
