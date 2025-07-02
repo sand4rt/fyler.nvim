@@ -14,17 +14,15 @@ function FylerConfirmView:open(msg, chs, cb)
   local mappings = config.get_reverse_mappings("confirm")
 
   self.win = Win {
-    name = "confirm",
     bufname = "confirm",
-    title = " Confirm ",
-    title_pos = "center",
-    footer = chs,
-    footer_pos = "center",
-    enter = true,
     bufopts = {
       modifiable = false,
     },
+    enter = true,
+    name = "confirm",
+    title = string.format(" Confirm %s ", chs),
     winopts = {
+      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       wrap = false,
     },
     -- stylua ignore start

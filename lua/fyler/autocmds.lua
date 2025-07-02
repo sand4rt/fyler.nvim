@@ -29,7 +29,12 @@ function M.setup()
   api.nvim_create_autocmd("BufEnter", {
     group = require("fyler").augroup,
     callback = function()
-      local cur_instance = require("fyler.views.explorer").cur_instance()
+      local explorer = require("fyler.views.explorer")
+      if not explorer.root_dir then
+        return
+      end
+
+      local cur_instance = explorer.instances[explorer.root_dir]
       if cur_instance then
         cur_instance:_action("try_focus_buffer")()
       end

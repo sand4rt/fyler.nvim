@@ -10,9 +10,9 @@ local fn = vim.fn
 local api = vim.api
 
 ---@class FylerExplorerView
----@field cwd       string
----@field win       FylerWin
----@field fs_root   FylerFSItem
+---@field cwd     string      - Directory path which act as a root
+---@field fs_root FylerFSItem - Root |FylerFSItem| instance
+---@field win     FylerWin    - Window instance
 local ExplorerView = {}
 ExplorerView.__index = ExplorerView
 
@@ -27,8 +27,8 @@ function ExplorerView.new(opts)
 
   local instance = {
     cwd = opts.cwd,
-    kind = opts.kind,
     fs_root = fs_root,
+    kind = opts.kind,
   }
 
   setmetatable(instance, ExplorerView)
@@ -42,22 +42,23 @@ function ExplorerView:open(opts)
   self.fs_root:update()
 
   self.win = Win {
-    enter = true,
-    name = "explorer",
     bufname = string.format("fyler://%s", self.cwd),
-    kind = opts.kind,
     bufopts = {
       syntax = "fyler",
       filetype = "fyler",
       buftype = "acwrite",
     },
+    enter = true,
+    kind = opts.kind,
+    name = "explorer",
     winopts = {
-      wrap = false,
+      concealcursor = "nvic",
+      conceallevel = 3,
+      cursorline = true,
       number = true,
       relativenumber = true,
-      conceallevel = 3,
-      concealcursor = "nvic",
-      cursorline = true,
+      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      wrap = false,
     },
     -- stylua: ignore start
     mappings = {
@@ -113,9 +114,20 @@ local M = {
   root_dir = nil,
 }
 
----@return FylerExplorerView?
-function M.cur_instance()
-  return M.instances[M.root_dir]
+---@param opts { cwd?: string, kind?: FylerWinKind }
+---@return FylerExplorerView
+function M.get_instance(opts)
+  if M.instances[opts.cwd] then
+    return M.instances[opts.cwd]
+  end
+
+  M.root_dir = opts.cwd
+  M.instances[opts.cwd] = ExplorerView.new {
+    cwd = opts.cwd,
+    kind = opts.kind,
+  }
+
+  return M.instances[opts.cwd]
 end
 
 ---@param opts { cwd?: string, kind?: FylerWinKind }
@@ -124,21 +136,8 @@ function M.open(opts)
   opts.cwd = opts.cwd or fs.getcwd()
   opts.kind = opts.kind or config.get_view("explorer").kind
 
-  local cur_instance = M.cur_instance()
-  if not cur_instance then
-    cur_instance = ExplorerView.new {
-      cwd = opts.cwd,
-      kind = opts.kind,
-    }
-
-    M.instances[opts.cwd] = cur_instance
-    M.root_dir = opts.cwd
-  end
-
-  if cur_instance.close then
-    cur_instance:close()
-  end
-
+  local cur_instance = M.get_instance(opts)
+  cur_instance:close()
   cur_instance:open(opts)
 end
 
