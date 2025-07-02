@@ -1,26 +1,13 @@
 local components = require("fyler.lib.ui.components")
+local config = require("fyler.config")
+local icon_provider = type(config.values.icon_provider) == "function" and config.values.icon_provider
+  or require("fyler.integrations.icon")[config.values.icon_provider]
 
 local Line = components.Line
 
 local M = {}
 
----@param type string
----@param name string
-function M.get_icon(type, name)
-  local has_icons, minicons = pcall(require, "mini.icons")
-  if not has_icons then
-    return "", ""
-  end
-
-  local status, icon, hl = pcall(minicons.get, type, name)
-  if not status then
-    return "", ""
-  end
-
-  return icon, hl
-end
-
-local BrokenLinkIcon = M.get_icon("default", "default")
+local BrokenLinkIcon = icon_provider("default", "default")
 
 local function get_sorted(tbl)
   table.sort(tbl, function(a, b)
@@ -50,15 +37,15 @@ local function TREE_STRUCTURE(tbl, depth)
     local icon, hl
 
     if item.type == "directory" then
-      icon = M.get_icon(item.type, item.name)
+      icon = icon_provider(item.type, item.name)
     elseif item.type == "link" then
       if item.link_path and item.link_type then
-        icon = M.get_icon(item.link_type, item.name)
+        icon = icon_provider(item.link_type, item.name)
       else
         icon = BrokenLinkIcon
       end
     else
-      icon, hl = M.get_icon(item.type, item.name)
+      icon, hl = icon_provider(item.type, item.name)
     end
 
     table.insert(
