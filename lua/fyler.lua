@@ -51,7 +51,6 @@ function M.setup(opts)
   did_setup = true
 end
 
----@param opts? FylerExplorerViewOpenOpts
 function M.open(opts)
   opts = opts or {}
 
@@ -65,16 +64,16 @@ end
 function M.complete(arglead, cmdline)
   if arglead:find("^kind=") then
     return {
-      "split:left",
-      "split:above",
-      "split:right",
-      "split:below",
+      "kind=split:left",
+      "kind=split:above",
+      "kind=split:right",
+      "kind=split:below",
     }
   end
 
   if arglead:find("^cwd=") then
     return {
-      (vim.uv or vim.loop).cwd(),
+      "cwd=" .. (vim.uv or vim.loop).cwd(),
     }
   end
 
