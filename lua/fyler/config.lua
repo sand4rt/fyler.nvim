@@ -1,4 +1,16 @@
+---@class FylerConfigView
+---@field width  number
+---@field height number
+---@field kind   FylerWinKind
+---@field border string|string[]
+
 ---@class FylerConfig
+---@field default_explorer? boolean
+---@field close_on_select?  boolean
+---@field icon_provider?    boolean
+---@field views?            table<string, FylerConfigView>
+---@field mappings?         table<string, table<"n"|"i", table<string, string>>>
+
 local M = {}
 
 local defaults = {
@@ -65,6 +77,7 @@ function M.get_reverse_mappings(name)
   return reverse_mappings
 end
 
+---@param opts? FylerConfig
 function M.setup(opts)
   opts = opts or {}
   M.values = vim.tbl_deep_extend("force", defaults, opts)

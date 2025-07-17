@@ -3,16 +3,18 @@ local M = {}
 local api = vim.api
 local uv = vim.uv or vim.loop
 
+local augroup = vim.api.nvim_create_augroup("Fyler", { clear = true })
+
 function M.setup()
   api.nvim_create_autocmd("ColorScheme", {
-    group = require("fyler").augroup,
+    group = augroup,
     callback = function()
       require("fyler.lib.hls").setup()
     end,
   })
 
   api.nvim_create_autocmd("BufEnter", {
-    group = require("fyler").augroup,
+    group = augroup,
     callback = function(arg)
       local stats = uv.fs_stat(arg.file)
       if stats and stats.type == "directory" then
@@ -27,7 +29,7 @@ function M.setup()
   })
 
   api.nvim_create_autocmd("BufEnter", {
-    group = require("fyler").augroup,
+    group = augroup,
     callback = function()
       local explorer = require("fyler.views.explorer")
       if not explorer.root_dir then

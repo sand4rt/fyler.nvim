@@ -6,4 +6,29 @@ vim.api.nvim_create_user_command("Fyler", function(args)
   end
 
   require("fyler").open(opts)
-end, { nargs = "*", complete = require("fyler").complete })
+end, {
+  nargs = "*",
+  complete = function(arglead, cmdline)
+    if arglead:find("^kind=") then
+      return {
+        "kind=split:left",
+        "kind=split:above",
+        "kind=split:right",
+        "kind=split:below",
+      }
+    end
+
+    if arglead:find("^cwd=") then
+      return {
+        "cwd=" .. (vim.uv or vim.loop).cwd(),
+      }
+    end
+
+    return vim.tbl_filter(function(arg)
+      return cmdline:match(arg) == nil
+    end, {
+      "kind=",
+      "cwd=",
+    })
+  end,
+})

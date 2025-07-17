@@ -7,7 +7,7 @@ local function to_hex(dec)
   return string.format("%06X", math.max(0, math.min(0xFFFFFF, math.floor(dec))))
 end
 
--- https://github.com/NeogitOrg/neogit/blob/1b4f44374f97d9262caa680e41ecbebcaf1553bd/lua/neogit/lib/hl.lua#L34
+-- https://github.com/NeogitOrg/neogit
 ---@param name string
 ---@return string|nil
 local function get_fg(name)
@@ -21,7 +21,7 @@ local function get_fg(name)
   end
 end
 
--- https://github.com/NeogitOrg/neogit/blob/1b4f44374f97d9262caa680e41ecbebcaf1553bd/lua/neogit/lib/hl.lua#L47
+-- https://github.com/NeogitOrg/neogit
 ---@param name string
 ---@return string|nil
 local function get_bg(name)
