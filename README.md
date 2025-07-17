@@ -34,10 +34,21 @@ A modern neovim file tree which can edit your file system like a buffer
   <summary><a href="https://github.com/folke/lazy.nvim">lazy.nvim</a> (recommended)</summary>
 
 ```lua
+-- `mini-icons` variant
 {
   "A7Lavinraj/fyler.nvim",
   dependencies = { "echasnovski/mini.icons" },
   opts = {} -- check the default options in the README.md
+}
+
+-- `nvim-web-devicons` variant
+{
+  "A7Lavinraj/fyler.nvim",
+  dependencies = { "nvim-tree/nvim-web-devicons" },
+  commit = "d87e4281e18712361f82a07f9fca71957244ef33",
+  opts = { -- check the default options in the README.md
+    icon_provider = "nvim-web-devicons",
+  }
 }
 ```
 
@@ -117,7 +128,7 @@ local defaults = {
 
 <https://github.com/user-attachments/assets/ea71ff58-1c5c-4cda-b54e-f845d70f5184>
 
-There is user command `Fyler` is optionally accepts two options:
+There is an user command `Fyler` which optionally accepts two options:
 
 - kind
 - cwd
@@ -135,15 +146,14 @@ There is user command `Fyler` is optionally accepts two options:
 
 ## TODOS
 
-- [x] Basic file operations (CREATE, DELETE, MOVE)
+- [x] Basic file operations `CREATE | DELETE | MOVE`
 - [x] User command to change behaviour on startup
 - [x] Hijack NETRW
 - [x] Track current buffer
-- [ ] GIT integration (BASIC)
-- [ ] GIT integration (ADVANCE)
-- [ ] Fuzzy finding
+- [ ] GIT integration
 - [ ] LSP integration
 - [ ] SSH integration
+- [ ] Fuzzy finding
 
 ## Have problems with fyler.nvim?
 
@@ -162,6 +172,7 @@ There is user command `Fyler` is optionally accepts two options:
 ## Codebase inspiration
 
 - [neogit](https://github.com/NeogitOrg/neogit)
+- [telescope](https://github.com/nvim-telescope/telescope.nvim)
 
 ## Special thanks to all contributors
 
