@@ -45,7 +45,6 @@ A modern neovim file tree which can edit your file system like a buffer
 {
   "A7Lavinraj/fyler.nvim",
   dependencies = { "nvim-tree/nvim-web-devicons" },
-  commit = "d87e4281e18712361f82a07f9fca71957244ef33",
   opts = { -- check the default options in the README.md
     icon_provider = "nvim-web-devicons",
   }
