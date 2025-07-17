@@ -109,7 +109,7 @@ function M.get_diff(view)
       table.insert(ops_tbl.create, root.path)
     else
       if recent_tree_hash[root.key] ~= root.path then
-        table.insert(ops_tbl.move, { from = recent_tree_hash[root.key], to = root.path })
+        table.insert(ops_tbl.move, { src = recent_tree_hash[root.key], dst = root.path })
       end
 
       recent_tree_hash[root.key] = nil

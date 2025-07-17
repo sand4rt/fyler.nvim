@@ -66,13 +66,13 @@ end
 ---@param tbl table
 ---@return table
 local function get_tbl(tbl)
-  local lines = {}
+  local lines = { { { str = "", hl = "" } } }
 
   if not vim.tbl_isempty(tbl.create) then
     table.insert(lines, { { str = "# Creation", hl = "FylerGreen" } })
     for _, change in ipairs(tbl.create) do
       table.insert(lines, {
-        { str = "  - " },
+        { str = "  | " },
         { str = fs.relpath(fs.getcwd(), change), hl = "Conceal" },
       })
     end
@@ -84,7 +84,7 @@ local function get_tbl(tbl)
     table.insert(lines, { { str = "# Deletetion", hl = "FylerRed" } })
     for _, change in ipairs(tbl.delete) do
       table.insert(lines, {
-        { str = "  - " },
+        { str = "  | " },
         { str = fs.relpath(fs.getcwd(), change), hl = "Conceal" },
       })
     end
@@ -96,7 +96,7 @@ local function get_tbl(tbl)
     table.insert(lines, { { str = "# Migration", hl = "FylerYellow" } })
     for _, change in ipairs(tbl.move) do
       table.insert(lines, {
-        { str = "  - " },
+        { str = "  | " },
         { str = fs.relpath(fs.getcwd(), change.src), hl = "Conceal" },
         { str = " > " },
         { str = fs.relpath(fs.getcwd(), change.dst), hl = "Conceal" },

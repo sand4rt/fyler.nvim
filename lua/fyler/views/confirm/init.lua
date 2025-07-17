@@ -13,6 +13,7 @@ FylerConfirmView.__index = FylerConfirmView
 function FylerConfirmView:open(msg, chs, cb)
   local mappings = config.get_reverse_mappings("confirm")
 
+  --stylua: ignore start
   self.win = Win {
     bufname = "confirm",
     bufopts = {
@@ -22,17 +23,15 @@ function FylerConfirmView:open(msg, chs, cb)
     name = "confirm",
     title = string.format(" Confirm %s ", chs),
     winopts = {
-      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-      wrap = false,
+      winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
+      wrap         = false,
     },
-    -- stylua ignore start
     mappings = {
       n = {
         [mappings["Confirm"]] = self:_action("n_confirm", cb),
         [mappings["Discard"]] = self:_action("n_discard", cb),
       },
     },
-    -- stylua ignore end
     autocmds = {
       ["QuitPre"] = self:_action("n_close_view", cb),
     },
@@ -40,6 +39,7 @@ function FylerConfirmView:open(msg, chs, cb)
       return { lines = ui.Confirm(msg) }
     end,
   }
+  --stylua: ignore end
 
   self.win:show()
 end

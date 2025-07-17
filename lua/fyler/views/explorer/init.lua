@@ -57,7 +57,7 @@ ExplorerView.open = a.async(function(self, opts)
       cursorline     = true,
       number         = true,
       relativenumber = true,
-      winhighlight   = "Normal:Normal,FloatBorder:FloatBorder",
+      winhighlight   = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
       wrap           = false,
     },
     mappings = {
@@ -83,6 +83,7 @@ ExplorerView.open = a.async(function(self, opts)
 
       return {
         lines = ui.Explorer(algos.tree_table_from_node(self).children),
+        on_render = self:_action("try_focus_buffer")
       }
     end,
   }

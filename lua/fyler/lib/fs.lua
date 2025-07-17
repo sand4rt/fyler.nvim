@@ -1,8 +1,7 @@
 local List = require("fyler.lib.structs.list")
 local Stack = require("fyler.lib.structs.stack")
 
-local async = require("fyler.lib.async").async
-local await = require("fyler.lib.async").await
+local a = require("fyler.lib.async")
 
 local M = {}
 
@@ -11,7 +10,7 @@ local fn = vim.fn
 
 ---@param path string
 ---@return string?, string?
-function M.linkpath(path)
+function M.resolve_link(path)
   local res_path = nil
   local res_type = nil
   while true do
@@ -38,11 +37,9 @@ function M.getcwd()
   return uv.cwd() or fn.getcwd(0)
 end
 
----@param a string
----@param b string
 ---@return string
-function M.joinpath(a, b)
-  return vim.fs.joinpath(a, b)
+function M.joinpath(...)
+  return vim.fs.joinpath(...)
 end
 
 ---@param path string
@@ -58,8 +55,8 @@ end
 
 ---@param path string
 ---@param cb fun(err?: string, items: table)
-M.ls = async(function(path, cb)
-  local stat_err, stat = await(uv.fs_stat, path)
+M.ls = a.async(function(path, cb)
+  local stat_err, stat = a.await(uv.fs_stat, path)
   if not stat then
     return cb(stat_err, {})
   end
@@ -69,7 +66,7 @@ M.ls = async(function(path, cb)
   local items = {}
 
   while true do
-    local _, entries = await(uv.fs_readdir, dir)
+    local _, entries = a.await(uv.fs_readdir, dir)
     if not entries then
       break
     end
@@ -79,7 +76,7 @@ M.ls = async(function(path, cb)
       vim
         .iter(entries)
         :map(function(entry)
-          local link_path, link_type = M.linkpath(M.joinpath(path, entry.name))
+          local link_path, link_type = M.resolve_link(M.joinpath(path, entry.name))
           return {
             name = entry.name,
             type = entry.type,
@@ -97,29 +94,29 @@ end)
 
 ---@param path string
 ---@param cb fun(err?: string, success: boolean)
-M.touch = async(function(path, cb)
-  local stat_err, stat = await(uv.fs_stat, path)
+M.touch = a.async(function(path, cb)
+  local stat_err, stat = a.await(uv.fs_stat, path)
   if stat then
     return cb(stat_err, false)
   end
 
-  local fd_err, fd = await(uv.fs_open, path, "a", 420)
+  local fd_err, fd = a.await(uv.fs_open, path, "a", 420)
   if not fd then
     return cb(fd_err, false)
   end
 
-  return cb(await(uv.fs_close, fd))
+  return cb(a.await(uv.fs_close, fd))
 end)
 
 ---@param path string
 ---@param cb fun(err?: string, success: boolean)
-M.rm = async(function(path, cb)
-  local stat_err, stat = await(uv.fs_stat, path)
+M.rm = a.async(function(path, cb)
+  local stat_err, stat = a.await(uv.fs_stat, path)
   if not stat or stat.type == "directory" then
     return cb(stat_err, false)
   end
 
-  local unlink_err, success = await(uv.fs_unlink, path)
+  local unlink_err, success = a.await(uv.fs_unlink, path)
   if not success then
     return cb(unlink_err, false)
   end
@@ -129,8 +126,8 @@ end)
 
 ---@param path string
 ---@param cb fun(err?: string, success: boolean)
-M.rm_r = async(function(path, cb)
-  local stat_err, stat = await(uv.fs_stat, path)
+M.rm_r = a.async(function(path, cb)
+  local stat_err, stat = a.await(uv.fs_stat, path)
   if not stat then
     return cb(stat_err, false)
   end
@@ -145,7 +142,7 @@ M.rm_r = async(function(path, cb)
     lst:insert(1, cur_entry)
 
     if cur_entry.type == "directory" then
-      local ls_err, entries = await(M.ls, cur_entry.path)
+      local ls_err, entries = a.await(M.ls, cur_entry.path)
       if ls_err then
         return cb(ls_err, false)
       end
@@ -158,12 +155,12 @@ M.rm_r = async(function(path, cb)
 
   for _, entry in ipairs(lst:totable()) do
     if entry.type == "directory" then
-      local rmdir_err, rmdir_success = await(M.rmdir, entry.path)
+      local rmdir_err, rmdir_success = a.await(M.rmdir, entry.path)
       if not rmdir_success then
         return cb(rmdir_err, false)
       end
     else
-      local rm_err, rm_success = await(M.rm, entry.path)
+      local rm_err, rm_success = a.await(M.rm, entry.path)
       if not rm_success then
         return cb(rm_err, false)
       end
@@ -175,13 +172,13 @@ end)
 
 ---@param path string
 ---@param cb fun(err?: string, success: boolean)
-M.mkdir = async(function(path, cb)
-  local stat_err, stat = await(uv.fs_stat, path)
+M.mkdir = a.async(function(path, cb)
+  local stat_err, stat = a.await(uv.fs_stat, path)
   if stat and stat.type == "directory" then
     return cb(stat_err, false)
   end
 
-  local mkdir_err, success = await(uv.fs_mkdir, path, 493)
+  local mkdir_err, success = a.await(uv.fs_mkdir, path, 493)
   if not success then
     return cb(mkdir_err, false)
   end
@@ -191,7 +188,7 @@ end)
 
 ---@param path string
 ---@param cb fun(err?: string, success: boolean)
-M.mkdir_p = async(function(path, cb)
+M.mkdir_p = a.async(function(path, cb)
   local parts = vim
     .iter(vim.split(path, "/"))
     :filter(function(part)
@@ -203,9 +200,9 @@ M.mkdir_p = async(function(path, cb)
   for i = 1, #parts do
     dir = dir .. string.format("/%s", parts[i])
 
-    local _, stat = await(uv.fs_stat, dir)
+    local _, stat = a.await(uv.fs_stat, dir)
     if not stat then
-      local mkdir_err, mkdir_success = await(M.mkdir, dir)
+      local mkdir_err, mkdir_success = a.await(M.mkdir, dir)
       if not mkdir_success then
         return cb(mkdir_err, false)
       end
@@ -217,13 +214,13 @@ end)
 
 ---@param path string
 ---@param cb fun(err?: string, success: boolean)
-M.rmdir = async(function(path, cb)
-  local stat_err, stat = await(uv.fs_stat, path)
+M.rmdir = a.async(function(path, cb)
+  local stat_err, stat = a.await(uv.fs_stat, path)
   if not stat then
     return cb(stat_err, false)
   end
 
-  local rmdir_err, success = await(uv.fs_rmdir, path)
+  local rmdir_err, success = a.await(uv.fs_rmdir, path)
   if not success then
     return cb(rmdir_err, false)
   end
@@ -234,18 +231,18 @@ end)
 ---@param src_path string
 ---@param dst_path string
 ---@param cb fun(err?: string, success: boolean)
-M.mv = async(function(src_path, dst_path, cb)
-  local stat_err, stat = await(uv.fs_stat, src_path)
-  if not stat then
+M.mv = a.async(function(src_path, dst_path, cb)
+  local stat_err, src_stat = a.await(uv.fs_stat, src_path)
+  if not src_stat then
     return cb(stat_err, false)
   end
 
-  _, stat = await(uv.fs_stat, dst_path)
-  if stat then
+  local _, dst_stat = a.await(uv.fs_stat, dst_path)
+  if dst_stat then
     return cb("Destination path already exists", false)
   end
 
-  local rename_err, rename_success = await(uv.fs_rename, src_path, dst_path)
+  local rename_err, rename_success = a.await(uv.fs_rename, src_path, dst_path)
   if not rename_success then
     return cb(rename_err, false)
   end
@@ -255,19 +252,20 @@ end)
 
 ---@param path string
 ---@param cb fun(err?: string, success: boolean)
-M.create = async(function(path, cb)
-  local mkdirp_err, mkdirp_success = await(M.mkdir_p, fn.fnamemodify(path, vim.endswith(path, "/") and ":h:h" or ":h"))
+M.create = a.async(function(path, cb)
+  local mkdirp_err, mkdirp_success =
+    a.await(M.mkdir_p, fn.fnamemodify(path, vim.endswith(path, "/") and ":h:h" or ":h"))
   if not mkdirp_success then
     return cb(mkdirp_err, false)
   end
 
   if vim.endswith(path, "/") then
-    local mkdir_err, mkdir_success = await(M.mkdir, path)
+    local mkdir_err, mkdir_success = a.await(M.mkdir, path)
     if not mkdir_success then
       return cb(mkdir_err, false)
     end
   else
-    local touch_err, touch_success = await(M.touch, path)
+    local touch_err, touch_success = a.await(M.touch, path)
     if not touch_success then
       return cb(touch_err, false)
     end
@@ -278,8 +276,8 @@ end)
 
 ---@param path string
 ---@param cb fun(err?: string, success: boolean)
-M.delete = async(function(path, cb)
-  local rm_r_err, rm_r_success = await(M.rm_r, path)
+M.delete = a.async(function(path, cb)
+  local rm_r_err, rm_r_success = a.await(M.rm_r, path)
   if not rm_r_success then
     return cb(rm_r_err, false)
   end
@@ -290,13 +288,13 @@ end)
 ---@param src_path string
 ---@param dst_path string
 ---@param cb fun(err?: string, success: boolean)
-M.move = async(function(src_path, dst_path, cb)
-  local mkdirp_err, mkdirp_success = await(M.mkdir_p, fn.fnamemodify(dst_path, ":h"))
+M.move = a.async(function(src_path, dst_path, cb)
+  local mkdirp_err, mkdirp_success = a.await(M.mkdir_p, fn.fnamemodify(dst_path, ":h"))
   if not mkdirp_success then
     return cb(mkdirp_err, false)
   end
 
-  local mv_err, mv_success = await(M.mv, src_path, dst_path)
+  local mv_err, mv_success = a.await(M.mv, src_path, dst_path)
   if not mv_success then
     return cb(mv_err, false)
   end
