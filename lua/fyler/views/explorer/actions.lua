@@ -178,11 +178,13 @@ function M.try_focus_buffer(view)
       end
     end)()
 
-    if cache.get_entry("recent_path") == focused_path then
+    if not focused_path then
       return
     end
 
-    cache.set_entry("recent_path", focused_path)
+    if cache.get_entry("recent_path") == focused_path then
+      return api.nvim_win_set_cursor(view.win.winid, cache.get_entry("recent_cursor"))
+    end
 
     local rel = fs.relpath(require("fyler.views.explorer").root_dir, fn.fnamemodify(fn.expand(focused_path), ":p"))
     if not rel then
@@ -202,6 +204,9 @@ function M.try_focus_buffer(view)
 
     local focused_node = view.fs_root
     local focused_part
+
+    a.await(focused_node.update, focused_node)
+
     for i, part in ipairs(parts) do
       local child = vim.iter(focused_node.children):find(function(child)
         return store.get(child.meta).name == part
@@ -232,6 +237,9 @@ function M.try_focus_buffer(view)
       local buf_lines = api.nvim_buf_get_lines(view.win.bufnr, 0, -1, false)
       for ln, buf_line in ipairs(buf_lines) do
         if buf_line:find(focused_node.meta) then
+          cache.set_entry("recent_path", focused_path)
+          cache.set_entry("recent_cursor", { ln, 0 })
+
           api.nvim_win_set_cursor(view.win.winid, { ln, 0 })
         end
       end
