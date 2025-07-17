@@ -1,3 +1,4 @@
+local a = require("fyler.lib.async")
 local fs = require("fyler.lib.fs")
 local store = require("fyler.views.explorer.store")
 
@@ -54,15 +55,15 @@ function FSItem:find(addr)
   return nil
 end
 
-function FSItem:update()
+FSItem.update = a.async(function(self, cb)
   if not self.open then
-    return
+    return cb()
   end
 
   local meta_meta = store.get(self.meta)
-  local items, err = fs.listdir(meta_meta.path)
+  local err, items = a.await(fs.ls, meta_meta.path)
   if err then
-    return
+    return cb()
   end
 
   self.children = vim
@@ -85,43 +86,50 @@ function FSItem:update()
   end
 
   for _, child in ipairs(self.children) do
-    child:update()
+    a.await(child.update, child)
   end
-end
+
+  return cb()
+end)
 
 ---@param max_depth number?
-function FSItem:open_recursive(max_depth)
+FSItem.open_recursive = a.async(function(self, max_depth, cb)
   if max_depth ~= nil and max_depth <= 0 then
     vim.notify("Reached recursion limit on directory.", vim.log.levels.WARN)
-    return
+    return cb()
   end
 
   max_depth = max_depth or DEFAULT_RECURSION_LIMIT
 
   self.open = true
-  self:update()
   for _, child in pairs(self.children) do
     if store.get(child.meta):is_directory() then
-      child:open_recursive(max_depth - 1)
+      a.await(child.open_recursive, child, max_depth - 1)
     end
   end
-end
+
+  return cb()
+end)
 
 ---@param max_depth number?
-function FSItem:close_recursive(max_depth)
+FSItem.close_recursive = a.async(function(self, max_depth, cb)
   if max_depth ~= nil and max_depth <= 0 then
     vim.notify("Reached recursion limit on directory.", vim.log.levels.WARN)
-    return
+    return cb()
   end
 
   max_depth = max_depth or DEFAULT_RECURSION_LIMIT
+
   for _, child in pairs(self.children) do
     if store.get(child.meta):is_directory() and child.open then
-      child:close_recursive(max_depth - 1)
+      a.await(child.close_recursive, child, max_depth - 1)
     end
   end
+
   self.open = false
-end
+
+  return cb()
+end)
 
 function FSItem:toggle_recursive()
   if self.open then

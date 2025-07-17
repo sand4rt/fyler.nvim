@@ -90,8 +90,8 @@ function Ui:render(opts)
   opts = opts or {}
   vim.schedule(function()
     self:_render(opts.lines)
-    if opts.cb then
-      opts.cb()
+    if opts.on_render then
+      opts.on_render()
     end
   end)
 end

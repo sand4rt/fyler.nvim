@@ -1,4 +1,6 @@
+local a = require("fyler.lib.async")
 local algos = require("fyler.views.explorer.algos")
+local cache = require("fyler.cache")
 local config = require("fyler.config")
 local confirm_view = require("fyler.views.confirm")
 local fs = require("fyler.lib.fs")
@@ -32,7 +34,7 @@ function M.n_select(view)
       view.fs_root:find(key):toggle()
       api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
     else
-      local recent_win = require("fyler.cache").get_entry("recent_win")
+      local recent_win = cache.get_entry("recent_win")
       if recent_win and api.nvim_win_is_valid(recent_win) then
         fn.win_execute(recent_win, string.format("edit %s", meta_data:resolved_path()))
         fn.win_gotoid(recent_win)
@@ -71,7 +73,7 @@ local function get_tbl(tbl)
     for _, change in ipairs(tbl.create) do
       table.insert(lines, {
         { str = "  - " },
-        { str = fs.relpath(change), hl = "Conceal" },
+        { str = fs.relpath(fs.getcwd(), change), hl = "Conceal" },
       })
     end
 
@@ -83,7 +85,7 @@ local function get_tbl(tbl)
     for _, change in ipairs(tbl.delete) do
       table.insert(lines, {
         { str = "  - " },
-        { str = fs.relpath(change), hl = "Conceal" },
+        { str = fs.relpath(fs.getcwd(), change), hl = "Conceal" },
       })
     end
 
@@ -95,9 +97,9 @@ local function get_tbl(tbl)
     for _, change in ipairs(tbl.move) do
       table.insert(lines, {
         { str = "  - " },
-        { str = fs.relpath(change.from), hl = "Conceal" },
+        { str = fs.relpath(fs.getcwd(), change.src), hl = "Conceal" },
         { str = " > " },
-        { str = fs.relpath(change.to), hl = "Conceal" },
+        { str = fs.relpath(fs.getcwd(), change.dst), hl = "Conceal" },
       })
     end
 
@@ -109,41 +111,42 @@ end
 
 ---@param view FylerExplorerView
 function M.n_synchronize(view)
-  return function()
+  return a.async(function()
     local changes = algos.get_diff(view)
-    confirm_view.open(get_tbl(changes), "(y/n)", function(c)
-      if c then
-        for _, change in ipairs(changes.create) do
-          fs.create_fs_item(change)
-        end
-
-        for _, change in ipairs(changes.delete) do
-          fs.delete_fs_item(change)
-        end
-
-        for _, change in ipairs(changes.move) do
-          fs.move_fs_item(change.from, change.to)
-        end
+    if a.await(confirm_view.open, get_tbl(changes), "(y/n)") then
+      for _, change in ipairs(changes.create) do
+        a.await(fs.create, change)
       end
 
+      for _, change in ipairs(changes.delete) do
+        a.await(fs.delete, change)
+      end
+
+      for _, change in ipairs(changes.move) do
+        a.await(fs.move, change.src, change.dst)
+      end
+    end
+
+    vim.schedule(function()
       api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
     end)
-  end
+  end)
 end
 
 ---@param view FylerExplorerView
----@param cb function
-function M.n_refreshview(view, cb)
-  return function()
-    view.fs_root:update()
+---@param on_render function
+function M.n_refreshview(view, on_render)
+  return a.async(function()
+    a.await(view.fs_root.update, view.fs_root)
+
     view.win.ui:render {
       lines = ui.Explorer(algos.tree_table_from_node(view).children),
-      cb = cb,
+      on_render = on_render,
     }
 
     vim.bo[view.win.bufnr].syntax = "fyler"
     vim.bo[view.win.bufnr].filetype = "fyler"
-  end
+  end)
 end
 
 function M.constrain_cursor(view)
@@ -164,17 +167,42 @@ end
 
 ---@param view FylerExplorerView
 function M.try_focus_buffer(view)
-  return function()
+  return a.async(function()
     if not view.win:is_visible() then
       return
     end
 
-    local focused_path = api.nvim_buf_get_name(fn.bufnr("%") == view.win.bufnr and fn.bufnr("#") or 0)
-    local rel = fs.relpath(focused_path)
-    local parts = {}
-    if rel then
-      parts = vim.split(rel, "/")
+    local focused_path = (function()
+      local bufname = fn.bufname("%")
+      local recent_win = cache.get_entry("recent_win")
+      if bufname == "" or string.match(bufname, "^fyler://*") then
+        return recent_win and fn.bufname(fn.winbufnr(recent_win)) or nil
+      else
+        return bufname
+      end
+    end)()
+
+    if cache.get_entry("recent_path") == focused_path then
+      return
     end
+
+    cache.set_entry("recent_path", focused_path)
+
+    local rel = fs.relpath(require("fyler.views.explorer").root_dir, fn.fnamemodify(fn.expand(focused_path), ":p"))
+    if not rel then
+      return
+    end
+
+    local parts = vim
+      .iter(vim.split(rel, "/"))
+      :filter(function(part)
+        if part == "" then
+          return false
+        end
+
+        return true
+      end)
+      :totable()
 
     local focused_node = view.fs_root
     local focused_part
@@ -187,10 +215,13 @@ function M.try_focus_buffer(view)
         break
       end
 
-      child.open = true
-      child:update()
-      focused_node = child
+      if store.get(child.meta):is_directory() then
+        child.open = true
+        a.await(child.update, child)
+      end
+
       focused_part = i
+      focused_node = child
     end
 
     if focused_part ~= #parts then
@@ -206,11 +237,10 @@ function M.try_focus_buffer(view)
       for ln, buf_line in ipairs(buf_lines) do
         if buf_line:find(focused_node.meta) then
           api.nvim_win_set_cursor(view.win.winid, { ln, 0 })
-          return
         end
       end
     end)()
-  end
+  end)
 end
 
 return M

@@ -1,5 +1,6 @@
 local FSItem = require("fyler.views.explorer.struct")
 local Win = require("fyler.lib.win")
+local a = require("fyler.lib.async")
 local algos = require("fyler.views.explorer.algos")
 local config = require("fyler.config")
 local fs = require("fyler.lib.fs")
@@ -36,31 +37,29 @@ function ExplorerView.new(opts)
   return instance
 end
 
-function ExplorerView:open(opts)
+ExplorerView.open = a.async(function(self, opts)
   local mappings = config.get_reverse_mappings("explorer")
 
-  self.fs_root:update()
-
+  -- stylua: ignore start
   self.win = Win {
     bufname = string.format("fyler://%s", self.cwd),
     bufopts = {
-      syntax = "fyler",
+      buftype  = "acwrite",
       filetype = "fyler",
-      buftype = "acwrite",
+      syntax   = "fyler",
     },
     enter = true,
-    kind = opts.kind,
-    name = "explorer",
+    kind  = opts.kind,
+    name  = "explorer",
     winopts = {
-      concealcursor = "nvic",
-      conceallevel = 3,
-      cursorline = true,
-      number = true,
+      concealcursor  = "nvic",
+      conceallevel   = 3,
+      cursorline     = true,
+      number         = true,
       relativenumber = true,
-      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-      wrap = false,
+      winhighlight   = "Normal:Normal,FloatBorder:FloatBorder",
+      wrap           = false,
     },
-    -- stylua: ignore start
     mappings = {
       n = {
         [mappings["Select"]]          = self:_action("n_select"),
@@ -79,20 +78,20 @@ function ExplorerView:open(opts)
       ["RefreshView"] = self:_action("n_refreshview"),
       ["Synchronize"] = self:_action("n_synchronize"),
     },
-    -- stylua: ignore end
     render = function()
+      a.await(self.fs_root.update, self.fs_root)
+
       return {
         lines = ui.Explorer(algos.tree_table_from_node(self).children),
       }
     end,
   }
+  -- stylua: ignore end
 
   require("fyler.cache").set_entry("recent_win", api.nvim_get_current_win())
 
   self.win:show()
-
-  self:_action("try_focus_buffer")()
-end
+end)
 
 function ExplorerView:close()
   if self.win then
