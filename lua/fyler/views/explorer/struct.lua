@@ -2,8 +2,6 @@ local a = require("fyler.lib.async")
 local fs = require("fyler.lib.fs")
 local store = require("fyler.views.explorer.store")
 
-local DEFAULT_RECURSION_LIMIT = 32
-
 ---@class FylerFSItem
 ---@field meta string
 ---@field open boolean
@@ -91,52 +89,5 @@ FSItem.update = a.async(function(self, cb)
 
   return cb()
 end)
-
----@param max_depth number?
-FSItem.open_recursive = a.async(function(self, max_depth, cb)
-  if max_depth ~= nil and max_depth <= 0 then
-    vim.notify("Reached recursion limit on directory.", vim.log.levels.WARN)
-    return cb()
-  end
-
-  max_depth = max_depth or DEFAULT_RECURSION_LIMIT
-
-  self.open = true
-  for _, child in pairs(self.children) do
-    if store.get(child.meta):is_directory() then
-      a.await(child.open_recursive, child, max_depth - 1)
-    end
-  end
-
-  return cb()
-end)
-
----@param max_depth number?
-FSItem.close_recursive = a.async(function(self, max_depth, cb)
-  if max_depth ~= nil and max_depth <= 0 then
-    vim.notify("Reached recursion limit on directory.", vim.log.levels.WARN)
-    return cb()
-  end
-
-  max_depth = max_depth or DEFAULT_RECURSION_LIMIT
-
-  for _, child in pairs(self.children) do
-    if store.get(child.meta):is_directory() and child.open then
-      a.await(child.close_recursive, child, max_depth - 1)
-    end
-  end
-
-  self.open = false
-
-  return cb()
-end)
-
-function FSItem:toggle_recursive()
-  if self.open then
-    self:close_recursive()
-  else
-    self:open_recursive()
-  end
-end
 
 return M

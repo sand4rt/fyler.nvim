@@ -55,7 +55,7 @@ add({
 
 </details>
 
-<details>
+<details open>
   <summary>(Default configuration)</summary>
 
 ```lua
@@ -105,7 +105,6 @@ local defaults = {
       n = {
         ["q"] = "CloseView",
         ["<CR>"] = "Select",
-        ["<C-CR>"] = "SelectRecursive",
       },
     },
   },

@@ -46,23 +46,6 @@ function M.n_select(view)
   end
 end
 
----@param view FylerExplorerView
-function M.n_select_recursive(view)
-  return function()
-    local key = regex.match_meta(api.nvim_get_current_line())
-    if not key then
-      return
-    end
-
-    local meta_data = store.get(key)
-    if meta_data:is_directory() then
-      view.fs_root:find(key):toggle_recursive()
-    else
-      M.n_select(view)
-    end
-  end
-end
-
 ---@param tbl table
 ---@return table
 local function get_tbl(tbl)

@@ -42,7 +42,6 @@ Fyler supports plenty of options to customize. Following are default values
         n = {
           ["q"] = "CloseView",
           ["<CR>"] = "Select",
-          ["<C-CR>"] = "SelectRecursive",
         },
       },
     },
