@@ -8,6 +8,33 @@ local M = {}
 local uv = vim.uv or vim.loop
 local fn = vim.fn
 
+---@return string
+function M.getcwd()
+  return uv.cwd() or fn.getcwd(0)
+end
+
+---@param path string
+---@return string
+function M.normalize(path)
+  return vim.fs.normalize(path)
+end
+
+---@return string
+function M.joinpath(...)
+  return vim.fs.joinpath(...)
+end
+
+---@param path string
+---@return string
+function M.abspath(path)
+  return vim.fs.abspath(path)
+end
+
+---@param path string
+function M.relpath(base, path)
+  return vim.fs.relpath(base, path)
+end
+
 ---@param path string
 ---@return string?, string?
 function M.resolve_link(path)
@@ -30,27 +57,6 @@ function M.resolve_link(path)
   end
 
   return res_path, res_type
-end
-
----@return string
-function M.getcwd()
-  return uv.cwd() or fn.getcwd(0)
-end
-
----@return string
-function M.joinpath(...)
-  return vim.fs.joinpath(...)
-end
-
----@param path string
----@return string
-function M.abspath(path)
-  return vim.fs.abspath(path)
-end
-
----@param path string
-function M.relpath(base, path)
-  return vim.fs.relpath(base, path)
 end
 
 ---@param path string

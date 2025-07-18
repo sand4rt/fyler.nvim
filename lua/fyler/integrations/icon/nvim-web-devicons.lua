@@ -10,7 +10,7 @@ function M.get_icon(type, name)
   end
 
   local icon, hl = devicons.get_icon(name, vim.fn.fnamemodify(name, ":e"))
-  icon = (type == "directory" and "" or (icon or ""))
+  icon = (type == "directory" and "" or (icon or ""))
   hl = hl or (type == "directory" and "Fylerblue" or "FylerWhite")
   return icon, hl
 end

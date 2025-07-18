@@ -85,6 +85,9 @@ local defaults = {
   -- It also accepts `fun(type, name): icon: string, highlight: string`
   icon_provider = "mini-icons",
 
+  -- Controls whether to show git status or not
+  git_status = true,
+
   -- Views configuration:
   -- Every view config contains following options to be customized
   -- `width` a number in [0, 1]
@@ -149,7 +152,7 @@ There is an user command `Fyler` which optionally accepts two options:
 - [x] User command to change behaviour on startup
 - [x] Hijack NETRW
 - [x] Track current buffer
-- [ ] GIT integration
+- [x] GIT integration
 - [ ] LSP integration
 - [ ] SSH integration
 - [ ] Fuzzy finding

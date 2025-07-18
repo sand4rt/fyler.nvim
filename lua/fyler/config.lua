@@ -17,6 +17,7 @@ local defaults = {
   default_explorer = false,
   close_on_select = true,
   icon_provider = "mini-icons",
+  git_status = true,
   views = {
     confirm = {
       width = 0.5,

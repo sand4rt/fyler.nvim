@@ -39,12 +39,14 @@ local function make_palette()
   -- stylua: ignore start
   return {
     bg     = get_bg("Normal"),
-    fg     = get_fg("Normal"),
-    red    = get_fg("Error"),
     blue   = get_fg("Directory"),
+    cyan   = get_fg("Operator"),
+    fg     = get_fg("Normal"),
     green  = get_fg("String"),
+    grey   = get_fg("Comment"),
+    orange = get_fg("SpecialChar"),
+    red    = get_fg("Error"),
     yellow = get_fg("WarningMsg"),
-    grey   = get_fg("Whitespace"),
 
     black  = "#000000",
     white  = "#ffffff"
@@ -57,17 +59,16 @@ function M.setup()
 
   -- stylua: ignore start
   local hl_groups = {
-    FylerRed         = { fg = palette.red },
-    FylerGreen       = { fg = palette.green },
-    FylerBlue        = { fg = palette.blue },
-    FylerYellow      = { fg = palette.yellow },
-    FylerHeading     = { fg = palette.blue, bold = true },
-    FylerParagraph   = { fg = palette.white },
-    FylerLabelRed    = { fg = palette.black, bg = palette.red },
-    FylerLabelGreen  = { fg = palette.black, bg = palette.green },
-    FylerLabelBlue   = { fg = palette.black, bg = palette.blue },
-    FylerLabelYellow = { fg = palette.black, bg = palette.yellow },
-    FylerLabelGrey   = { fg = palette.black, bg = palette.grey }
+    FylerBlue      = { fg = palette.blue },
+    FylerCyan      = { fg = palette.cyan },
+    FylerGreen     = { fg = palette.green },
+    FylerGrey      = { fg = palette.grey },
+    FylerHeading   = { fg = palette.blue, bold = true },
+    FylerOrange    = { fg = palette.orange },
+    FylerParagraph = { fg = palette.white },
+    FylerRed       = { fg = palette.red },
+    FylerWhite     = { fg = palette.white },
+    FylerYellow    = { fg = palette.yellow },
   }
   -- stylua: ignore end
 

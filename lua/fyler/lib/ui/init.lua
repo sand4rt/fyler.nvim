@@ -70,11 +70,10 @@ function Ui:_render(lines)
     end
 
     for _, mark in pairs(line.marks) do
-      api.nvim_buf_set_extmark(self.win.bufnr, self.win.namespace, i - 1, 1, {
-        id = tonumber(mark.id),
+      api.nvim_buf_set_extmark(self.win.bufnr, self.win.namespace, i - 1, 0, {
         virt_text = { { mark.str, mark.hl or "" } },
         virt_text_pos = "eol",
-        hl_group = mark.hl or "",
+        hl_mode = "combine",
       })
     end
   end

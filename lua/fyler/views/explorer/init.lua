@@ -81,7 +81,7 @@ ExplorerView.open = a.async(function(self, opts)
       a.await(self.fs_root.update, self.fs_root)
 
       return {
-        lines = ui.Explorer(algos.tree_table_from_node(self).children),
+        lines = a.await(ui.Explorer, algos.tree_table_from_node(self).children),
         on_render = self:_action("try_focus_buffer")
       }
     end,

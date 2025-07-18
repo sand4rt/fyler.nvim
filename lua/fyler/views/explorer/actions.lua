@@ -119,7 +119,7 @@ function M.n_refreshview(view, on_render)
     a.await(view.fs_root.update, view.fs_root)
 
     view.win.ui:render {
-      lines = ui.Explorer(algos.tree_table_from_node(view).children),
+      lines = a.await(ui.Explorer, algos.tree_table_from_node(view).children),
       on_render = on_render,
     }
 
