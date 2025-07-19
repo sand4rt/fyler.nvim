@@ -5,7 +5,7 @@ A modern neovim file tree which can edit your file system like a buffer
 ![License](https://img.shields.io/github/license/A7Lavinraj/fyler.nvim?style=for-the-badge&logo=starship&color=ee999f&logoColor=D9E0EE&labelColor=302D41)
 ![Stars](https://img.shields.io/github/stars/A7Lavinraj/fyler.nvim?style=for-the-badge&logo=starship&color=c69ff5&logoColor=D9E0EE&labelColor=302D41)
 
-![Image](https://github.com/user-attachments/assets/cf3d7904-d5dd-4c15-94cd-eaecd38ddc1e)
+![showcase](https://github.com/user-attachments/assets/c1dca603-7199-4a90-9a26-50dda96dec6e)
 
 > [!WARNING]
 > This plugin is still under development and not ready to use
@@ -152,8 +152,6 @@ local defaults = {
 </details>
 
 ## Usage
-
-<https://github.com/user-attachments/assets/ea71ff58-1c5c-4cda-b54e-f845d70f5184>
 
 There is an user command `Fyler` which optionally accepts two options:
 
