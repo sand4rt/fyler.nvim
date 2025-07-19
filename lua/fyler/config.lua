@@ -18,6 +18,11 @@ local defaults = {
   close_on_select = true,
   icon_provider = "mini-icons",
   git_status = true,
+  indentscope = {
+    enabled = true,
+    group = "FylerDarkGrey",
+    marker = "│",
+  },
   views = {
     confirm = {
       width = 0.5,

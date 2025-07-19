@@ -88,6 +88,13 @@ local defaults = {
   -- Controls whether to show git status or not
   git_status = true,
 
+  -- Controls behaviour of indentation marker
+  indentscope = {
+    enabled = true,
+    group = "FylerDarkGrey",
+    marker = "│",
+  },
+
   -- Views configuration:
   -- Every view config contains following options to be customized
   -- `width` a number in [0, 1]
@@ -153,6 +160,8 @@ There is an user command `Fyler` which optionally accepts two options:
 - [x] Hijack NETRW
 - [x] Track current buffer
 - [x] GIT integration
+- [x] Indentation guides
+- [ ] Explorer, Loaded buffers and File system relationship
 - [ ] LSP integration
 - [ ] SSH integration
 - [ ] Fuzzy finding

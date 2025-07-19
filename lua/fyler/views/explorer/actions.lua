@@ -230,4 +230,43 @@ function M.try_focus_buffer(view)
   end)
 end
 
+local extmark_namespace = api.nvim_create_namespace("indent-test")
+
+---@param view FylerExplorerView
+function M.draw_indentscope(view)
+  local function draw_line(ln)
+    local cur_line = unpack(api.nvim_buf_get_lines(view.win.bufnr, ln - 1, ln, false))
+    local cur_indent = #regex.match_indent(cur_line)
+    if cur_indent == 0 then
+      return
+    end
+
+    local indent_depth = math.floor(cur_indent * 0.5)
+    for i = 1, indent_depth do
+      api.nvim_buf_set_extmark(view.win.bufnr, extmark_namespace, ln - 1, 0, {
+        hl_mode = "combine",
+        virt_text = {
+          {
+            config.values.indentscope.marker,
+            config.values.indentscope.group,
+          },
+        },
+        virt_text_pos = "overlay",
+        virt_text_win_col = (i - 1) * 2,
+      })
+    end
+  end
+
+  return function()
+    if not config.values.indentscope.enabled then
+      return
+    end
+
+    api.nvim_buf_clear_namespace(view.win.bufnr, extmark_namespace, 0, -1)
+    for i = 1, api.nvim_buf_line_count(view.win.bufnr) do
+      draw_line(i)
+    end
+  end
+end
+
 return M

@@ -18,6 +18,11 @@ Fyler supports plenty of options to customize. Following are default values
     close_on_select = true,
     icon_provider = "mini-icons",
     git_status = true,
+    indentscope = {
+      enabled = true,
+      group = "FylerDarkGrey",
+      marker = "│",
+    },
     views = {
       confirm = {
         width = 0.5,

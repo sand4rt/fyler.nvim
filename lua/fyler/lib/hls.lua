@@ -38,15 +38,16 @@ end
 local function make_palette()
   -- stylua: ignore start
   return {
-    bg     = get_bg("Normal"),
-    blue   = get_fg("Directory"),
-    cyan   = get_fg("Operator"),
-    fg     = get_fg("Normal"),
-    green  = get_fg("String"),
-    grey   = get_fg("Comment"),
-    orange = get_fg("SpecialChar"),
-    red    = get_fg("Error"),
-    yellow = get_fg("WarningMsg"),
+    bg        = get_bg("Normal"),
+    blue      = get_fg("Directory"),
+    cyan      = get_fg("Operator"),
+    dark_grey = get_fg("WhiteSpace"),
+    fg        = get_fg("Normal"),
+    green     = get_fg("String"),
+    grey      = get_fg("Comment"),
+    orange    = get_fg("SpecialChar"),
+    red       = get_fg("Error"),
+    yellow    = get_fg("WarningMsg"),
 
     black  = "#000000",
     white  = "#ffffff"
@@ -63,6 +64,7 @@ function M.setup()
     FylerCyan      = { fg = palette.cyan },
     FylerGreen     = { fg = palette.green },
     FylerGrey      = { fg = palette.grey },
+    FylerDarkGrey  = { fg = palette.dark_grey },
     FylerHeading   = { fg = palette.blue, bold = true },
     FylerOrange    = { fg = palette.orange },
     FylerParagraph = { fg = palette.white },

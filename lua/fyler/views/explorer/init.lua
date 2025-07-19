@@ -71,6 +71,8 @@ ExplorerView.open = a.async(function(self, opts)
       ["BufWriteCmd"]  = self:_action("n_synchronize"),
       ["CursorMoved"]  = self:_action("constrain_cursor"),
       ["CursorMovedI"] = self:_action("constrain_cursor"),
+      ["TextChanged"]  = self:_action("draw_indentscope"),
+      ["TextChangedI"] = self:_action("draw_indentscope"),
       ["WinClosed"]    = self:_action("n_close_view"),
     },
     user_autocmds = {
@@ -99,13 +101,20 @@ function ExplorerView:close()
   end
 end
 
----@param name string
-function ExplorerView:_action(name)
-  local action = require("fyler.views.explorer.actions")[name]
+---@param ... any
+function ExplorerView:_action(...)
+  local actions = {}
+  for _, name in ipairs { ... } do
+    local action = require("fyler.views.explorer.actions")[name]
+    assert(action, string.format("%s action is not available", name))
+    table.insert(actions, action)
+  end
 
-  assert(action, string.format("%s action is not available", name))
-
-  return action(self)
+  return function(...)
+    for _, action in ipairs(actions) do
+      action(self)(...)
+    end
+  end
 end
 
 local M = {
