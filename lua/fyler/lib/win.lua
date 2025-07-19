@@ -2,6 +2,7 @@ local Ui = require("fyler.lib.ui")
 local config = require("fyler.config")
 
 local api = vim.api
+local fn = vim.fn
 
 ---@alias FylerWinKind
 ---| "float"
@@ -9,6 +10,10 @@ local api = vim.api
 ---| "split:above"
 ---| "split:right"
 ---| "split:below"
+---| "split:leftmost"
+---| "split:abovemost"
+---| "split:rightmost"
+---| "split:belowmost"
 
 ---@class FylerWin
 ---@field augroup       string          - Autogroup associated with window instance
@@ -135,8 +140,26 @@ function Win:show()
     return
   end
 
-  self.bufnr = api.nvim_create_buf(false, true)
-  self.winid = api.nvim_open_win(self.bufnr, self.enter, self:config())
+  local win_config = self:config()
+  if win_config.split and win_config.split:match("^%w+most$") then
+    if win_config.split == "leftmost" then
+      fn.execute("topleft vnew")
+    elseif win_config.split == "abovemost" then
+      fn.execute("topleft new")
+    elseif win_config.split == "rightmost" then
+      fn.execute("botright vnew")
+    elseif win_config.split == "belowmost" then
+      fn.execute("botright new")
+    else
+      error(string.format("Invalid window kind `%s`", win_config.split))
+    end
+
+    self.bufnr = api.nvim_get_current_buf()
+    self.winid = api.nvim_get_current_win()
+  else
+    self.bufnr = api.nvim_create_buf(false, true)
+    self.winid = api.nvim_open_win(self.bufnr, self.enter, win_config)
+  end
 
   if self.render then
     self.ui:render(self.render())

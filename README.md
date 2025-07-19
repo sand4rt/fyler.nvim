@@ -99,8 +99,26 @@ local defaults = {
   -- Every view config contains following options to be customized
   -- `width` a number in [0, 1]
   -- `height` a number in [0, 1]
-  -- `kind` could be 'float', 'split:left', 'split:above', 'split:right', 'split:below'
-  -- `border` could be 'bold', 'double', 'none', 'rounded', 'shadow', 'single', 'solid'
+
+  -- `kind` could be as following:
+  -- 'float',
+  -- 'split:left',
+  -- 'split:above',
+  -- 'split:right',
+  -- 'split:below'
+  -- 'split:leftmost',
+  -- 'split:abovemost',
+  -- 'split:rightmost',
+  -- 'split:belowmost'
+
+  -- `border` could be as following:
+  -- 'bold',
+  -- 'double',
+  -- 'none',
+  -- 'rounded',
+  -- 'shadow',
+  -- 'single',
+  -- 'solid'
   views = {
     explorer = {
       width = 0.8,
@@ -144,10 +162,15 @@ There is an user command `Fyler` which optionally accepts two options:
 
 ```vim
 " Open fyler with specific window kind
+:Fyler kind=float
 :Fyler kind=split:left
 :Fyler kind=split:right
 :Fyler kind=split:above
 :Fyler kind=split:below
+:Fyler kind=split:leftmost
+:Fyler kind=split:rightmost
+:Fyler kind=split:abovemost
+:Fyler kind=split:belowmost
 
 " Open fyler with specific directory
 :Fyler cwd=/home/user/.config/nvim
