@@ -280,12 +280,43 @@ M.create = a.async(function(path, cb)
   return cb(nil, true)
 end)
 
+local function get_alt_buf(for_buf)
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_valid(buf) and buf ~= for_buf then
+      return buf
+    end
+  end
+
+  return vim.api.nvim_create_buf(false, true)
+end
+
 ---@param path string
 ---@param cb fun(err?: string, success: boolean)
 M.delete = a.async(function(path, cb)
   local rm_r_err, rm_r_success = a.await(M.rm_r, path)
   if not rm_r_success then
     return cb(rm_r_err, false)
+  end
+
+  local buf = fn.bufnr(path)
+  if buf == -1 then
+    return cb("Unable to find buffer to delete", false)
+  end
+
+  local alt = get_alt_buf(buf)
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == buf then
+      if alt < 1 or alt == buf then
+        alt = vim.api.nvim_create_buf(true, false)
+      end
+
+      vim.api.nvim_win_set_buf(win, alt)
+    end
+  end
+
+  local success, msg = pcall(vim.api.nvim_buf_delete, buf, { force = true })
+  if not success then
+    return cb(msg, false)
   end
 
   return cb(nil, true)
@@ -303,6 +334,26 @@ M.move = a.async(function(src_path, dst_path, cb)
   local mv_err, mv_success = a.await(M.mv, src_path, dst_path)
   if not mv_success then
     return cb(mv_err, false)
+  end
+
+  local src_buf = fn.bufnr(src_path)
+  if src_buf == -1 then
+    return cb("unable to find moved buffer", false)
+  end
+
+  local dst_buf = fn.bufadd(dst_path)
+  fn.bufload(dst_buf)
+  vim.bo[dst_buf].buflisted = true
+
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == src_buf then
+      vim.api.nvim_win_set_buf(win, dst_buf)
+    end
+  end
+
+  local success, msg = pcall(vim.api.nvim_buf_delete, src_buf, { force = true })
+  if not success then
+    return cb(msg, false)
   end
 
   return cb(nil, true)

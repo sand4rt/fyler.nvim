@@ -55,7 +55,7 @@ local function get_tbl(tbl)
     for _, change in ipairs(tbl.create) do
       table.insert(lines, {
         { str = "  | " },
-        { str = fs.relpath(fs.getcwd(), change), hl = "Conceal" },
+        { str = fs.relpath(fs.getcwd(), change), hl = "FylerGrey" },
       })
     end
     table.insert(lines, { { str = "" } })
@@ -66,7 +66,7 @@ local function get_tbl(tbl)
     for _, change in ipairs(tbl.delete) do
       table.insert(lines, {
         { str = "  | " },
-        { str = fs.relpath(fs.getcwd(), change), hl = "Conceal" },
+        { str = fs.relpath(fs.getcwd(), change), hl = "FylerGrey" },
       })
     end
     table.insert(lines, { { str = "" } })
@@ -77,9 +77,9 @@ local function get_tbl(tbl)
     for _, change in ipairs(tbl.move) do
       table.insert(lines, {
         { str = "  | " },
-        { str = fs.relpath(fs.getcwd(), change.src), hl = "Conceal" },
+        { str = fs.relpath(fs.getcwd(), change.src), hl = "FylerGrey" },
         { str = " > " },
-        { str = fs.relpath(fs.getcwd(), change.dst), hl = "Conceal" },
+        { str = fs.relpath(fs.getcwd(), change.dst), hl = "FylerGrey" },
       })
     end
     table.insert(lines, { { str = "" } })

@@ -119,7 +119,7 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
             str = git_symbol and string.format(" %s ", git_symbol) or " ",
             hl = git_status_hl[git_symbol],
           },
-          { str = string.format("/%s", item.key) },
+          { str = string.format("/%s", item.meta) },
           {
             str = string.format(" %s", item.name),
             hl = (function()

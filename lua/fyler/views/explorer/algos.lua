@@ -11,7 +11,7 @@ function M.tree_table_from_node(view)
   ---@param node FylerFSItem
   local function get_tbl(node)
     local sub_tbl = store.get(node.meta)
-    sub_tbl.key = node.meta
+    sub_tbl.meta = node.meta
 
     if sub_tbl:is_directory() then
       sub_tbl.children = {}
@@ -45,12 +45,8 @@ function M.tree_table_from_buffer(view)
     end)
     :totable()
 
-  if #buf_lines == 0 then
-    return {}
-  end
-
   local root = vim.tbl_deep_extend("force", store.get(view.fs_root.meta), {
-    key = view.fs_root.meta,
+    meta = view.fs_root.meta,
     children = {},
   })
 
@@ -59,10 +55,10 @@ function M.tree_table_from_buffer(view)
   }
 
   for _, buf_line in ipairs(buf_lines) do
-    local key = regex.match_meta(buf_line)
+    local meta = regex.match_meta(buf_line)
     local name = regex.match_name(buf_line)
     local indent = regex.match_indent(buf_line)
-    local metadata = key and store.get(key)
+    local metadata = meta and store.get(meta)
 
     while #stack > 1 and #stack[#stack].indent >= #indent do
       table.remove(stack)
@@ -70,10 +66,14 @@ function M.tree_table_from_buffer(view)
 
     local parent = stack[#stack].node
     local path = fs.joinpath(parent.path, name)
-    local new_node = { key = key, name = name, type = (metadata or {}).type or "", path = path }
+    local new_node = {
+      meta = meta,
+      name = name,
+      type = (metadata or {}).type or "",
+      path = path,
+    }
 
     table.insert(parent.children, new_node)
-
     if metadata and metadata:is_directory() then
       new_node.children = {}
       table.insert(stack, { node = new_node, indent = indent })
@@ -89,8 +89,7 @@ function M.get_diff(view)
   local recent_tree_hash = {}
 
   local function save_hash(root)
-    recent_tree_hash[root.key] = root.path
-
+    recent_tree_hash[root.meta] = root.path
     for _, child in ipairs(root.children or {}) do
       save_hash(child)
     end
@@ -98,37 +97,37 @@ function M.get_diff(view)
 
   save_hash(M.tree_table_from_node(view))
 
-  local ops_tbl = {
+  local fs_actions = {
     create = {},
     delete = {},
     move = {},
   }
 
-  local function calculate_ops(root)
-    if not root.key then
-      table.insert(ops_tbl.create, root.path)
+  local function calculate_fs_actions(root)
+    if not root.meta then
+      table.insert(fs_actions.create, root.path)
     else
-      if recent_tree_hash[root.key] ~= root.path then
-        table.insert(ops_tbl.move, { src = recent_tree_hash[root.key], dst = root.path })
+      if recent_tree_hash[root.meta] ~= root.path then
+        table.insert(fs_actions.move, { src = recent_tree_hash[root.meta], dst = root.path })
       end
 
-      recent_tree_hash[root.key] = nil
+      recent_tree_hash[root.meta] = nil
     end
 
     for _, child in ipairs(root.children or {}) do
-      calculate_ops(child)
+      calculate_fs_actions(child)
     end
   end
 
-  calculate_ops(M.tree_table_from_buffer(view))
+  calculate_fs_actions(M.tree_table_from_buffer(view))
 
   for _, v in pairs(recent_tree_hash) do
     if v then
-      table.insert(ops_tbl.delete, v)
+      table.insert(fs_actions.delete, v)
     end
   end
 
-  return ops_tbl
+  return fs_actions
 end
 
 return M

@@ -182,7 +182,8 @@ There is an user command `Fyler` which optionally accepts two options:
 - [x] Track current buffer
 - [x] GIT integration
 - [x] Indentation guides
-- [ ] Explorer, Loaded buffers and File system relationship
+- [x] Buffer-Explorer synchronization
+- [ ] File system watching
 - [ ] LSP integration
 - [ ] SSH integration
 - [ ] Fuzzy finding
