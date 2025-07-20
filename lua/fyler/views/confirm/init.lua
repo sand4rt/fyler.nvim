@@ -12,14 +12,20 @@ FylerConfirmView.__index = FylerConfirmView
 ---@param cb fun(c: boolean)
 function FylerConfirmView:open(msg, chs, cb)
   local mappings = config.get_reverse_mappings("confirm")
+  local view = config.get_view("confirm")
 
   --stylua: ignore start
   self.win = Win {
+    enter   = true,
     bufname = "confirm",
+    width   = view.width,
+    height  = view.height,
+    border  = view.border,
+    kind    = view.kind,
     bufopts = {
+      buflisted  = false,
       modifiable = false,
     },
-    enter = true,
     name = "confirm",
     title = string.format(" Confirm %s ", chs),
     winopts = {

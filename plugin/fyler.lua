@@ -11,10 +11,15 @@ end, {
   complete = function(arglead, cmdline)
     if arglead:find("^kind=") then
       return {
+        "kind=float",
         "kind=split:left",
         "kind=split:above",
         "kind=split:right",
         "kind=split:below",
+        "kind=split:leftmost",
+        "kind=split:abovemost",
+        "kind=split:rightmost",
+        "kind=split:belowmost",
       }
     end
 

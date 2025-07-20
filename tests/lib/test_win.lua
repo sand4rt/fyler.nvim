@@ -8,12 +8,18 @@ T["can create instance"] = function()
     "split:above",
     "split:right",
     "split:below",
+    "split:leftmost",
+    "split:abovemost",
+    "split:rightmost",
+    "split:belowmost",
   }
 
   local opts = {
     name = "FylerTest",
     bufname = "fyler://foo",
     kind = kinds[math.random(1, 5)],
+    width = 0.8,
+    height = 0.8,
     enter = true,
     mappings = {},
   }
@@ -32,12 +38,18 @@ T["can show and hide"] = function()
     "split:above",
     "split:right",
     "split:below",
+    "split:leftmost",
+    "split:abovemost",
+    "split:rightmost",
+    "split:belowmost",
   }
 
   local win = require("fyler.lib.win") {
     name = "explorer",
     bufname = "fyler://foo",
     kind = kinds[math.random(1, 5)],
+    width = 0.8,
+    height = 0.8,
     enter = true,
     mappings = {},
   }

@@ -1,5 +1,4 @@
 local Ui = require("fyler.lib.ui")
-local config = require("fyler.config")
 
 local api = vim.api
 local fn = vim.fn
@@ -25,6 +24,7 @@ local fn = vim.fn
 ---@field enter         boolean         - whether to enter in the window on open
 ---@field footer?       any             - Footer content
 ---@field footer_pos?   string          - Footer alignment
+---@field height        number          - Height of window
 ---@field kind          FylerWinKind    - Decides launch behaviour of window instance
 ---@field mappings      table           - Kemaps local to the window instance
 ---@field name          string          - Also know as `view_name` which helps to get specific config from user end
@@ -34,6 +34,7 @@ local fn = vim.fn
 ---@field title_pos?    string          - Title alignment
 ---@field ui            FylerUi         - Ui responsible to render lines return from corresponding render function
 ---@field user_autocmds table           - User autocommands associated with window instance
+---@field width         number          - Width of window
 ---@field winid?        integer         - Window id associated with window instance
 ---@field winopts       table           - Window local options
 local Win = {}
@@ -61,22 +62,25 @@ local M = setmetatable({}, {
 
     -- stylua: ignore start
     local instance = {
-      augroup        = get_augroup(opts.name),
-      autocmds       = opts.autocmds or {},
-      bufname        = opts.bufname,
-      bufopts        = opts.bufopts or {},
-      enter          = opts.enter or false,
-      footer         = opts.footer,
-      footer_pos     = opts.footer_pos,
-      kind           = opts.kind or "float",
-      mappings       = opts.mappings or {},
-      name           = opts.name or "",
-      namespace      = get_namespace(opts.name),
-      render         = opts.render,
-      title          = opts.title,
-      title_pos      = opts.title_pos,
-      user_autocmds  = opts.user_autocmds or {},
-      winopts        = opts.winopts or {},
+      augroup       = get_augroup(opts.name),
+      autocmds      = opts.autocmds or {},
+      border        = opts.border,
+      bufname       = opts.bufname,
+      bufopts       = opts.bufopts or {},
+      enter         = opts.enter or false,
+      footer        = opts.footer,
+      footer_pos    = opts.footer_pos,
+      height        = opts.height,
+      kind          = opts.kind or "float",
+      mappings      = opts.mappings or {},
+      name          = opts.name or "",
+      namespace     = get_namespace(opts.name),
+      render        = opts.render,
+      title         = opts.title,
+      title_pos     = opts.title_pos,
+      user_autocmds = opts.user_autocmds or {},
+      width         = opts.width,
+      winopts       = opts.winopts or {},
     }
     -- stylua: ignore end
 
@@ -116,21 +120,23 @@ function Win:config()
     footer_pos = self.footer_pos,
   }
 
-  if self.kind:match("^split:*") then
+  if self.kind:match("^split:") then
     winconfig.split = self.kind:match("^split:(.*)")
+    winconfig.title = nil
+    winconfig.title_pos = nil
+    winconfig.footer = nil
+    winconfig.footer_pos = nil
   end
-
-  local win = config.get_view(self.name) or { width = 0.5, height = 0.5 }
 
   if self.kind == "float" then
     winconfig.relative = "editor"
-    winconfig.border = win.border
-    winconfig.col = math.floor((1 - win.width) * 0.5 * vim.o.columns)
-    winconfig.row = math.floor((1 - win.height) * 0.5 * vim.o.lines)
+    winconfig.border = self.border
+    winconfig.col = math.floor((1 - self.width) * 0.5 * vim.o.columns)
+    winconfig.row = math.floor((1 - self.height) * 0.5 * vim.o.lines)
   end
 
-  winconfig.width = math.ceil(win.width * vim.o.columns)
-  winconfig.height = math.ceil(win.height * vim.o.lines)
+  winconfig.width = math.ceil(self.width * vim.o.columns)
+  winconfig.height = math.ceil(self.height * vim.o.lines)
 
   return winconfig
 end

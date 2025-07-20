@@ -39,17 +39,22 @@ end
 
 ExplorerView.open = a.async(function(self, opts)
   local mappings = config.get_reverse_mappings("explorer")
+  local view = config.get_view("explorer")
 
   -- stylua: ignore start
   self.win = Win {
+    enter   = true,
     bufname = string.format("fyler://%s", self.cwd),
+    width   = view.width,
+    height  = view.height,
+    border  = view.border,
+    kind    = opts.kind or view.kind,
     bufopts = {
-      buftype  = "acwrite",
-      filetype = "fyler",
-      syntax   = "fyler",
+      buflisted = false,
+      buftype   = "acwrite",
+      filetype  = "fyler",
+      syntax    = "fyler",
     },
-    enter = true,
-    kind  = opts.kind,
     name  = "explorer",
     winopts = {
       concealcursor  = "nvic",
