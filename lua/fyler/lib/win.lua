@@ -162,6 +162,23 @@ function Win:show()
 
     self.bufnr = api.nvim_get_current_buf()
     self.winid = api.nvim_get_current_win()
+
+    --stylua: ignore start
+    for o, v in pairs {
+      colorcolumn    = "",
+      cursorcolumn   = false,
+      cursorline     = false,
+      list           = false,
+      number         = false,
+      relativenumber = false,
+      signcolumn     = "auto",
+      spell          = false,
+      statuscolumn   = "",
+      winhighlight   = "",
+    } do
+      vim.wo[self.winid][o] = v
+    end
+    --stylua: ignore start
   else
     self.bufnr = api.nvim_create_buf(false, true)
     self.winid = api.nvim_open_win(self.bufnr, self.enter, win_config)
