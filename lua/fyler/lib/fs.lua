@@ -202,8 +202,12 @@ M.mkdir_p = a.async(function(path, cb)
     end)
     :totable()
 
-  local dir = ""
-  for i = 1, #parts do
+  local is_win = vim.fn.has("win32")
+
+  local dir = is_win and parts[1] or ""
+
+  local start_idx = is_win and 2 or 1
+  for i = start_idx, #parts do
     dir = dir .. string.format("/%s", parts[i])
 
     local _, stat = a.await(uv.fs_stat, dir)
