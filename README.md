@@ -7,9 +7,6 @@ A modern neovim file tree which can edit your file system like a buffer
 
 ![showcase](https://github.com/user-attachments/assets/c1dca603-7199-4a90-9a26-50dda96dec6e)
 
-> [!WARNING]
-> This plugin is still under development and not ready to use
-
 ## Installtion
 
 ### Stable version
@@ -21,7 +18,7 @@ A modern neovim file tree which can edit your file system like a buffer
 {
   "A7Lavinraj/fyler.nvim",
   dependencies = { "echasnovski/mini.icons" },
-  commit = "d87e4281e18712361f82a07f9fca71957244ef33",
+  branch = "stable",
   opts = {} -- check the default options in the README.md
 }
 ```
