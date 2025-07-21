@@ -149,13 +149,13 @@ function Win:show()
   local win_config = self:config()
   if win_config.split and win_config.split:match("^%w+most$") then
     if win_config.split == "leftmost" then
-      fn.execute("topleft vnew")
+      fn.execute(string.format("topleft %dvnew", win_config.width))
     elseif win_config.split == "abovemost" then
-      fn.execute("topleft new")
+      fn.execute(string.format("topleft %dnew", win_config.height))
     elseif win_config.split == "rightmost" then
-      fn.execute("botright vnew")
+      fn.execute(string.format("botright %dvnew", win_config.width))
     elseif win_config.split == "belowmost" then
-      fn.execute("botright new")
+      fn.execute(string.format("botright %dnew", win_config.height))
     else
       error(string.format("Invalid window kind `%s`", win_config.split))
     end
