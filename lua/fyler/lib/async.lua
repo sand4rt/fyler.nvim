@@ -2,7 +2,10 @@ local M = {}
 
 function M.async(async_fn)
   return function(...)
-    coroutine.resume(coroutine.create(async_fn), ...)
+    local ok, err = coroutine.resume(coroutine.create(async_fn), ...)
+    if not ok then
+      error(err)
+    end
   end
 end
 
@@ -14,7 +17,7 @@ function M.await(fn, ...)
     args,
     vim.schedule_wrap(function(...)
       if not thread then
-        return print("ERROR: no coroutine is running")
+        return error("no coroutine is running")
       end
 
       coroutine.resume(thread, ...)
