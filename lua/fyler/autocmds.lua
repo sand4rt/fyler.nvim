@@ -3,7 +3,7 @@ local M = {}
 local api = vim.api
 local uv = vim.uv or vim.loop
 
-local augroup = vim.api.nvim_create_augroup("Fyler", { clear = true })
+local augroup = api.nvim_create_augroup("Fyler", { clear = true })
 
 function M.setup()
   api.nvim_create_autocmd("ColorScheme", {

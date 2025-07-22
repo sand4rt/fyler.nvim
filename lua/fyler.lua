@@ -7,7 +7,7 @@ local fn = vim.fn
 
 ---@param opts FylerConfig
 function M.setup(opts)
-  if vim.fn.has("nvim-0.11") ~= 1 then
+  if fn.has("nvim-0.11") ~= 1 then
     return vim.notify("Fyler requires at least NVIM 0.11")
   end
 
@@ -16,7 +16,7 @@ function M.setup(opts)
   end
 
   require("fyler.config").setup(opts)
-  require("fyler.lib.hls").setup()
+  require("fyler.lib.hls").setup(require("fyler.config"))
   require("fyler.autocmds").setup()
 
   if require("fyler.config").values.default_explorer then

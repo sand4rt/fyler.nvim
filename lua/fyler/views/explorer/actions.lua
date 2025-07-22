@@ -51,35 +51,35 @@ end
 local function get_tbl(tbl)
   local lines = { { { str = "", hl = "" } } }
   if not vim.tbl_isempty(tbl.create) then
-    table.insert(lines, { { str = "# Creation", hl = "FylerGreen" } })
+    table.insert(lines, { { str = "# Creation", hl = "FylerConfirmGreen" } })
     for _, change in ipairs(tbl.create) do
       table.insert(lines, {
         { str = "  | " },
-        { str = fs.relpath(fs.getcwd(), change), hl = "FylerGrey" },
+        { str = fs.relpath(fs.getcwd(), change), hl = "FylerConfirmGrey" },
       })
     end
     table.insert(lines, { { str = "" } })
   end
 
   if not vim.tbl_isempty(tbl.delete) then
-    table.insert(lines, { { str = "# Deletetion", hl = "FylerRed" } })
+    table.insert(lines, { { str = "# Deletetion", hl = "FylerConfirmRed" } })
     for _, change in ipairs(tbl.delete) do
       table.insert(lines, {
         { str = "  | " },
-        { str = fs.relpath(fs.getcwd(), change), hl = "FylerGrey" },
+        { str = fs.relpath(fs.getcwd(), change), hl = "FylerConfirmGrey" },
       })
     end
     table.insert(lines, { { str = "" } })
   end
 
   if not vim.tbl_isempty(tbl.move) then
-    table.insert(lines, { { str = "# Migration", hl = "FylerYellow" } })
+    table.insert(lines, { { str = "# Migration", hl = "FylerConfirmYellow" } })
     for _, change in ipairs(tbl.move) do
       table.insert(lines, {
         { str = "  | " },
-        { str = fs.relpath(fs.getcwd(), change.src), hl = "FylerGrey" },
+        { str = fs.relpath(fs.getcwd(), change.src), hl = "FylerConfirmGrey" },
         { str = " > " },
-        { str = fs.relpath(fs.getcwd(), change.dst), hl = "FylerGrey" },
+        { str = fs.relpath(fs.getcwd(), change.dst), hl = "FylerConfirmGrey" },
       })
     end
     table.insert(lines, { { str = "" } })

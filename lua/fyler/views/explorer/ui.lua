@@ -15,37 +15,23 @@ local Line = components.Line
 
 local M = {}
 
+-- stylua: ignore start
 local git_status_hl = setmetatable({
-  ["??"] = "FylerRed",
-  ["A "] = "FylerGreen",
-  ["AM"] = "FylerOrange",
-  ["AD"] = "FylerRed",
-
-  [" M"] = "FylerYellow",
-  ["M "] = "FylerGreen",
-  ["MM"] = "FylerOrange",
-  [" T"] = "FylerYellow",
-
-  ["R "] = "FylerCyan",
-  ["RM"] = "FylerOrange",
-  ["C "] = "FylerCyan",
-
-  [" D"] = "FylerRed",
-  ["D "] = "FylerRed",
-  ["DM"] = "FylerOrange",
-
-  ["UU"] = "FylerRed",
-  ["AA"] = "FylerRed",
-  ["DD"] = "FylerRed",
-  ["AU"] = "FylerOrange",
-  ["UD"] = "FylerOrange",
-
-  ["!!"] = "FylerGrey",
+  ["  "] = "FylerGitAdded",
+  ["UU"] = "FylerGitConflict",
+  [" D"] = "FylerGitDeleted",
+  ["!!"] = "FylerGitIgnored",
+  [" M"] = "FylerGitModified",
+  ["R "] = "FylerGitRenamed",
+  ["M "] = "FylerGitStaged",
+  ["??"] = "FylerGitUntracked",
+  ["MM"] = "FylerGitUnstaged",
 }, {
   __index = function()
-    return "FylerWhite"
+    return ""
   end,
 })
+-- stylua: ignore end
 
 local function get_sorted(tbl)
   table.sort(tbl, function(x, y)
@@ -107,9 +93,9 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
             str = icon,
             hl = (function()
               if item.type == "directory" then
-                return "FylerBlue"
+                return "FylerFSDirectory"
               elseif item.link_type == "directory" then
-                return "FylerBlue"
+                return "FylerFSDirectory"
               else
                 return hl
               end
@@ -126,11 +112,11 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
               if git_symbol then
                 return git_status_hl[git_symbol]
               elseif item.type == "directory" then
-                return "FylerBlue"
+                return "FylerFSDirectory"
               elseif item.link_type == "directory" then
-                return "FylerBlue"
+                return "FylerFSDirectory"
               else
-                return "FylerWhite"
+                return ""
               end
             end)(),
           },
@@ -139,7 +125,7 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
           local line = {}
           if item.type == "link" then
             table.insert(line, {
-              hl = "FylerGrey",
+              hl = "FylerFSLink",
               str = string.format(" %s", item.link_path),
             })
           end
