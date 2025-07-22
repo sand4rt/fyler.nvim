@@ -7,7 +7,7 @@ A modern neovim file tree which can edit your file system like a buffer
 
 ![showcase](https://github.com/user-attachments/assets/c1dca603-7199-4a90-9a26-50dda96dec6e)
 
-## Installtion
+## Installation
 
 ### Stable version
 
@@ -147,6 +147,10 @@ local defaults = {
 ```
 
 </details>
+
+> [!TIP]
+> Visit [configuration recipe](https://github.com/A7Lavinraj/fyler.nvim/wiki#configuration-recipe)
+> section on plugin wiki to deeply explore configuration options
 
 ## Usage
 
