@@ -9,6 +9,11 @@ A modern neovim file tree which can edit your file system like a buffer
 
 ## Installation
 
+> [!IMPORTANT]
+> Please be careful while choosing between `stable` and `latest` version.
+> `stable` branch will only get updates on releases.
+> on the other hand `latest` branch updates frequently.
+
 ### Stable version
 
 <details open>
