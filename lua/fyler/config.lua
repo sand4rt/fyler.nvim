@@ -5,12 +5,13 @@
 ---@field border string|string[]
 
 ---@class FylerConfig
+---@field auto_confirm_simple_edits? boolean
 ---@field close_on_select?           boolean
 ---@field default_explorer?          boolean
 ---@field git_status                 boolean
 ---@field icon_provider?             string|fun(type: string, name: string): string, string
----@field auto_confirm_simple_edits? boolean
 ---@field indentscope                { enabled: boolean, group: string, marker: string }
+---@field on_highlights              fun(hl_groups: table, palette: table): nil
 ---@field views?                     table<string, FylerConfigView>
 ---@field mappings?                  table<string, table<"n"|"i", table<string, string>>>
 
@@ -22,9 +23,10 @@ local defaults = {
   default_explorer = false,
   git_status = true,
   icon_provider = "mini-icons",
+  on_highlights = nil,
   indentscope = {
     enabled = true,
-    group = "FylerDarkGrey",
+    group = "FylerIndentMarker",
     marker = "│",
   },
   mappings = {

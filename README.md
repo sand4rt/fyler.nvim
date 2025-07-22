@@ -100,6 +100,16 @@ local defaults = {
     marker = "│",
   },
 
+  -- A function allow user to override highlight groups
+  -- function definition:
+  --[[
+    function(hl_groups: table, palette: table)
+      hl_groups.FylerDarkGrey = { fg = palette.white }
+      ...
+    end
+  ]]--
+  on_highlights = nil,
+
   -- Views configuration:
   -- Every view config contains following options to be customized
   -- `width` a number in [0, 1]

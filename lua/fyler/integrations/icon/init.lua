@@ -3,11 +3,11 @@
 ---@return string?, string?
 local function default_icon_provider(type, _)
   if type == "directory" then
-    return "*", "FylerBlue"
+    return "*", "FylerFSDirectory"
   elseif type == "file" then
-    return "*", "FylerWhite"
+    return "*", ""
   else
-    return "*", "FylerWhite"
+    return "*", ""
   end
 end
 

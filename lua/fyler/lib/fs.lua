@@ -5,6 +5,8 @@ local a = require("fyler.lib.async")
 
 local M = {}
 
+local api = vim.api
+
 local uv = vim.uv or vim.loop
 local fn = vim.fn
 
@@ -202,7 +204,7 @@ M.mkdir_p = a.async(function(path, cb)
     end)
     :totable()
 
-  local is_win = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
+  local is_win = fn.has("win32") == 1 or fn.has("win64") == 1
 
   local dir = is_win and parts[1] or ""
 
@@ -285,13 +287,13 @@ M.create = a.async(function(path, cb)
 end)
 
 local function get_alt_buf(for_buf)
-  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.api.nvim_buf_is_valid(buf) and buf ~= for_buf then
+  for _, buf in ipairs(api.nvim_list_bufs()) do
+    if api.nvim_buf_is_valid(buf) and buf ~= for_buf then
       return buf
     end
   end
 
-  return vim.api.nvim_create_buf(false, true)
+  return api.nvim_create_buf(false, true)
 end
 
 ---@param path string
@@ -308,17 +310,17 @@ M.delete = a.async(function(path, cb)
   end
 
   local alt = get_alt_buf(buf)
-  for _, win in ipairs(vim.api.nvim_list_wins()) do
-    if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == buf then
+  for _, win in ipairs(api.nvim_list_wins()) do
+    if api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == buf then
       if alt < 1 or alt == buf then
-        alt = vim.api.nvim_create_buf(true, false)
+        alt = api.nvim_create_buf(true, false)
       end
 
-      vim.api.nvim_win_set_buf(win, alt)
+      api.nvim_win_set_buf(win, alt)
     end
   end
 
-  local success, msg = pcall(vim.api.nvim_buf_delete, buf, { force = true })
+  local success, msg = pcall(api.nvim_buf_delete, buf, { force = true })
   if not success then
     return cb(msg, false)
   end
@@ -349,13 +351,13 @@ M.move = a.async(function(src_path, dst_path, cb)
   fn.bufload(dst_buf)
   vim.bo[dst_buf].buflisted = true
 
-  for _, win in ipairs(vim.api.nvim_list_wins()) do
-    if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == src_buf then
-      vim.api.nvim_win_set_buf(win, dst_buf)
+  for _, win in ipairs(api.nvim_list_wins()) do
+    if api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == src_buf then
+      api.nvim_win_set_buf(win, dst_buf)
     end
   end
 
-  local success, msg = pcall(vim.api.nvim_buf_delete, src_buf, { force = true })
+  local success, msg = pcall(api.nvim_buf_delete, src_buf, { force = true })
   if not success then
     return cb(msg, false)
   end
