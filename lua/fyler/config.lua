@@ -5,14 +5,14 @@
 ---@field border string|string[]
 
 ---@class FylerConfig
----@field close_on_select?               boolean
----@field default_explorer?              boolean
----@field git_status                     boolean
----@field icon_provider?                 boolean
----@field skip_simple_edit_confirmation? boolean
----@field indentscope                    { enabled: boolean, group: string, marker: string }
----@field views?                         table<string, FylerConfigView>
----@field mappings?                      table<string, table<"n"|"i", table<string, string>>>
+---@field close_on_select?           boolean
+---@field default_explorer?          boolean
+---@field git_status                 boolean
+---@field icon_provider?             boolean
+---@field auto_confirm_simple_edits? boolean
+---@field indentscope                { enabled: boolean, group: string, marker: string }
+---@field views?                     table<string, FylerConfigView>
+---@field mappings?                  table<string, table<"n"|"i", table<string, string>>>
 
 local M = {}
 
