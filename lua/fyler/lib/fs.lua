@@ -202,7 +202,7 @@ M.mkdir_p = a.async(function(path, cb)
     end)
     :totable()
 
-  local is_win = vim.fn.has("win32")
+  local is_win = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
 
   local dir = is_win and parts[1] or ""
 
