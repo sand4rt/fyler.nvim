@@ -7,6 +7,10 @@ local fn = vim.fn
 
 ---@param opts FylerConfig
 function M.setup(opts)
+  if vim.fn.has("nvim-0.11") ~= 1 then
+    return vim.notify("Fyler requires at least NVIM 0.11")
+  end
+
   if did_setup then
     return
   end
