@@ -14,28 +14,15 @@ Fyler supports plenty of options to customize. Following are default values
 
 >lua
   local defaults = {
-    default_explorer = false,
+    auto_confirm_simple_edits = false,
     close_on_select = true,
-    icon_provider = "mini-icons",
+    default_explorer = false,
     git_status = true,
+    icon_provider = "mini-icons",
     indentscope = {
       enabled = true,
       group = "FylerDarkGrey",
       marker = "│",
-    },
-    views = {
-      confirm = {
-        width = 0.5,
-        height = 0.4,
-        kind = "float",
-        border = "single",
-      },
-      explorer = {
-        width = 0.8,
-        height = 0.8,
-        kind = "float",
-        border = "single",
-      },
     },
     mappings = {
       confirm = {
@@ -49,6 +36,20 @@ Fyler supports plenty of options to customize. Following are default values
           ["q"] = "CloseView",
           ["<CR>"] = "Select",
         },
+      },
+    },
+    views = {
+      confirm = {
+        width = 0.5,
+        height = 0.4,
+        kind = "float",
+        border = "single",
+      },
+      explorer = {
+        width = 0.8,
+        height = 0.8,
+        kind = "float",
+        border = "single",
       },
     },
   }
