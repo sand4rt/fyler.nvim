@@ -88,11 +88,41 @@ local function get_tbl(tbl)
   return lines
 end
 
+---@param changes table
+---@return boolean
+local function can_bypass(changes)
+  if not vim.tbl_isempty(changes.delete) then
+    return false
+  end
+
+  if #changes.move > 1 then
+    return false
+  end
+
+  if #changes.create > 5 then
+    return false
+  end
+
+  return true
+end
+
 ---@param view FylerExplorerView
 function M.n_synchronize(view)
   return a.async(function()
     local changes = algos.get_diff(view)
-    if a.await(confirm_view.open, get_tbl(changes), "(y/n)") then
+    local can_sync = (function()
+      if not config.values.auto_confirm_simple_edits then
+        return a.await(confirm_view.open, get_tbl(changes), "(y/n)")
+      end
+
+      if can_bypass(changes) then
+        return true
+      end
+
+      return a.await(confirm_view.open, get_tbl(changes), "(y/n)")
+    end)()
+
+    if can_sync then
       for _, change in ipairs(changes.create) do
         a.await(fs.create, change)
       end

@@ -5,37 +5,27 @@
 ---@field border string|string[]
 
 ---@class FylerConfig
----@field default_explorer? boolean
----@field close_on_select?  boolean
----@field icon_provider?    boolean
----@field views?            table<string, FylerConfigView>
----@field mappings?         table<string, table<"n"|"i", table<string, string>>>
+---@field close_on_select?               boolean
+---@field default_explorer?              boolean
+---@field git_status                     boolean
+---@field icon_provider?                 boolean
+---@field skip_simple_edit_confirmation? boolean
+---@field indentscope                    { enabled: boolean, group: string, marker: string }
+---@field views?                         table<string, FylerConfigView>
+---@field mappings?                      table<string, table<"n"|"i", table<string, string>>>
 
 local M = {}
 
 local defaults = {
-  default_explorer = false,
+  auto_confirm_simple_edits = false,
   close_on_select = true,
-  icon_provider = "mini-icons",
+  default_explorer = false,
   git_status = true,
+  icon_provider = "mini-icons",
   indentscope = {
     enabled = true,
     group = "FylerDarkGrey",
     marker = "│",
-  },
-  views = {
-    confirm = {
-      width = 0.5,
-      height = 0.4,
-      kind = "float",
-      border = "single",
-    },
-    explorer = {
-      width = 0.8,
-      height = 0.8,
-      kind = "float",
-      border = "single",
-    },
   },
   mappings = {
     confirm = {
@@ -49,6 +39,20 @@ local defaults = {
         ["q"] = "CloseView",
         ["<CR>"] = "Select",
       },
+    },
+  },
+  views = {
+    confirm = {
+      width = 0.5,
+      height = 0.4,
+      kind = "float",
+      border = "single",
+    },
+    explorer = {
+      width = 0.8,
+      height = 0.8,
+      kind = "float",
+      border = "single",
     },
   },
 }

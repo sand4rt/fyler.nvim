@@ -67,6 +67,9 @@ add({
 
 ```lua
 local defaults = {
+  -- Allow user to confirm simple edits
+  auto_confirm_simple_edits = false,
+
   -- NETRW Hijacking:
   -- The plugin will replace most of the netrw command
   -- By default this option is disable to avoid any incompatibility
