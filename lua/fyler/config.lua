@@ -8,7 +8,7 @@
 ---@field close_on_select?           boolean
 ---@field default_explorer?          boolean
 ---@field git_status                 boolean
----@field icon_provider?             boolean
+---@field icon_provider?             string|fun(type: string, name: string): string, string
 ---@field auto_confirm_simple_edits? boolean
 ---@field indentscope                { enabled: boolean, group: string, marker: string }
 ---@field views?                     table<string, FylerConfigView>
