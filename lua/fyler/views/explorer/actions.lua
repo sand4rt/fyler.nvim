@@ -111,6 +111,10 @@ function M.n_synchronize(view)
   return a.async(function()
     local changes = algos.get_diff(view)
     local can_sync = (function()
+      if #changes.create == 0 and #changes.delete == 0 and #changes.move == 0 then
+        return true
+      end
+
       if not config.values.auto_confirm_simple_edits then
         return a.await(confirm_view.open, get_tbl(changes), "(y/n)")
       end
