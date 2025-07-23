@@ -17,7 +17,7 @@ function M.setup(opts)
 
   require("fyler.config").setup(opts)
   require("fyler.lib.hls").setup(require("fyler.config"))
-  require("fyler.autocmds").setup()
+  require("fyler.autocmds").setup(require("fyler.config"))
 
   if require("fyler.config").values.default_explorer then
     vim.g.loaded_netrw = 1
