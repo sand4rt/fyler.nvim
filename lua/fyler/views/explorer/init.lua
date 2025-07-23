@@ -74,9 +74,15 @@ ExplorerView.open = a.async(function(self, opts)
     render = function()
       a.await(self.fs_root.update, self.fs_root)
 
+      vim.bo[self.win.bufnr].undolevels = -1
+
       return {
         lines = a.await(ui.Explorer, algos.tree_table_from_node(self).children),
-        on_render = self:_action("try_focus_buffer")
+        on_render = function()
+          vim.bo[self.win.bufnr].undolevels = vim.go.undolevels
+
+          self:_action("try_focus_buffer")()
+        end
       }
     end,
   }
