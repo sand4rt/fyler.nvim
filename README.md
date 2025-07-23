@@ -112,8 +112,8 @@ local defaults = {
 
   -- Views configuration:
   -- Every view config contains following options to be customized
-  -- `width` a number in [0, 1]
-  -- `height` a number in [0, 1]
+  -- `width` a number in (0, 1]
+  -- `height` a number in (0, 1]
 
   -- `kind` could be as following:
   -- 'float',
@@ -126,34 +126,54 @@ local defaults = {
   -- 'split:rightmost',
   -- 'split:belowmost'
 
-  -- `border` could be as following:
-  -- 'bold',
-  -- 'double',
-  -- 'none',
-  -- 'rounded',
-  -- 'shadow',
-  -- 'single',
-  -- 'solid'
+  -- for `border` |:help winborder|
   views = {
+    confirm = {
+      width = 0.8,
+      height = 0.8,
+      kind = "float",
+      border = "single",
+      buf_opts = {
+        buflisted = false,
+        modifiable = false,
+      },
+      win_opts = {
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
+        wrap = false,
+      },
+    },
     explorer = {
       width = 0.8,
       height = 0.8,
       kind = "float",
       border = "single",
-    },
-    confirm = {
-      width = 0.5,
-      height = 0.4,
-      kind = "float",
-      border = "single",
+      buf_opts = {
+        buflisted = false,
+        buftype = "acwrite",
+        filetype = "fyler",
+        syntax = "fyler",
+      },
+      win_opts = {
+        concealcursor = "nvic",
+        conceallevel = 3,
+        cursorline = true,
+        number = true,
+        relativenumber = true,
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
+        wrap = false,
+      },
     },
   },
 
   -- Mappings:
-  -- mappings can be customized by action names which are local to thier view
+  -- mappings can be customized by action names which are local to their view
   mappings = {
-    -- For `explorer` actions checkout following link:
-    -- https://github.com/A7Lavinraj/fyler.nvim/blob/main/lua/fyler/views/explorer/actions.lua
+    confirm = {
+      n = {
+        ["y"] = "Confirm",
+        ["n"] = "Discard",
+      },
+    },
     explorer = {
       n = {
         ["q"] = "CloseView",

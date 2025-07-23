@@ -16,22 +16,16 @@ function FylerConfirmView:open(msg, chs, cb)
 
   --stylua: ignore start
   self.win = Win {
-    enter   = true,
-    bufname = "confirm",
-    width   = view.width,
-    height  = view.height,
-    border  = view.border,
-    kind    = view.kind,
-    bufopts = {
-      buflisted  = false,
-      modifiable = false,
-    },
-    name = "confirm",
-    title = string.format(" Confirm %s ", chs),
-    winopts = {
-      winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
-      wrap         = false,
-    },
+    border   = view.border,
+    buf_opts = view.buf_opts,
+    bufname  = "confirm",
+    enter    = true,
+    height   = view.height,
+    kind     = view.kind,
+    name     = "confirm",
+    title    = string.format(" Confirm %s ", chs),
+    width    = view.width,
+    win_opts = view.win_opts,
     mappings = {
       n = {
         [mappings["Confirm"]] = self:_action("n_confirm", cb),

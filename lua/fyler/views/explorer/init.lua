@@ -43,28 +43,15 @@ ExplorerView.open = a.async(function(self, opts)
 
   -- stylua: ignore start
   self.win = Win {
-    enter   = true,
-    bufname = string.format("fyler://%s", self.cwd),
-    width   = view.width,
-    height  = view.height,
-    border  = view.border,
-    kind    = opts.kind or view.kind,
-    bufopts = {
-      buflisted = false,
-      buftype   = "acwrite",
-      filetype  = "fyler",
-      syntax    = "fyler",
-    },
-    name  = "explorer",
-    winopts = {
-      concealcursor  = "nvic",
-      conceallevel   = 3,
-      cursorline     = true,
-      number         = true,
-      relativenumber = true,
-      winhighlight   = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
-      wrap           = false,
-    },
+    border   = view.border,
+    buf_opts = view.buf_opts,
+    bufname  = string.format("fyler://%s", self.cwd),
+    enter    = true,
+    height   = view.height,
+    kind     = opts.kind or view.kind,
+    name     = "explorer",
+    width    = view.width,
+    win_opts = view.win_opts,
     mappings = {
       n = {
         [mappings["Select"]]    = self:_action("n_select"),
