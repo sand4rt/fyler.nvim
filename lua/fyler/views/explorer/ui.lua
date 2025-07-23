@@ -59,7 +59,16 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
 
   local lines = {}
   for _, item in ipairs(get_sorted(tbl)) do
-    local icon, hl
+    local icon, hl = (function()
+      if item.type == "directory" then
+        return icon_provider(item.type, item.name)
+      elseif item.type == "link" then
+        return icon_provider(item.link_type, item.name)
+      else
+        return icon_provider(item.type, item.name)
+      end
+    end)()
+
     local git_symbol = (function()
       if not status_map then
         return nil
@@ -71,18 +80,6 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
 
       return nil
     end)()
-
-    if item.type == "directory" then
-      icon = icon_provider(item.type, item.name)
-    elseif item.type == "link" then
-      if item.link_path and item.link_type then
-        icon = icon_provider(item.link_type, item.name)
-      else
-        icon = icon_provider("default", "default")
-      end
-    else
-      icon, hl = icon_provider(item.type, item.name)
-    end
 
     table.insert(
       lines,

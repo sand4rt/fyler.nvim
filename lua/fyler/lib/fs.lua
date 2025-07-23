@@ -306,7 +306,7 @@ M.delete = a.async(function(path, cb)
 
   local buf = fn.bufnr(path)
   if buf == -1 then
-    return cb("Unable to find buffer to delete", false)
+    return cb("Unable to find buffer to delete", true)
   end
 
   local alt = get_alt_buf(buf)
@@ -322,7 +322,7 @@ M.delete = a.async(function(path, cb)
 
   local success, msg = pcall(api.nvim_buf_delete, buf, { force = true })
   if not success then
-    return cb(msg, false)
+    return cb(msg, true)
   end
 
   return cb(nil, true)
@@ -344,7 +344,7 @@ M.move = a.async(function(src_path, dst_path, cb)
 
   local src_buf = fn.bufnr(src_path)
   if src_buf == -1 then
-    return cb("unable to find moved buffer", false)
+    return cb("unable to find moved buffer", true)
   end
 
   local dst_buf = fn.bufadd(dst_path)
@@ -359,7 +359,7 @@ M.move = a.async(function(src_path, dst_path, cb)
 
   local success, msg = pcall(api.nvim_buf_delete, src_buf, { force = true })
   if not success then
-    return cb(msg, false)
+    return cb(msg, true)
   end
 
   return cb(nil, true)
