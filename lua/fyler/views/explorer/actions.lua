@@ -128,15 +128,30 @@ function M.n_synchronize(view)
 
     if can_sync then
       for _, change in ipairs(changes.create) do
-        a.await(fs.create, change)
+        local err, success = a.await(fs.create, change)
+        if not success then
+          vim.schedule(function()
+            vim.notify(err, vim.log.levels.ERROR)
+          end)
+        end
       end
 
       for _, change in ipairs(changes.delete) do
-        a.await(fs.delete, change)
+        local err, success = a.await(fs.delete, change)
+        if not success then
+          vim.schedule(function()
+            vim.notify(err, vim.log.levels.ERROR)
+          end)
+        end
       end
 
       for _, change in ipairs(changes.move) do
-        a.await(fs.move, change.src, change.dst)
+        local err, success = a.await(fs.move, change.src, change.dst)
+        if not success then
+          vim.schedule(function()
+            vim.notify(err, vim.log.levels.ERROR)
+          end)
+        end
       end
     end
 

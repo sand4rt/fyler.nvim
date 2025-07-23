@@ -68,6 +68,7 @@ function M.setup(opts)
     FylerConfirmRed    = { fg = palette.red },
     FylerConfirmYellow = { fg = palette.yellow },
     FylerFSDirectory   = { fg = palette.blue },
+    FylerFSFile        = { fg = palette.white },
     FylerFSLink        = { fg = palette.grey },
     FylerGitAdded      = { fg = palette.green },
     FylerGitConflict   = { fg = palette.red },
