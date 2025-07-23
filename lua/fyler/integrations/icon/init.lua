@@ -3,9 +3,9 @@
 ---@return string?, string?
 local function default_icon_provider(type, _)
   if type == "directory" then
-    return "*", "FylerFSDirectory"
+    return "D", "FylerFSDirectory"
   elseif type == "file" then
-    return "*", ""
+    return "F", "FylerFSFile"
   else
     return "*", ""
   end
@@ -18,6 +18,13 @@ return setmetatable({}, {
       return default_icon_provider
     end
 
-    return icon_provider.get_icon
+    return function(...)
+      local success, icon, hl = pcall(icon_provider.get_icon, ...)
+      if not success then
+        return default_icon_provider(...)
+      end
+
+      return icon, hl
+    end
   end,
 })
