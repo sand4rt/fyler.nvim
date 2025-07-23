@@ -38,22 +38,20 @@ function M.setup(opts)
         api.nvim_buf_delete(current_bufnr, { force = true })
       end
 
-      vim.schedule(function()
-        M.open { cwd = arg_path }
-      end)
+      M.open { cwd = arg_path }
     end
   end
 
   did_setup = true
 end
 
-function M.open(opts)
+M.open = vim.schedule_wrap(function(opts)
   opts = opts or {}
 
   require("fyler.views.explorer").open {
     cwd = opts.cwd,
     kind = opts.kind,
   }
-end
+end)
 
 return M
