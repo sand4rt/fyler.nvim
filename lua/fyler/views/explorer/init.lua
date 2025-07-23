@@ -1,11 +1,9 @@
 local FSItem = require("fyler.views.explorer.struct")
 local Win = require("fyler.lib.win")
 local a = require("fyler.lib.async")
-local algos = require("fyler.views.explorer.algos")
 local config = require("fyler.config")
 local fs = require("fyler.lib.fs")
 local store = require("fyler.views.explorer.store")
-local ui = require("fyler.views.explorer.ui")
 
 local fn = vim.fn
 local api = vim.api
@@ -59,32 +57,17 @@ ExplorerView.open = a.async(function(self, opts)
       },
     },
     autocmds = {
-      ["BufReadCmd"]   = self:_action("n_refreshview"),
-      ["BufWriteCmd"]  = self:_action("n_synchronize"),
+      ["BufReadCmd"]   = self:_action("refreshview"),
+      ["BufWriteCmd"]  = self:_action("synchronize"),
       ["CursorMoved"]  = self:_action("constrain_cursor"),
       ["CursorMovedI"] = self:_action("constrain_cursor"),
-      ["TextChanged"]  = self:_action("draw_indentscope"),
-      ["TextChangedI"] = self:_action("draw_indentscope"),
       ["WinClosed"]    = self:_action("n_close_view"),
     },
     user_autocmds = {
-      ["RefreshView"] = self:_action("n_refreshview"),
-      ["Synchronize"] = self:_action("n_synchronize"),
+      ["RefreshView"] = self:_action("refreshview"),
+      ["Synchronize"] = self:_action("synchronize"),
     },
-    render = function()
-      a.await(self.fs_root.update, self.fs_root)
-
-      vim.bo[self.win.bufnr].undolevels = -1
-
-      return {
-        lines = a.await(ui.Explorer, algos.tree_table_from_node(self).children),
-        on_render = function()
-          vim.bo[self.win.bufnr].undolevels = vim.go.undolevels
-
-          self:_action("try_focus_buffer")()
-        end
-      }
-    end,
+    render = self:_action("refreshview", self:_action("try_focus_buffer")),
   }
   -- stylua: ignore end
 
@@ -100,19 +83,12 @@ function ExplorerView:close()
 end
 
 ---@param ... any
-function ExplorerView:_action(...)
-  local actions = {}
-  for _, name in ipairs { ... } do
-    local action = require("fyler.views.explorer.actions")[name]
-    assert(action, string.format("%s action is not available", name))
-    table.insert(actions, action)
-  end
+function ExplorerView:_action(name, ...)
+  local action = require("fyler.views.explorer.actions")[name]
 
-  return function(...)
-    for _, action in ipairs(actions) do
-      action(self)(...)
-    end
-  end
+  assert(action, string.format("%s action is not available", name))
+
+  return action(self, ...)
 end
 
 local M = {

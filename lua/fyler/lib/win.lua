@@ -185,7 +185,7 @@ function Win:show()
   end
 
   if self.render then
-    self.ui:render(self.render())
+    self.render()
   end
 
   api.nvim_buf_set_name(self.bufnr, self.bufname)

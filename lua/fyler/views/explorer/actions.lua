@@ -13,7 +13,6 @@ local M = {}
 local fn = vim.fn
 local api = vim.api
 
--- `view` must have close implementation
 ---@param view table
 function M.n_close_view(view)
   return function()
@@ -107,7 +106,7 @@ local function can_bypass(changes)
 end
 
 ---@param view FylerExplorerView
-function M.n_synchronize(view)
+function M.synchronize(view)
   return a.async(function()
     local changes = algos.get_diff(view)
     local can_sync = (function()
@@ -163,13 +162,23 @@ end
 
 ---@param view FylerExplorerView
 ---@param on_render function
-function M.n_refreshview(view, on_render)
+function M.refreshview(view, on_render)
   return a.async(function()
     a.await(view.fs_root.update, view.fs_root)
 
+    vim.bo[view.win.bufnr].undolevels = -1
+
     view.win.ui:render {
-      lines = a.await(ui.Explorer, algos.tree_table_from_node(view).children),
-      on_render = on_render,
+      ui_lines = a.await(ui.Explorer, algos.tree_table_from_node(view).children),
+      on_render = function()
+        if on_render then
+          on_render()
+        end
+
+        M.draw_indentscope(view)()
+
+        vim.bo[view.win.bufnr].undolevels = vim.go.undolevels
+      end,
     }
 
     vim.bo[view.win.bufnr].syntax = "fyler"
@@ -261,7 +270,7 @@ function M.try_focus_buffer(view)
       return
     end
 
-    M.n_refreshview(view, function()
+    M.refreshview(view, function()
       if not view.win:is_visible() then
         return
       end

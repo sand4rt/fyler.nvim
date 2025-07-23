@@ -28,8 +28,8 @@ local function get_margin(width, align, line)
   end
 end
 
----@param lines FylerUiLine[]
-function Ui:_render(lines)
+---@param ui_lines FylerUiLine[]
+function Ui:_render(ui_lines)
   if not self.win:has_valid_bufnr() then
     return
   end
@@ -40,7 +40,7 @@ function Ui:_render(lines)
 
   vim.bo[self.win.bufnr].modifiable = true
 
-  for _, line in ipairs(lines) do
+  for _, line in ipairs(ui_lines) do
     local line_text = table.concat(vim.tbl_map(function(word)
       return word.str
     end, line.words))
@@ -57,7 +57,7 @@ function Ui:_render(lines)
   api.nvim_buf_set_lines(self.win.bufnr, 0, -1, false, buf_lines)
   api.nvim_buf_clear_namespace(self.win.bufnr, self.win.namespace, 0, -1)
 
-  for i, line in ipairs(lines) do
+  for i, line in ipairs(ui_lines) do
     local offset = 0
 
     for _, word in ipairs(line.words) do
@@ -87,8 +87,9 @@ end
 
 function Ui:render(opts)
   opts = opts or {}
+
   vim.schedule(function()
-    self:_render(opts.lines)
+    self:_render(opts.ui_lines)
     if opts.on_render then
       opts.on_render()
     end
