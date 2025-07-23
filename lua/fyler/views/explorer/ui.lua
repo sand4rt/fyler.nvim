@@ -1,8 +1,8 @@
 local a = require("fyler.lib.async")
 local components = require("fyler.lib.ui.components")
 local config = require("fyler.config")
-local fs = require("fyler.lib.fs")
 local git = require("fyler.lib.git")
+
 local icon_provider = (function()
   if type(config.values.icon_provider) == "function" then
     return config.values.icon_provider
@@ -65,8 +65,8 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
         return nil
       end
 
-      if status_map[fs.relpath(fs.getcwd(), item.path)] then
-        return status_map[fs.relpath(fs.getcwd(), item.path)]
+      if status_map[item.path] then
+        return status_map[item.path]
       end
 
       return nil

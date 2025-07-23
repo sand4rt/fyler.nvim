@@ -23,6 +23,16 @@ local git_status = a.async(function(cb)
   return cb(out.stdout)
 end)
 
+---@param cb fun(path?: string)
+local git_toplevel = a.async(function(cb)
+  local out = a.await(vim.system, { "git", "rev-parse", "--show-toplevel" }, nil) ---@type vim.SystemCompleted
+  if not out.stdout then
+    return cb(nil)
+  end
+
+  return cb(string.match(out.stdout, "^(.*)\n$"))
+end)
+
 ---@param cb fun(status_map?: table)
 M.status_map = a.async(function(cb)
   local status_str = a.await(git_status)
@@ -41,6 +51,11 @@ M.status_map = a.async(function(cb)
     end)
     :totable()
 
+  local toplevel = a.await(git_toplevel)
+  if not toplevel then
+    return cb(nil)
+  end
+
   local status_map = {}
   for _, status in ipairs(statuses) do
     local symbol, path = (function()
@@ -51,7 +66,7 @@ M.status_map = a.async(function(cb)
       end
     end)()
 
-    status_map[fs.normalize(path)] = symbol
+    status_map[fs.joinpath(toplevel, fs.normalize(path))] = symbol
   end
 
   return cb(status_map)
