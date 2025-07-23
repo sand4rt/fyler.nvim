@@ -96,7 +96,7 @@ local defaults = {
   -- Controls behaviour of indentation marker
   indentscope = {
     enabled = true,
-    group = "FylerDarkGrey",
+    group = "FylerIndentMarker",
     marker = "│",
   },
 
@@ -104,7 +104,7 @@ local defaults = {
   -- function definition:
   --[[
     function(hl_groups: table, palette: table)
-      hl_groups.FylerDarkGrey = { fg = palette.white }
+      hl_groups.FylerIndentMarker = { fg = palette.white }
       ...
     end
   ]]--

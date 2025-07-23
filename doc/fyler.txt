@@ -21,7 +21,7 @@ Fyler supports plenty of options to customize. Following are default values
     git_status = true,
     indentscope = {
       enabled = true,
-      group = "FylerDarkGrey",
+      group = "FylerIndentMarker",
       marker = "│",
     },
     on_highlights = nil,
