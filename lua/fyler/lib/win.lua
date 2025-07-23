@@ -20,7 +20,7 @@ local fn = vim.fn
 ---@field border        string|string[] - Border format - read ':winborder' for more info
 ---@field bufname       string          - Builtin way to name neovim buffers
 ---@field bufnr?        integer         - Buffer number associated with window instance
----@field bufopts       table           - Buffer local options
+---@field buf_opts       table           - Buffer local options
 ---@field enter         boolean         - whether to enter in the window on open
 ---@field footer?       any             - Footer content
 ---@field footer_pos?   string          - Footer alignment
@@ -36,7 +36,7 @@ local fn = vim.fn
 ---@field user_autocmds table           - User autocommands associated with window instance
 ---@field width         number          - Width of window
 ---@field winid?        integer         - Window id associated with window instance
----@field winopts       table           - Window local options
+---@field win_opts       table           - Window local options
 local Win = {}
 Win.__index = Win
 
@@ -66,7 +66,7 @@ local M = setmetatable({}, {
       autocmds      = opts.autocmds or {},
       border        = opts.border,
       bufname       = opts.bufname,
-      bufopts       = opts.bufopts or {},
+      buf_opts       = opts.buf_opts or {},
       enter         = opts.enter or false,
       footer        = opts.footer,
       footer_pos    = opts.footer_pos,
@@ -80,7 +80,7 @@ local M = setmetatable({}, {
       title_pos     = opts.title_pos,
       user_autocmds = opts.user_autocmds or {},
       width         = opts.width,
-      winopts       = opts.winopts or {},
+      win_opts       = opts.win_opts or {},
     }
     -- stylua: ignore end
 
@@ -196,11 +196,11 @@ function Win:show()
     end
   end
 
-  for key, val in pairs(self.winopts) do
+  for key, val in pairs(self.win_opts) do
     vim.wo[self.winid][key] = val
   end
 
-  for key, val in pairs(self.bufopts) do
+  for key, val in pairs(self.buf_opts) do
     vim.bo[self.bufnr][key] = val
   end
 

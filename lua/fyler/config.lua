@@ -49,12 +49,35 @@ local defaults = {
       height = 0.4,
       kind = "float",
       border = "single",
+      buf_opts = {
+        buflisted = false,
+        modifiable = false,
+      },
+      win_opts = {
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
+        wrap = false,
+      },
     },
     explorer = {
       width = 0.8,
       height = 0.8,
       kind = "float",
       border = "single",
+      buf_opts = {
+        buflisted = false,
+        buftype = "acwrite",
+        filetype = "fyler",
+        syntax = "fyler",
+      },
+      win_opts = {
+        concealcursor = "nvic",
+        conceallevel = 3,
+        cursorline = true,
+        number = true,
+        relativenumber = true,
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
+        wrap = false,
+      },
     },
   },
 }
