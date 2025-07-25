@@ -58,8 +58,8 @@ FSItem.update = a.async(function(self, cb)
     return cb()
   end
 
-  local meta_meta = store.get(self.meta)
-  local err, items = a.await(fs.ls, meta_meta.path)
+  local meta_data = store.get(self.meta)
+  local err, items = a.await(fs.ls, meta_data.path)
   if err then
     return cb()
   end

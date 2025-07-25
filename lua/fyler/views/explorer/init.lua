@@ -44,7 +44,7 @@ ExplorerView.open = a.async(function(self, opts)
     border   = view.border,
     buf_opts = view.buf_opts,
     bufname  = string.format("fyler://%s", self.cwd),
-    enter    = true,
+    enter    = opts.enter,
     height   = view.height,
     kind     = opts.kind or view.kind,
     name     = "explorer",
@@ -67,7 +67,7 @@ ExplorerView.open = a.async(function(self, opts)
       ["RefreshView"] = self:_action("refreshview"),
       ["Synchronize"] = self:_action("synchronize"),
     },
-    render = self:_action("refreshview", self:_action("try_focus_buffer")),
+    render = self:_action("refreshview"),
   }
   -- stylua: ignore end
 
@@ -92,35 +92,34 @@ function ExplorerView:_action(name, ...)
 end
 
 local M = {
-  instances = {},
-  root_dir = nil,
+  instance = nil, ---@type FylerExplorerView
 }
 
 ---@param opts { cwd?: string, kind?: FylerWinKind }
 ---@return FylerExplorerView
 function M.get_instance(opts)
-  if M.instances[opts.cwd] then
-    return M.instances[opts.cwd]
+  if (not M.instance) or (M.instance.cwd ~= opts.cwd) then
+    M.instance = ExplorerView.new {
+      cwd = opts.cwd,
+      kind = opts.kind,
+    }
   end
 
-  M.root_dir = opts.cwd
-  M.instances[opts.cwd] = ExplorerView.new {
-    cwd = opts.cwd,
-    kind = opts.kind,
-  }
-
-  return M.instances[opts.cwd]
+  return M.instance
 end
 
----@param opts { cwd?: string, kind?: FylerWinKind }
+---@param opts? { enter?: boolean, cwd?: string, kind?: FylerWinKind }
 function M.open(opts)
   opts = opts or {}
+  opts.enter = opts.enter == nil and true or opts.enter
   opts.cwd = opts.cwd or fs.getcwd()
   opts.kind = opts.kind or config.get_view("explorer").kind
 
-  local cur_instance = M.get_instance(opts)
-  cur_instance:close()
-  cur_instance:open(opts)
+  if M.instance then
+    M.instance:close()
+  end
+
+  M.get_instance(opts):open(opts)
 end
 
 return M
