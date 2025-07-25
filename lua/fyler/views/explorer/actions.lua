@@ -34,9 +34,11 @@ function M.n_select(view)
       api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
     else
       local recent_win = cache.get_entry("recent_win")
+
       if recent_win and api.nvim_win_is_valid(recent_win) then
         fn.win_execute(recent_win, string.format("edit %s", meta_data:resolved_path()))
         fn.win_gotoid(recent_win)
+
         if config.values.close_on_select then
           view:close()
         end
@@ -164,6 +166,10 @@ end
 ---@param on_render function
 function M.refreshview(view, on_render)
   return a.async(function()
+    if not view.win:has_valid_bufnr() then
+      return
+    end
+
     a.await(view.fs_root.update, view.fs_root)
 
     vim.bo[view.win.bufnr].undolevels = -1
@@ -176,6 +182,10 @@ function M.refreshview(view, on_render)
         end
 
         M.draw_indentscope(view)()
+
+        if not view.win:has_valid_bufnr() then
+          return
+        end
 
         vim.bo[view.win.bufnr].undolevels = vim.go.undolevels
       end,
@@ -195,6 +205,10 @@ function M.constrain_cursor(view)
     end
 
     local _, ub = string.find(cur, meta)
+    if not view.win:has_valid_winid() then
+      return
+    end
+
     local row, col = unpack(api.nvim_win_get_cursor(view.win.winid))
     if col <= ub then
       api.nvim_win_set_cursor(view.win.winid, { row, ub + 1 })
@@ -217,7 +231,7 @@ function M.try_focus_buffer(view)
 
     if string.match(arg.file, "^fyler://*") then
       local recent_win = cache.get_entry("recent_win")
-      if not recent_win then
+      if (type(recent_win) ~= "number") or (not api.nvim_win_is_valid(recent_win)) then
         return
       end
 
@@ -269,7 +283,7 @@ function M.try_focus_buffer(view)
     end
 
     M.refreshview(view, function()
-      if not view.win:is_visible() then
+      if not view.win:has_valid_winid() then
         return
       end
 
@@ -288,6 +302,10 @@ local extmark_namespace = api.nvim_create_namespace("FylerIndentScope")
 ---@param view FylerExplorerView
 function M.draw_indentscope(view)
   local function draw_line(ln)
+    if not view.win:has_valid_bufnr() then
+      return
+    end
+
     local cur_line = unpack(api.nvim_buf_get_lines(view.win.bufnr, ln - 1, ln, false))
     local cur_indent = #regex.match_indent(cur_line)
     if cur_indent == 0 then
