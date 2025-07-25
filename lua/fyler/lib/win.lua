@@ -149,6 +149,10 @@ function Win:show()
   local win_config = self:config()
 
   self.bufnr = api.nvim_create_buf(false, true)
+  if self.render then
+    self.render()
+  end
+
   api.nvim_buf_set_name(self.bufnr, self.bufname)
 
   if win_config.split and win_config.split:match("^%w+most$") then
@@ -169,15 +173,13 @@ function Win:show()
     if not self.enter then
       api.nvim_set_current_win(recent_win)
     end
+
+    api.nvim_win_set_buf(self.winid, self.bufnr)
   else
     self.winid = api.nvim_open_win(self.bufnr, self.enter, win_config)
   end
 
-  api.nvim_win_set_buf(self.winid, self.bufnr)
-
-  if self.render then
-    self.render()
-  end
+  api.nvim_exec_autocmds("BufEnter", {})
 
   for mode, map in pairs(self.mappings) do
     for key, val in pairs(map) do
