@@ -11,7 +11,7 @@ function Stack:push(data)
 end
 
 function Stack:pop()
-  assert(self.items.node, "stack is empty")
+  assert(not self:is_empty(), "stack is empty")
 
   local data = self.items.node.data
   self.items:erase(1)

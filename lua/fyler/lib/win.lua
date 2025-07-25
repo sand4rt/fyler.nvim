@@ -1,7 +1,6 @@
 local Ui = require("fyler.lib.ui")
 
 local api = vim.api
-local fn = vim.fn
 
 ---@alias FylerWinKind
 ---| "float"
@@ -20,7 +19,7 @@ local fn = vim.fn
 ---@field border        string|string[] - Border format - read ':winborder' for more info
 ---@field bufname       string          - Builtin way to name neovim buffers
 ---@field bufnr?        integer         - Buffer number associated with window instance
----@field buf_opts       table           - Buffer local options
+---@field buf_opts      table           - Buffer local options
 ---@field enter         boolean         - whether to enter in the window on open
 ---@field footer?       any             - Footer content
 ---@field footer_pos?   string          - Footer alignment
@@ -36,7 +35,7 @@ local fn = vim.fn
 ---@field user_autocmds table           - User autocommands associated with window instance
 ---@field width         number          - Width of window
 ---@field winid?        integer         - Window id associated with window instance
----@field win_opts       table           - Window local options
+---@field win_opts      table           - Window local options
 local Win = {}
 Win.__index = Win
 
@@ -66,8 +65,8 @@ local M = setmetatable({}, {
       autocmds      = opts.autocmds or {},
       border        = opts.border,
       bufname       = opts.bufname,
-      buf_opts       = opts.buf_opts or {},
-      enter         = opts.enter or false,
+      buf_opts      = opts.buf_opts or {},
+      enter         = opts.enter,
       footer        = opts.footer,
       footer_pos    = opts.footer_pos,
       height        = opts.height,
@@ -80,7 +79,7 @@ local M = setmetatable({}, {
       title_pos     = opts.title_pos,
       user_autocmds = opts.user_autocmds or {},
       width         = opts.width,
-      win_opts       = opts.win_opts or {},
+      win_opts      = opts.win_opts or {},
     }
     -- stylua: ignore end
 
@@ -146,49 +145,39 @@ function Win:show()
     return
   end
 
+  local recent_win = api.nvim_get_current_win()
   local win_config = self:config()
+
+  self.bufnr = api.nvim_create_buf(false, true)
+  api.nvim_buf_set_name(self.bufnr, self.bufname)
+
   if win_config.split and win_config.split:match("^%w+most$") then
     if win_config.split == "leftmost" then
-      fn.execute(string.format("topleft %dvnew", win_config.width))
+      api.nvim_command(string.format("topleft %dvsplit", win_config.width))
     elseif win_config.split == "abovemost" then
-      fn.execute(string.format("topleft %dnew", win_config.height))
+      api.nvim_command(string.format("topleft %dsplit", win_config.height))
     elseif win_config.split == "rightmost" then
-      fn.execute(string.format("botright %dvnew", win_config.width))
+      api.nvim_command(string.format("botright %dvsplit", win_config.width))
     elseif win_config.split == "belowmost" then
-      fn.execute(string.format("botright %dnew", win_config.height))
+      api.nvim_command(string.format("botright %dsplit", win_config.height))
     else
       error(string.format("Invalid window kind `%s`", win_config.split))
     end
 
-    self.bufnr = api.nvim_get_current_buf()
     self.winid = api.nvim_get_current_win()
 
-    --stylua: ignore start
-    for o, v in pairs {
-      colorcolumn    = "",
-      cursorcolumn   = false,
-      cursorline     = false,
-      list           = false,
-      number         = false,
-      relativenumber = false,
-      signcolumn     = "auto",
-      spell          = false,
-      statuscolumn   = "",
-      winhighlight   = "",
-    } do
-      vim.wo[self.winid][o] = v
+    if not self.enter then
+      api.nvim_set_current_win(recent_win)
     end
-    --stylua: ignore start
   else
-    self.bufnr = api.nvim_create_buf(false, true)
     self.winid = api.nvim_open_win(self.bufnr, self.enter, win_config)
   end
+
+  api.nvim_win_set_buf(self.winid, self.bufnr)
 
   if self.render then
     self.render()
   end
-
-  api.nvim_buf_set_name(self.bufnr, self.bufname)
 
   for mode, map in pairs(self.mappings) do
     for key, val in pairs(map) do

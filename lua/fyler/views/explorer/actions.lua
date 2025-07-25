@@ -61,7 +61,7 @@ local function get_tbl(tbl)
   end
 
   if not vim.tbl_isempty(tbl.delete) then
-    table.insert(lines, { { str = "# Deletetion", hl = "FylerConfirmRed" } })
+    table.insert(lines, { { str = "# Deletion", hl = "FylerConfirmRed" } })
     for _, change in ipairs(tbl.delete) do
       table.insert(lines, {
         { str = "  | " },
@@ -204,47 +204,46 @@ end
 
 ---@param view FylerExplorerView
 function M.try_focus_buffer(view)
-  return a.async(function()
+  return a.schedule_async(function(arg)
+    local explorer = require("fyler.views.explorer")
+
     if not view.win:is_visible() then
       return
     end
 
-    local focused_path = (function()
-      local bufname = fn.bufname("%")
+    if arg.file == "" then
+      return
+    end
+
+    if string.match(arg.file, "^fyler://*") then
       local recent_win = cache.get_entry("recent_win")
-      if bufname == "" or string.match(bufname, "^fyler://*") then
-        return recent_win and fn.bufname(fn.winbufnr(recent_win)) or nil
-      else
-        return bufname
+      if not recent_win then
+        return
       end
-    end)()
 
-    if not focused_path then
+      local recent_bufname = fn.bufname(api.nvim_win_get_buf(recent_win))
+      if recent_bufname == "" or string.match(recent_bufname, "^fyler://*") then
+        return
+      end
+
+      arg.file = fs.abspath(recent_bufname)
+    end
+
+    if not vim.startswith(arg.file, view.cwd) then
+      explorer.open {
+        enter = fn.bufname("%") == view.win.bufname,
+        cwd = fn.fnamemodify(arg.file, ":h"),
+      }
+    end
+
+    local relpath = fs.relpath(view.cwd, arg.file)
+    if not relpath then
       return
     end
-
-    if cache.get_entry("recent_path") == focused_path then
-      return api.nvim_win_set_cursor(view.win.winid, cache.get_entry("recent_cursor"))
-    end
-
-    local rel = fs.relpath(require("fyler.views.explorer").root_dir, fn.fnamemodify(fn.expand(focused_path), ":p"))
-    if not rel then
-      return
-    end
-
-    local parts = vim
-      .iter(vim.split(rel, "/"))
-      :filter(function(part)
-        if part == "" then
-          return false
-        end
-
-        return true
-      end)
-      :totable()
 
     local focused_node = view.fs_root
-    local focused_part
+    local last_visit = 0
+    local parts = vim.split(relpath, "/")
 
     a.await(focused_node.update, focused_node)
 
@@ -262,11 +261,10 @@ function M.try_focus_buffer(view)
         a.await(child.update, child)
       end
 
-      focused_part = i
-      focused_node = child
+      focused_node, last_visit = child, i
     end
 
-    if focused_part ~= #parts then
+    if last_visit ~= #parts then
       return
     end
 
@@ -278,9 +276,6 @@ function M.try_focus_buffer(view)
       local buf_lines = api.nvim_buf_get_lines(view.win.bufnr, 0, -1, false)
       for ln, buf_line in ipairs(buf_lines) do
         if buf_line:find(focused_node.meta) then
-          cache.set_entry("recent_path", focused_path)
-          cache.set_entry("recent_cursor", { ln, 0 })
-
           api.nvim_win_set_cursor(view.win.winid, { ln, 0 })
         end
       end
@@ -316,6 +311,10 @@ function M.draw_indentscope(view)
   end
 
   return function()
+    if not view.win:has_valid_bufnr() then
+      return
+    end
+
     if not config.values.indentscope.enabled then
       return
     end
