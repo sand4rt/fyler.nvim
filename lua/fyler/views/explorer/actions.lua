@@ -16,7 +16,12 @@ local api = vim.api
 ---@param view table
 function M.n_close_view(view)
   return function()
-    view:close()
+    local success = pcall(api.nvim_win_close, view.win.winid, true)
+    if not success then
+      api.nvim_win_set_buf(view.win.winid, fn.bufnr("#", true))
+    end
+
+    pcall(api.nvim_buf_delete, view.win.bufnr, { force = true })
   end
 end
 
@@ -40,7 +45,7 @@ function M.n_select(view)
         fn.win_gotoid(recent_win)
 
         if config.values.close_on_select then
-          view:close()
+          view.win:hide()
         end
       end
     end
