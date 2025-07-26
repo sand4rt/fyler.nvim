@@ -76,12 +76,6 @@ ExplorerView.open = a.async(function(self, opts)
   self.win:show()
 end)
 
-function ExplorerView:close()
-  if self.win then
-    self.win:hide()
-  end
-end
-
 ---@param ... any
 function ExplorerView:_action(name, ...)
   local action = require("fyler.views.explorer.actions")[name]
@@ -115,8 +109,8 @@ function M.open(opts)
   opts.cwd = opts.cwd or fs.getcwd()
   opts.kind = opts.kind or config.get_view("explorer").kind
 
-  if M.instance then
-    M.instance:close()
+  if M.instance and fn.winbufnr(M.instance.win.winid) == M.instance.win.bufnr then
+    M.instance.win:hide()
   end
 
   M.get_instance(opts):open(opts)

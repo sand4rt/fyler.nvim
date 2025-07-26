@@ -187,27 +187,28 @@ function Win:show()
     end
   end
 
-  for key, val in pairs(self.win_opts) do
-    vim.wo[self.winid][key] = val
+  for option, value in pairs(self.win_opts) do
+    vim.w[self.winid][option] = vim.wo[self.winid][option]
+    vim.wo[self.winid][option] = value
   end
 
-  for key, val in pairs(self.buf_opts) do
-    vim.bo[self.bufnr][key] = val
+  for option, value in pairs(self.buf_opts) do
+    vim.bo[self.bufnr][option] = value
   end
 
-  for ev, cb in pairs(self.autocmds) do
-    api.nvim_create_autocmd(ev, {
+  for event, callback in pairs(self.autocmds) do
+    api.nvim_create_autocmd(event, {
       group = self.augroup,
       buffer = self.bufnr,
-      callback = cb,
+      callback = callback,
     })
   end
 
-  for ev, cb in pairs(self.user_autocmds) do
+  for event, callback in pairs(self.user_autocmds) do
     api.nvim_create_autocmd("User", {
-      pattern = ev,
+      pattern = event,
       group = self.augroup,
-      callback = cb,
+      callback = callback,
     })
   end
 end
