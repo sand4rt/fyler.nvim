@@ -16,7 +16,7 @@ local api = vim.api
 ---@class FylerWin
 ---@field augroup       string          - Autogroup associated with window instance
 ---@field autocmds      table           - Autocommands locally associated with window instance
----@field border        string|string[] - Border format - read ':winborder' for more info
+---@field border        nil|string|string[]   - Border format, see ':help winborder' for more info. When set to `nil`, it uses `vim.o.winborder` value on nvim 0.11+, otherwise, it defaults to 'single'
 ---@field bufname       string          - Builtin way to name neovim buffers
 ---@field bufnr?        integer         - Buffer number associated with window instance
 ---@field buf_opts      table           - Buffer local options
@@ -25,7 +25,7 @@ local api = vim.api
 ---@field footer_pos?   string          - Footer alignment
 ---@field height        number          - Height of window
 ---@field kind          FylerWinKind    - Decides launch behaviour of window instance
----@field mappings      table           - Kemaps local to the window instance
+---@field mappings      table           - Keymaps local to the window instance
 ---@field name          string          - Also know as `view_name` which helps to get specific config from user end
 ---@field namespace     integer         - Namespace associated with window instance
 ---@field render?       function        - Defines what to render on the screen on open
@@ -59,11 +59,21 @@ local M = setmetatable({}, {
     assert(opts.name, "name is required field")
     assert(opts.bufname, "bufname is required field")
 
+    -- support neovim 0.11+ vim.o.winborder option
+    local border = opts.border
+    if vim.o.winborder ~= nil and opts.border == nil then
+      if vim.o.winborder ~= '' then
+        border = vim.o.winborder
+      else
+        border = 'single'
+      end
+    end
+
     -- stylua: ignore start
     local instance = {
       augroup       = get_augroup(opts.name),
       autocmds      = opts.autocmds or {},
-      border        = opts.border,
+      border        = border,
       bufname       = opts.bufname,
       buf_opts      = opts.buf_opts or {},
       enter         = opts.enter,

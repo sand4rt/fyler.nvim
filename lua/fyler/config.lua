@@ -2,7 +2,7 @@
 ---@field width  number
 ---@field height number
 ---@field kind   FylerWinKind
----@field border string|string[]
+---@field border nil|string|string[]
 
 ---@class FylerConfig
 ---@field auto_confirm_simple_edits? boolean
@@ -48,7 +48,7 @@ local defaults = {
       width = 0.5,
       height = 0.4,
       kind = "float",
-      border = "single",
+      border = nil,
       buf_opts = {
         buflisted = false,
         modifiable = false,
@@ -62,7 +62,7 @@ local defaults = {
       width = 0.8,
       height = 0.8,
       kind = "float",
-      border = "single",
+      border = nil,
       buf_opts = {
         buflisted = false,
         buftype = "acwrite",

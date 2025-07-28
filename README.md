@@ -126,13 +126,15 @@ local defaults = {
   -- 'split:rightmost',
   -- 'split:belowmost'
 
-  -- for `border` |:help winborder|
+  -- For `border` see |:help winborder|
+  -- When set to `nil`, it uses `vim.o.winborder` value on nvim 0.11+,
+  -- otherwise, it defaults to 'single'
   views = {
     confirm = {
       width = 0.8,
       height = 0.8,
       kind = "float",
-      border = "single",
+      border = nil,
       buf_opts = {
         buflisted = false,
         modifiable = false,
@@ -146,7 +148,7 @@ local defaults = {
       width = 0.8,
       height = 0.8,
       kind = "float",
-      border = "single",
+      border = nil,
       buf_opts = {
         buflisted = false,
         buftype = "acwrite",
