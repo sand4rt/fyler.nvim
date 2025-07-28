@@ -38,7 +38,7 @@ function M.setup(opts)
       end
 
       if api.nvim_get_current_win() == explorer.win.winid then
-        for option, _ in pairs(require("fyler.config").get_view("explorer").win_opts) do
+        for option, _ in pairs(require("fyler.config").get_view("explorer").win.win_opts) do
           if not explorer.win:has_valid_winid() then
             return
           end
@@ -49,7 +49,7 @@ function M.setup(opts)
     end),
   })
 
-  if opts.values.default_explorer then
+  if opts.values.views.explorer.default_explorer then
     api.nvim_create_autocmd("BufEnter", {
       group = augroup,
       callback = function(arg)

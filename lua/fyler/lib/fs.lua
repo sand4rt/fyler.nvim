@@ -6,9 +6,8 @@ local a = require("fyler.lib.async")
 local M = {}
 
 local api = vim.api
-
-local uv = vim.uv or vim.loop
 local fn = vim.fn
+local uv = vim.uv or vim.loop
 
 ---@return string
 function M.getcwd()

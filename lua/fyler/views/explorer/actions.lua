@@ -44,7 +44,7 @@ function M.n_select(view)
         fn.win_execute(recent_win, string.format("edit %s", meta_data:resolved_path()))
         fn.win_gotoid(recent_win)
 
-        if config.values.close_on_select then
+        if config.values.views.explorer.close_on_select then
           view.win:hide()
         end
       end
@@ -121,7 +121,7 @@ function M.synchronize(view)
         return true
       end
 
-      if not config.values.auto_confirm_simple_edits then
+      if not config.values.views.explorer.confirm_simple then
         return a.await(confirm_view.open, get_tbl(changes), "(y/n)")
       end
 
@@ -193,11 +193,10 @@ function M.refreshview(view, on_render)
         end
 
         vim.bo[view.win.bufnr].undolevels = vim.go.undolevels
+        vim.bo[view.win.bufnr].syntax = "fyler"
+        vim.bo[view.win.bufnr].filetype = "fyler"
       end,
     }
-
-    vim.bo[view.win.bufnr].syntax = "fyler"
-    vim.bo[view.win.bufnr].filetype = "fyler"
   end)
 end
 
@@ -323,8 +322,8 @@ function M.draw_indentscope(view)
         hl_mode = "combine",
         virt_text = {
           {
-            config.values.indentscope.marker,
-            config.values.indentscope.group,
+            config.values.views.explorer.indentscope.marker,
+            config.values.views.explorer.indentscope.group,
           },
         },
         virt_text_pos = "overlay",
@@ -338,7 +337,7 @@ function M.draw_indentscope(view)
       return
     end
 
-    if not config.values.indentscope.enabled then
+    if not config.values.views.explorer.indentscope.enabled then
       return
     end
 

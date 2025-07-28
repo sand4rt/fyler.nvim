@@ -10,23 +10,16 @@ end, {
   nargs = "*",
   complete = function(arglead, cmdline)
     if arglead:find("^kind=") then
-      return {
-        "kind=float",
-        "kind=split:left",
-        "kind=split:above",
-        "kind=split:right",
-        "kind=split:below",
-        "kind=split:leftmost",
-        "kind=split:abovemost",
-        "kind=split:rightmost",
-        "kind=split:belowmost",
-      }
+      return vim
+        .iter(vim.tbl_keys(require("fyler.config").values.views.explorer.win.kind_presets))
+        :map(function(kind_preset)
+          return string.format("kind=%s", kind_preset)
+        end)
+        :totable()
     end
 
     if arglead:find("^cwd=") then
-      return {
-        "cwd=" .. (vim.uv or vim.loop).cwd(),
-      }
+      return { "cwd=" .. (vim.uv or vim.loop).cwd() }
     end
 
     return vim.tbl_filter(function(arg)
