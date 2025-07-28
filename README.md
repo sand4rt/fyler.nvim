@@ -1,23 +1,39 @@
-# Fyler.nvim
-
-A modern neovim file tree which can edit your file system like a buffer
-
-![License](https://img.shields.io/github/license/A7Lavinraj/fyler.nvim?style=for-the-badge&logo=starship&color=ee999f&logoColor=D9E0EE&labelColor=302D41)
-![Stars](https://img.shields.io/github/stars/A7Lavinraj/fyler.nvim?style=for-the-badge&logo=starship&color=c69ff5&logoColor=D9E0EE&labelColor=302D41)
-
-![showcase](https://github.com/user-attachments/assets/c1dca603-7199-4a90-9a26-50dda96dec6e)
+<div>
+  <img
+    alt="Showcase"
+    src="https://github.com/user-attachments/assets/51d8d4dd-6b0a-4539-af65-84dc6714066c"
+  />
+  <div align="center">
+    <h1>Fyler.nvim</h1>
+    <table>
+      <tr>
+        <td>
+          <strong>A file manager for <a href="https://neovim.io">Neovim</a></strong>
+        </td>
+      </tr>
+    </table>
+    <div>
+      <img
+        alt="License"
+        src="https://img.shields.io/github/license/A7Lavinraj/fyler.nvim?style=for-the-badge&logo=starship&color=ee999f&logoColor=D9E0EE&labelColor=302D41"
+      />
+      <img
+        alt="Stars"
+        src="https://img.shields.io/github/stars/A7Lavinraj/fyler.nvim?style=for-the-badge&logo=starship&color=c69ff5&logoColor=D9E0EE&labelColor=302D41"
+      />
+    </div>
+  </div>
+</div>
 
 ## Installation
 
 > [!IMPORTANT]
-> Please be careful while choosing between `stable` and `latest` version.
-> `stable` branch will only get updates on releases.
-> on the other hand `latest` branch updates frequently.
+> Please be careful while choosing between `stable` and `latest` version. `stable` branch will only get updates on releases. On the other hand `latest` branch updates frequently.
 
 ### Stable version
 
 <details open>
-  <summary><a href="https://github.com/folke/lazy.nvim">lazy.nvim</a> (recommended)</summary>
+  <summary><a href="https://github.com/folke/lazy.nvim"><strong>Lazy.nvim</strong></a> (recommended)</summary>
 
 ```lua
 {
@@ -33,21 +49,25 @@ A modern neovim file tree which can edit your file system like a buffer
 ### Latest version
 
 <details open>
-  <summary><a href="https://github.com/folke/lazy.nvim">lazy.nvim</a> (recommended)</summary>
+  <summary><a href="https://github.com/folke/lazy.nvim"><strong>Lazy.nvim</strong></a> (recommended)</summary>
+
+You can use default setup with `mini.icons`
 
 ```lua
--- `mini-icons` variant
 {
   "A7Lavinraj/fyler.nvim",
   dependencies = { "echasnovski/mini.icons" },
-  opts = {} -- check the default options in the README.md
+  opts = {}
 }
+```
 
--- `nvim-web-devicons` variant
+Or change to `nvim-web-devicons`
+
+```lua
 {
   "A7Lavinraj/fyler.nvim",
   dependencies = { "nvim-tree/nvim-web-devicons" },
-  opts = { -- check the default options in the README.md
+  opts = {
     icon_provider = "nvim-web-devicons",
   }
 }
@@ -56,7 +76,7 @@ A modern neovim file tree which can edit your file system like a buffer
 </details>
 
 <details>
-  <summary><a href="https://github.com/echasnovski/mini.deps">mini.deps</a></summary>
+  <summary><a href="https://github.com/echasnovski/mini.deps"><strong>Mini.deps</strong></a></summary>
 
 ```lua
 add({
@@ -71,150 +91,172 @@ add({
   <summary>(Default configuration)</summary>
 
 ```lua
-local defaults = {
-  -- Allow user to confirm simple edits
-  auto_confirm_simple_edits = false,
-
-  -- NETRW Hijacking:
-  -- The plugin will replace most of the netrw command
-  -- By default this option is disable to avoid any incompatibility
-  default_explorer = false,
-
-  -- Close open file:
-  -- This enable user to close fyler window on opening a file
-  close_on_select = true,
-
-  -- Defines icon provider used by fyler, integrated ones are below:
-  -- - "mini-icons"
-  -- - "nvim-web-devicons"
-  -- It also accepts `fun(type, name): icon: string, highlight: string`
-  icon_provider = "mini-icons",
-
-  -- Controls whether to show git status or not
-  git_status = true,
-
-  -- Controls behaviour of indentation marker
-  indentscope = {
-    enabled = true,
-    group = "FylerIndentMarker",
-    marker = "│",
-  },
-
-  -- A function allow user to override highlight groups
-  -- function definition:
-  --[[
-    function(hl_groups: table, palette: table)
-      hl_groups.FylerIndentMarker = { fg = palette.white }
-      ...
-    end
-  ]]--
-  on_highlights = nil,
-
-  -- Views configuration:
-  -- Every view config contains following options to be customized
-  -- `width` a number in (0, 1]
-  -- `height` a number in (0, 1]
-
-  -- `kind` could be as following:
-  -- 'float',
-  -- 'split:left',
-  -- 'split:above',
-  -- 'split:right',
-  -- 'split:below'
-  -- 'split:leftmost',
-  -- 'split:abovemost',
-  -- 'split:rightmost',
-  -- 'split:belowmost'
-
-  -- For `border` see |:help winborder|
-  -- When set to `nil`, it uses `vim.o.winborder` value on nvim 0.11+,
-  -- otherwise, it defaults to 'single'
-  views = {
-    confirm = {
-      width = 0.8,
-      height = 0.8,
-      kind = "float",
-      border = nil,
-      buf_opts = {
-        buflisted = false,
-        modifiable = false,
+  local defaults = {
+    -- Changes icon provider
+    icon_provider = "mini-icons",
+    -- Changes mappings for associated view
+    mappings = {
+      explorer = {
+        ["q"] = "CloseView",
+        ["<CR>"] = "Select",
       },
-      win_opts = {
-        winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
-        wrap = false,
-      },
-    },
-    explorer = {
-      width = 0.8,
-      height = 0.8,
-      kind = "float",
-      border = nil,
-      buf_opts = {
-        expandtab = true,
-        shiftwidth = 2,
-        buflisted = false,
-        buftype = "acwrite",
-        filetype = "fyler",
-        syntax = "fyler",
-      },
-      win_opts = {
-        concealcursor = "nvic",
-        conceallevel = 3,
-        cursorline = true,
-        number = true,
-        relativenumber = true,
-        winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
-        wrap = false,
-      },
-    },
-  },
-
-  -- Mappings:
-  -- mappings can be customized by action names which are local to their view
-  mappings = {
-    confirm = {
-      n = {
+      confirm = {
         ["y"] = "Confirm",
         ["n"] = "Discard",
       },
     },
-    explorer = {
-      n = {
-        ["q"] = "CloseView",
-        ["<CR>"] = "Select",
+    -- Changes builtin highlight groups
+    on_highlights = function() end,
+    -- Changes configuration for associated view
+    views = {
+      confirm = {
+        win = {
+          -- Changes window border
+          border = "single",
+          -- Changes buffer options
+          buf_opts = {
+            buflisted = false,
+            modifiable = false,
+          },
+          -- Changes window kind
+          kind = "float",
+          -- Changes window kind preset
+          kind_presets = {
+            float = {
+              height = 0.4,
+              width = 0.5,
+            },
+            split_above = {
+              height = 0.5,
+            },
+            split_above_all = {
+              height = 0.5,
+            },
+            split_below = {
+              height = 0.5,
+            },
+            split_below_all = {
+              height = 0.5,
+            },
+            split_left = {
+              width = 0.5,
+            },
+            split_left_most = {
+              width = 0.5,
+            },
+            split_right = {
+              width = 0.5,
+            },
+            split_right_most = {
+              width = 0.5,
+            },
+          },
+          -- Changes window options
+          win_opts = {
+            winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
+            wrap = false,
+          },
+        },
+      },
+      explorer = {
+        -- Changes explorer closing behaviour when a file get selected
+        close_on_select = true,
+        -- Changes explorer behaviour to auto confirm simple edits
+        confirm_simple = false,
+        -- Changes explorer behaviour to hijack NETRW
+        default_explorer = false,
+        -- Changes git statuses visibility
+        git_status = true,
+        -- Changes Indentation marker properties
+        indentscope = {
+          enabled = true,
+          group = "FylerIndentMarker",
+          marker = "│",
+        },
+        win = {
+        -- Changes window border
+          border = "single",
+        -- Changes buffer options
+          buf_opts = {
+            buflisted = false,
+            buftype = "acwrite",
+            filetype = "fyler",
+            syntax = "fyler",
+          },
+        -- Changes window kind
+          kind = "float",
+        -- Changes window kind preset
+          kind_presets = {
+            float = {
+              height = 0.7,
+              width = 0.7,
+            },
+            split_above = {
+              height = 0.7,
+            },
+            split_above_all = {
+              height = 0.7,
+            },
+            split_below = {
+              height = 0.7,
+            },
+            split_below_all = {
+              height = 0.7,
+            },
+            split_left = {
+              width = 0.3,
+            },
+            split_left_most = {
+              width = 0.3,
+            },
+            split_right = {
+              width = 0.3,
+            },
+            split_right_most = {
+              width = 0.3,
+            },
+          },
+        -- Changes window options
+          win_opts = {
+            concealcursor = "nvic",
+            conceallevel = 3,
+            cursorline = true,
+            number = true,
+            relativenumber = true,
+            winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
+            wrap = false,
+          },
+        },
       },
     },
-  },
-}
+  }
 ```
 
 </details>
 
-> [!TIP]
-> Visit [configuration recipe](https://github.com/A7Lavinraj/fyler.nvim/wiki#configuration-recipe)
-> section on plugin wiki to deeply explore configuration options
-
 ## Usage
 
-There is an user command `Fyler` which optionally accepts two options:
-
-- kind
-- cwd
+You can either open Fyler by `Fyler` command
 
 ```vim
-" Open fyler with specific window kind
-:Fyler kind=float
-:Fyler kind=split:left
-:Fyler kind=split:right
-:Fyler kind=split:above
-:Fyler kind=split:below
-:Fyler kind=split:leftmost
-:Fyler kind=split:rightmost
-:Fyler kind=split:abovemost
-:Fyler kind=split:belowmost
+:Fyler             " Open with default options
+:Fyler kind=<kind> " Open with specific window kind
+:Fyler cwd=<path>  " Open with specific directory
+```
 
-" Open fyler with specific directory
-:Fyler cwd=/home/user/.config/nvim
+Or using lua api
+
+```lua
+local fyler = require("fyler")
+
+-- Open with default options
+fyler.open()
+
+-- Open with specific directory
+fyler.open({ cwd = "~/" })
+
+-- Open with specific kind
+fyler.open({ cwd = "split_left_most" })
 ```
 
 ## TODOS
