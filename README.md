@@ -180,7 +180,9 @@ add({
           buf_opts = {
             buflisted = false,
             buftype = "acwrite",
+            expandtab = true,
             filetype = "fyler",
+            shiftwidth = 2,
             syntax = "fyler",
           },
         -- Changes window kind
