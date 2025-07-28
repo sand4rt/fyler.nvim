@@ -59,6 +59,8 @@ ExplorerView.open = a.async(function(self, opts)
       ["BufWriteCmd"]  = self:_action("synchronize"),
       ["CursorMoved"]  = self:_action("constrain_cursor"),
       ["CursorMovedI"] = self:_action("constrain_cursor"),
+      ["TextChanged"]  = self:_action("draw_indentscope"),
+      ["TextChangedI"] = self:_action("draw_indentscope"),
       ["WinClosed"]    = self:_action("n_close_view"),
     },
     user_autocmds = {

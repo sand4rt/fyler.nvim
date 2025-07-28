@@ -186,8 +186,6 @@ function M.refreshview(view, on_render)
           on_render()
         end
 
-        M.draw_indentscope(view)()
-
         if not view.win:has_valid_bufnr() then
           return
         end
