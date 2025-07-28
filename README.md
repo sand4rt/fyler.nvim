@@ -150,6 +150,7 @@ local defaults = {
       kind = "float",
       border = nil,
       buf_opts = {
+        expandtab = true,
         buflisted = false,
         buftype = "acwrite",
         filetype = "fyler",
