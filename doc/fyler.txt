@@ -30,7 +30,7 @@ Fyler supports plenty of options to customize. Following are default values
         width = 0.8,
         height = 0.8,
         kind = "float",
-        border = "single",
+        border = nil,
         buf_opts = {
           buflisted = false,
           modifiable = false,
@@ -44,7 +44,7 @@ Fyler supports plenty of options to customize. Following are default values
         width = 0.8,
         height = 0.8,
         kind = "float",
-        border = "single",
+        border = nil,
         buf_opts = {
           buflisted = false,
           buftype = "acwrite",
