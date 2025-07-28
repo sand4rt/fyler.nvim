@@ -16,7 +16,9 @@ local api = vim.api
 ---@class FylerWin
 ---@field augroup       string          - Autogroup associated with window instance
 ---@field autocmds      table           - Autocommands locally associated with window instance
----@field border        nil|string|string[]   - Border format, see ':help winborder' for more info. When set to `nil`, it uses `vim.o.winborder` value on nvim 0.11+, otherwise, it defaults to 'single'
+---@field border        nil|string|string[] - Border format, see ':help winborder' for more info.
+---                                         When set to `nil`, it uses `vim.o.winborder` value on nvim 0.11+,
+---                                         otherwise, it defaults to 'single'
 ---@field bufname       string          - Builtin way to name neovim buffers
 ---@field bufnr?        integer         - Buffer number associated with window instance
 ---@field buf_opts      table           - Buffer local options
@@ -62,10 +64,10 @@ local M = setmetatable({}, {
     -- support neovim 0.11+ vim.o.winborder option
     local border = opts.border
     if vim.o.winborder ~= nil and opts.border == nil then
-      if vim.o.winborder ~= '' then
+      if vim.o.winborder ~= "" then
         border = vim.o.winborder
       else
-        border = 'single'
+        border = "single"
       end
     end
 
