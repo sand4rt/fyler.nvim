@@ -19,9 +19,10 @@ function M.setup(opts)
   require("fyler.lib.hls").setup(require("fyler.config"))
   require("fyler.autocmds").setup(require("fyler.config"))
 
-  if require("fyler.config").values.default_explorer then
+  if require("fyler.config").values.views.explorer.default_explorer then
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
+
     if fn.exists("#FileExplorer") then
       api.nvim_create_augroup("FileExplorer", { clear = true })
     end
@@ -46,12 +47,7 @@ function M.setup(opts)
 end
 
 M.open = vim.schedule_wrap(function(opts)
-  opts = opts or {}
-
-  require("fyler.views.explorer").open {
-    cwd = opts.cwd,
-    kind = opts.kind,
-  }
+  require("fyler.views.explorer").open(opts)
 end)
 
 return M

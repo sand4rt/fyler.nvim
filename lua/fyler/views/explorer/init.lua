@@ -37,24 +37,22 @@ end
 
 ExplorerView.open = a.async(function(self, opts)
   local mappings = config.get_reverse_mappings("explorer")
-  local view = config.get_view("explorer")
+  local win = config.get_view("explorer", opts.kind).win
 
   -- stylua: ignore start
   self.win = Win {
-    border   = view.border,
-    buf_opts = view.buf_opts,
+    border   = win.border,
+    buf_opts = win.buf_opts,
     bufname  = string.format("fyler://%s", self.cwd),
     enter    = opts.enter,
-    height   = view.height,
-    kind     = opts.kind or view.kind,
+    height   = win.height,
+    kind     = opts.kind or win.kind,
     name     = "explorer",
-    width    = view.width,
-    win_opts = view.win_opts,
+    width    = win.width,
+    win_opts = win.win_opts,
     mappings = {
-      n = {
-        [mappings["Select"]]    = self:_action("n_select"),
-        [mappings["CloseView"]] = self:_action("n_close_view"),
-      },
+      [mappings["Select"]]    = self:_action("n_select"),
+      [mappings["CloseView"]] = self:_action("n_close_view"),
     },
     autocmds = {
       ["BufReadCmd"]   = self:_action("refreshview"),

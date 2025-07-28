@@ -4,14 +4,14 @@ local T = test.new_set()
 T["can create instance"] = function()
   local kinds = {
     "float",
-    "split:left",
-    "split:above",
-    "split:right",
-    "split:below",
-    "split:leftmost",
-    "split:abovemost",
-    "split:rightmost",
-    "split:belowmost",
+    "split_above",
+    "split_above_all",
+    "split_below",
+    "split_below_all",
+    "split_left",
+    "split_left_most",
+    "split_right",
+    "split_right_most",
   }
 
   local opts = {
@@ -34,14 +34,14 @@ end
 T["can show and hide"] = function()
   local kinds = {
     "float",
-    "split:left",
-    "split:above",
-    "split:right",
-    "split:below",
-    "split:leftmost",
-    "split:abovemost",
-    "split:rightmost",
-    "split:belowmost",
+    "split_above",
+    "split_above_all",
+    "split_below",
+    "split_below_all",
+    "split_left",
+    "split_left_most",
+    "split_right",
+    "split_right_most",
   }
 
   local win = require("fyler.lib.win") {
@@ -54,7 +54,7 @@ T["can show and hide"] = function()
     mappings = {},
   }
 
-  require("fyler.config").setup()
+  require("fyler.config").setup {}
 
   win:show()
   test.expect.equality(win:has_valid_bufnr(), true)

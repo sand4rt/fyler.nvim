@@ -1,17 +1,15 @@
 local Ui = require("fyler.lib.ui")
 
-local api = vim.api
-
 ---@alias FylerWinKind
 ---| "float"
----| "split:left"
----| "split:above"
----| "split:right"
----| "split:below"
----| "split:leftmost"
----| "split:abovemost"
----| "split:rightmost"
----| "split:belowmost"
+---| "split_above"
+---| "split_above_all"
+---| "split_below"
+---| "split_below_all"
+---| "split_left"
+---| "split_left_most"
+---| "split_right"
+---| "split_right_most"
 
 ---@class FylerWin
 ---@field augroup       string          - Autogroup associated with window instance
@@ -41,19 +39,29 @@ local api = vim.api
 local Win = {}
 Win.__index = Win
 
--- Prepares namespace ID by attaching buffer's given name
+local api = vim.api
+
 ---@param name string
 local function get_namespace(name)
   return api.nvim_create_namespace("Fyler" .. name)
 end
 
--- Prepares autogroup ID by attaching buffer's given name
 ---@param name string
 local function get_augroup(name)
   return api.nvim_create_augroup("Fyler" .. name, { clear = true })
 end
 
+---@class FylerWinOpts : FylerWin
+---@field bufnr?      integer
+---@field footer?     string|string[]
+---@field footer_pos? string|string[]
+---@field render?     function
+---@field title?      string|string[]
+---@field title_pos?  string|string[]
+---@field winid?      integer
+
 local M = setmetatable({}, {
+  ---@param opts FylerWinOpts
   ---@return FylerWin
   __call = function(_, opts)
     opts = opts or {}
@@ -102,13 +110,11 @@ local M = setmetatable({}, {
   end,
 })
 
--- Determine whether the `Win` has valid buffer
 ---@return boolean
 function Win:has_valid_bufnr()
   return type(self.bufnr) == "number" and api.nvim_buf_is_valid(self.bufnr)
 end
 
--- Determine whether the `Win` has valid window
 ---@return boolean
 function Win:has_valid_winid()
   return type(self.winid) == "number" and api.nvim_win_is_valid(self.winid)
@@ -119,7 +125,6 @@ function Win:is_visible()
   return self:has_valid_bufnr() and self:has_valid_winid()
 end
 
--- Construct respective window config in vim understandable format
 ---@return vim.api.keyset.win_config
 function Win:config()
   local winconfig = {
@@ -131,23 +136,28 @@ function Win:config()
     footer_pos = self.footer_pos,
   }
 
-  if self.kind:match("^split:") then
-    winconfig.split = self.kind:match("^split:(.*)")
+  if self.kind:match("^split_") then
+    winconfig.split = self.kind:match("^split_(.*)")
     winconfig.title = nil
     winconfig.title_pos = nil
     winconfig.footer = nil
     winconfig.footer_pos = nil
-  end
-
-  if self.kind == "float" then
+  elseif self.kind:match("^float") then
     winconfig.relative = "editor"
     winconfig.border = self.border
     winconfig.col = math.floor((1 - self.width) * 0.5 * vim.o.columns)
     winconfig.row = math.floor((1 - self.height) * 0.5 * vim.o.lines)
+  else
+    error(string.format("(fyler.nvim) Invalid window kind `%s`", self.kind))
   end
 
-  winconfig.width = math.ceil(self.width * vim.o.columns)
-  winconfig.height = math.ceil(self.height * vim.o.lines)
+  if self.width then
+    winconfig.width = math.ceil(self.width * vim.o.columns)
+  end
+
+  if self.height then
+    winconfig.height = math.ceil(self.height * vim.o.lines)
+  end
 
   return winconfig
 end
@@ -167,14 +177,14 @@ function Win:show()
 
   api.nvim_buf_set_name(self.bufnr, self.bufname)
 
-  if win_config.split and win_config.split:match("^%w+most$") then
-    if win_config.split == "leftmost" then
+  if win_config.split and (win_config.split:match("_all$") or win_config.split:match("_most$")) then
+    if win_config.split == "left_most" then
       api.nvim_command(string.format("topleft %dvsplit", win_config.width))
-    elseif win_config.split == "abovemost" then
+    elseif win_config.split == "above_all" then
       api.nvim_command(string.format("topleft %dsplit", win_config.height))
-    elseif win_config.split == "rightmost" then
+    elseif win_config.split == "right_most" then
       api.nvim_command(string.format("botright %dvsplit", win_config.width))
-    elseif win_config.split == "belowmost" then
+    elseif win_config.split == "below_all" then
       api.nvim_command(string.format("botright %dsplit", win_config.height))
     else
       error(string.format("Invalid window kind `%s`", win_config.split))
@@ -193,10 +203,8 @@ function Win:show()
 
   api.nvim_exec_autocmds("BufEnter", {})
 
-  for mode, map in pairs(self.mappings) do
-    for key, val in pairs(map) do
-      vim.keymap.set(mode, key, val, { buffer = self.bufnr, silent = true, noremap = true })
-    end
+  for key, val in pairs(self.mappings) do
+    vim.keymap.set("n", key, val, { buffer = self.bufnr, silent = true, noremap = true })
   end
 
   for option, value in pairs(self.win_opts) do

@@ -143,7 +143,7 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
 end)
 
 M.Explorer = a.async(function(tbl, cb)
-  return cb(a.await(TREE_STRUCTURE, tbl, config.values.git_status and a.await(git.status_map) or {}, 0))
+  return cb(a.await(TREE_STRUCTURE, tbl, config.values.views.explorer.git_status and a.await(git.status_map) or {}, 0))
 end)
 
 return M
