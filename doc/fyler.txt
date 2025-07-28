@@ -47,6 +47,7 @@ Fyler supports plenty of options to customize. Following are default values
         border = nil,
         buf_opts = {
           expandtab = true,
+          shfitwidth = 2,
           buflisted = false,
           buftype = "acwrite",
           filetype = "fyler",
