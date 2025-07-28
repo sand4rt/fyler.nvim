@@ -1,13 +1,12 @@
-local api = vim.api
-
 local M = {}
+
+local api = vim.api
 
 ---@param dec integer
 local function to_hex(dec)
   return string.format("%06X", math.max(0, math.min(0xFFFFFF, math.floor(dec))))
 end
 
--- https://github.com/NeogitOrg/neogit
 ---@param name string
 ---@return string|nil
 local function get_fg(name)
@@ -21,7 +20,6 @@ local function get_fg(name)
   end
 end
 
--- https://github.com/NeogitOrg/neogit
 ---@param name string
 ---@return string|nil
 local function get_bg(name)
@@ -35,6 +33,21 @@ local function get_bg(name)
   end
 end
 
+---@class FylerColorPalette
+---@field bg        string
+---@field black     string
+---@field blue      string
+---@field cyan      string
+---@field dark_grey string
+---@field fg        string
+---@field green     string
+---@field grey      string
+---@field orange    string
+---@field red       string
+---@field white     string
+---@field yellow    string
+
+---@return FylerColorPalette
 local function build_palette()
   -- stylua: ignore start
   return {
