@@ -28,9 +28,16 @@
 ## Installation
 
 > [!IMPORTANT]
-> Please be careful while choosing between `stable` and `latest` version. `stable` branch will only get updates on releases. On the other hand `latest` branch updates frequently.
+> Please be careful while choosing between `stable` and `latest` version.
+>
+> - `stable` branch updates on releases.
+> - `stable` version documentation might be different.
+> - `main` branch updates frequently(can have bugs).
 
 ### Stable version
+
+> [!NOTE]
+> Please refer to `stable` version [documentation page](https://github.com/A7Lavinraj/fyler.nvim/blob/stable/README.md). Latest version documentation might not be compatible for stable version.
 
 <details open>
   <summary><a href="https://github.com/folke/lazy.nvim"><strong>Lazy.nvim</strong></a> (recommended)</summary>
@@ -40,7 +47,7 @@
   "A7Lavinraj/fyler.nvim",
   dependencies = { "echasnovski/mini.icons" },
   branch = "stable",
-  opts = {} -- check the default options in the README.md
+  opts = {}
 }
 ```
 
@@ -91,147 +98,147 @@ add({
   <summary>(Default configuration)</summary>
 
 ```lua
-  local defaults = {
-    -- Changes icon provider
-    icon_provider = "mini-icons",
-    -- Changes mappings for associated view
-    mappings = {
-      explorer = {
-        ["q"] = "CloseView",
-        ["<CR>"] = "Select",
-      },
-      confirm = {
-        ["y"] = "Confirm",
-        ["n"] = "Discard",
-      },
+local defaults = {
+  -- Changes icon provider
+  icon_provider = "mini-icons",
+  -- Changes mappings for associated view
+  mappings = {
+    explorer = {
+      ["q"] = "CloseView",
+      ["<CR>"] = "Select",
     },
-    -- Changes builtin highlight groups
-    on_highlights = function() end,
-    -- Changes configuration for associated view
-    views = {
-      confirm = {
-        win = {
-          -- Changes window border
-          border = "single",
-          -- Changes buffer options
-          buf_opts = {
-            buflisted = false,
-            modifiable = false,
-          },
-          -- Changes window kind
-          kind = "float",
-          -- Changes window kind preset
-          kind_presets = {
-            float = {
-              height = 0.4,
-              width = 0.5,
-            },
-            split_above = {
-              height = 0.5,
-            },
-            split_above_all = {
-              height = 0.5,
-            },
-            split_below = {
-              height = 0.5,
-            },
-            split_below_all = {
-              height = 0.5,
-            },
-            split_left = {
-              width = 0.5,
-            },
-            split_left_most = {
-              width = 0.5,
-            },
-            split_right = {
-              width = 0.5,
-            },
-            split_right_most = {
-              width = 0.5,
-            },
-          },
-          -- Changes window options
-          win_opts = {
-            winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
-            wrap = false,
-          },
-        },
-      },
-      explorer = {
-        -- Changes explorer closing behaviour when a file get selected
-        close_on_select = true,
-        -- Changes explorer behaviour to auto confirm simple edits
-        confirm_simple = false,
-        -- Changes explorer behaviour to hijack NETRW
-        default_explorer = false,
-        -- Changes git statuses visibility
-        git_status = true,
-        -- Changes Indentation marker properties
-        indentscope = {
-          enabled = true,
-          group = "FylerIndentMarker",
-          marker = "│",
-        },
-        win = {
+    confirm = {
+      ["y"] = "Confirm",
+      ["n"] = "Discard",
+    },
+  },
+  -- Changes builtin highlight groups
+  on_highlights = function() end,
+  -- Changes configuration for associated view
+  views = {
+    confirm = {
+      win = {
         -- Changes window border
-          border = "single",
+        border = "single",
         -- Changes buffer options
-          buf_opts = {
-            buflisted = false,
-            buftype = "acwrite",
-            expandtab = true,
-            filetype = "fyler",
-            shiftwidth = 2,
-            syntax = "fyler",
-          },
+        buf_opts = {
+          buflisted = false,
+          modifiable = false,
+        },
         -- Changes window kind
-          kind = "float",
+        kind = "float",
         -- Changes window kind preset
-          kind_presets = {
-            float = {
-              height = 0.7,
-              width = 0.7,
-            },
-            split_above = {
-              height = 0.7,
-            },
-            split_above_all = {
-              height = 0.7,
-            },
-            split_below = {
-              height = 0.7,
-            },
-            split_below_all = {
-              height = 0.7,
-            },
-            split_left = {
-              width = 0.3,
-            },
-            split_left_most = {
-              width = 0.3,
-            },
-            split_right = {
-              width = 0.3,
-            },
-            split_right_most = {
-              width = 0.3,
-            },
+        kind_presets = {
+          float = {
+            height = 0.4,
+            width = 0.5,
           },
+          split_above = {
+            height = 0.5,
+          },
+          split_above_all = {
+            height = 0.5,
+          },
+          split_below = {
+            height = 0.5,
+          },
+          split_below_all = {
+            height = 0.5,
+          },
+          split_left = {
+            width = 0.5,
+          },
+          split_left_most = {
+            width = 0.5,
+          },
+          split_right = {
+            width = 0.5,
+          },
+          split_right_most = {
+            width = 0.5,
+          },
+        },
         -- Changes window options
-          win_opts = {
-            concealcursor = "nvic",
-            conceallevel = 3,
-            cursorline = true,
-            number = true,
-            relativenumber = true,
-            winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
-            wrap = false,
-          },
+        win_opts = {
+          winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
+          wrap = false,
         },
       },
     },
-  }
+    explorer = {
+      -- Changes explorer closing behaviour when a file get selected
+      close_on_select = true,
+      -- Changes explorer behaviour to auto confirm simple edits
+      confirm_simple = false,
+      -- Changes explorer behaviour to hijack NETRW
+      default_explorer = false,
+      -- Changes git statuses visibility
+      git_status = true,
+      -- Changes Indentation marker properties
+      indentscope = {
+        enabled = true,
+        group = "FylerIndentMarker",
+        marker = "│",
+      },
+      win = {
+      -- Changes window border
+        border = "single",
+      -- Changes buffer options
+        buf_opts = {
+          buflisted = false,
+          buftype = "acwrite",
+          expandtab = true,
+          filetype = "fyler",
+          shiftwidth = 2,
+          syntax = "fyler",
+        },
+      -- Changes window kind
+        kind = "float",
+      -- Changes window kind preset
+        kind_presets = {
+          float = {
+            height = 0.7,
+            width = 0.7,
+          },
+          split_above = {
+            height = 0.7,
+          },
+          split_above_all = {
+            height = 0.7,
+          },
+          split_below = {
+            height = 0.7,
+          },
+          split_below_all = {
+            height = 0.7,
+          },
+          split_left = {
+            width = 0.3,
+          },
+          split_left_most = {
+            width = 0.3,
+          },
+          split_right = {
+            width = 0.3,
+          },
+          split_right_most = {
+            width = 0.3,
+          },
+        },
+      -- Changes window options
+        win_opts = {
+          concealcursor = "nvic",
+          conceallevel = 3,
+          cursorline = true,
+          number = true,
+          relativenumber = true,
+          winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
+          wrap = false,
+        },
+      },
+    },
+  },
+}
 ```
 
 </details>
