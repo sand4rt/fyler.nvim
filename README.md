@@ -1,9 +1,16 @@
 <div>
-  <img
-    alt="Showcase"
-    src="https://github.com/user-attachments/assets/51d8d4dd-6b0a-4539-af65-84dc6714066c"
-  />
   <div align="center">
+    <br/>
+    <br/>
+    <br/>
+    <img
+      width="250"
+      alt="fyler-logo"
+      src="https://github.com/user-attachments/assets/24838a97-e3d0-4451-ae69-433f52f816a1"
+    />
+    <br/>
+    <br/>
+    <br/>
     <h1>Fyler.nvim</h1>
     <table>
       <tr>
@@ -23,6 +30,15 @@
       />
     </div>
   </div>
+  <h4 align="center">
+    <a href="https://youtube.com/playlist?list=PLE5gu3yOYmtiTiC1J3BysrcormCt_eWuq&si=L6yEiJI7rNuCp5cy">Live Streams</a>
+    ·
+    <a href="https://github.com/A7Lavinraj/fyler.nvim/wiki">Wiki Page</a>
+  </h4>
+  <img
+    alt="Showcase"
+    src="https://github.com/user-attachments/assets/51d8d4dd-6b0a-4539-af65-84dc6714066c"
+  />
 </div>
 
 ## Installation
