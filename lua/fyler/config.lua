@@ -13,6 +13,9 @@
 ---@alias FylerConfigMappingsExplorer
 ---| "CloseView" Close explorer view
 ---| "Select"    Select item under the cursor
+---| "NewTab"    Open file under the cursor in new tab
+---| "VerticalSplit"    Open file under the cursor in vertical split
+---| "HorizontalSplit"    Open file under the cursor horizontal split
 ---| false       Disable keymap
 
 ---@alias FylerConfigMappingsConfirm
@@ -40,7 +43,6 @@
 ---@field close_on_select  boolean
 ---@field confirm_simple   boolean
 ---@field default_explorer boolean
----@field open_in_new_tab  boolean
 ---@field git_status       boolean
 ---@field indentscope      FylerConfigIndentScope
 ---@field win              FylerConfigViewWin
@@ -70,6 +72,9 @@ local defaults = {
     explorer = {
       ["q"] = "CloseView",
       ["<CR>"] = "Select",
+      ["<C-t>"] = "NewTab",
+      ["<C-v>"] = "VerticalSplit",
+      ["<C-x>"] = "HorizontalSplit",
     },
     confirm = {
       ["y"] = "Confirm",
@@ -126,7 +131,6 @@ local defaults = {
       close_on_select = true,
       confirm_simple = false,
       default_explorer = false,
-      open_in_new_tab = false,
       git_status = true,
       indentscope = {
         enabled = true,
@@ -310,7 +314,6 @@ function M.setup(config)
   check_type("config.views.explorer.close_on_select", M.values.views.explorer.close_on_select, "boolean")
   check_type("config.views.explorer.confirm_simple", M.values.views.explorer.confirm_simple, "boolean")
   check_type("config.views.explorer.default_explorer", M.values.views.explorer.default_explorer, "boolean")
-  check_type("config.views.explorer.open_in_new_tab", M.values.views.explorer.open_in_new_tab, "boolean")
   check_type("config.views.explorer.git_status", M.values.views.explorer.git_status, "boolean")
   check_type("config.views.explorer.indentscope", M.values.views.explorer.indentscope, "table")
   check_type("config.views.explorer.indentscope.enabled", M.values.views.explorer.indentscope.enabled, "boolean")

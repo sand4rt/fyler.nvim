@@ -122,6 +122,9 @@ local defaults = {
     explorer = {
       ["q"] = "CloseView",
       ["<CR>"] = "Select",
+      ["<C-t>"] = "NewTab",
+      ["<C-v>"] = "VerticalSplit",
+      ["<C-x>"] = "HorizontalSplit",
     },
     confirm = {
       ["y"] = "Confirm",
@@ -188,8 +191,6 @@ local defaults = {
       confirm_simple = false,
       -- Changes explorer behaviour to hijack NETRW
       default_explorer = false,
-      -- Changes explorer behaviour to :edit (default) or :tabedit
-      open_in_new_tab = false,
       -- Changes git statuses visibility
       git_status = true,
       -- Changes Indentation marker properties

@@ -51,7 +51,10 @@ ExplorerView.open = a.async(function(self, opts)
     width    = win.width,
     win_opts = win.win_opts,
     mappings = {
-      [mappings["Select"]]    = self:_action("n_select"),
+      [mappings["Select"]] = self:_action("n_select"),
+      [mappings["NewTab"]] = self:_action("n_new_tab"),
+      [mappings["VerticalSplit"]] = self:_action("n_vertical_split"),
+      [mappings["HorizontalSplit"]] = self:_action("n_horizontal_split"),
       [mappings["CloseView"]] = self:_action("n_close_view"),
     },
     autocmds = {
