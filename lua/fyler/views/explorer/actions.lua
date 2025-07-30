@@ -41,7 +41,11 @@ function M.n_select(view)
       local recent_win = cache.get_entry("recent_win")
 
       if recent_win and api.nvim_win_is_valid(recent_win) then
-        fn.win_execute(recent_win, string.format("edit %s", meta_data:resolved_path()))
+          if config.values.views.explorer.open_in_new_tab then
+              fn.win_execute(recent_win, string.format("tabedit %s", meta_data:resolved_path()))
+          else
+              fn.win_execute(recent_win, string.format("edit %s", meta_data:resolved_path()))
+          end
         fn.win_gotoid(recent_win)
 
         if config.values.views.explorer.close_on_select then
@@ -347,3 +351,4 @@ function M.draw_indentscope(view)
 end
 
 return M
+

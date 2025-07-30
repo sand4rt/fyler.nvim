@@ -188,6 +188,8 @@ local defaults = {
       confirm_simple = false,
       -- Changes explorer behaviour to hijack NETRW
       default_explorer = false,
+      -- Changes explorer behaviour to :edit (default) or :tabedit
+      open_in_new_tab = false,
       -- Changes git statuses visibility
       git_status = true,
       -- Changes Indentation marker properties
@@ -320,3 +322,4 @@ fyler.open({ cwd = "split_left_most" })
 ## Special thanks to all contributors
 
 ![Contributors](https://contrib.rocks/image?repo=A7Lavinraj/fyler.nvim)
+
