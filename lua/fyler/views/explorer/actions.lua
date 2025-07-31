@@ -52,6 +52,84 @@ function M.n_select(view)
   end
 end
 
+---@param view FylerExplorerView
+function M.n_new_tab(view)
+  return function()
+    local key = regex.match_meta(api.nvim_get_current_line())
+    if not key then
+      return
+    end
+
+    local meta_data = store.get(key)
+    if meta_data:is_directory() then
+      view.fs_root:find(key):toggle()
+      api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
+    else
+      local recent_win = cache.get_entry("recent_win")
+
+      if recent_win and api.nvim_win_is_valid(recent_win) then
+        fn.execute(string.format("tabedit %s", meta_data:resolved_path()))
+
+        if config.values.views.explorer.close_on_select then
+          view.win:hide()
+        end
+      end
+    end
+  end
+end
+
+---@param view FylerExplorerView
+function M.n_vertical_split(view)
+  return function()
+    local key = regex.match_meta(api.nvim_get_current_line())
+    if not key then
+      return
+    end
+
+    local meta_data = store.get(key)
+    if meta_data:is_directory() then
+      view.fs_root:find(key):toggle()
+      api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
+    else
+      local recent_win = cache.get_entry("recent_win")
+
+      if recent_win and api.nvim_win_is_valid(recent_win) then
+        fn.win_execute(recent_win, string.format("vsplit %s", meta_data:resolved_path()))
+
+        if config.values.views.explorer.close_on_select then
+          view.win:hide()
+        end
+      end
+    end
+  end
+end
+
+---@param view FylerExplorerView
+function M.n_horizontal_split(view)
+  return function()
+    local key = regex.match_meta(api.nvim_get_current_line())
+    if not key then
+      return
+    end
+
+    local meta_data = store.get(key)
+    if meta_data:is_directory() then
+      view.fs_root:find(key):toggle()
+      api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
+    else
+      local recent_win = cache.get_entry("recent_win")
+
+      if recent_win and api.nvim_win_is_valid(recent_win) then
+        fn.win_execute(recent_win, string.format("split %s", meta_data:resolved_path()))
+
+        if config.values.views.explorer.close_on_select then
+          view.win:hide()
+        end
+      end
+    end
+  end
+end
+
 ---@param tbl table
 ---@return table
 local function get_tbl(tbl)
@@ -347,3 +425,4 @@ function M.draw_indentscope(view)
 end
 
 return M
+

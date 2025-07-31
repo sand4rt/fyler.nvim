@@ -122,6 +122,9 @@ local defaults = {
     explorer = {
       ["q"] = "CloseView",
       ["<CR>"] = "Select",
+      ["<C-t>"] = "NewTab",
+      ["<C-v>"] = "VerticalSplit",
+      ["<C-x>"] = "HorizontalSplit",
     },
     confirm = {
       ["y"] = "Confirm",
@@ -320,3 +323,4 @@ fyler.open({ cwd = "split_left_most" })
 ## Special thanks to all contributors
 
 ![Contributors](https://contrib.rocks/image?repo=A7Lavinraj/fyler.nvim)
+
