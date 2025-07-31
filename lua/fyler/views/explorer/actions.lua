@@ -94,7 +94,7 @@ function M.n_vertical_split(view)
       local recent_win = cache.get_entry("recent_win")
 
       if recent_win and api.nvim_win_is_valid(recent_win) then
-        fn.win_execute(recent_win, string.format("vsplit %s", meta_data:resolved_path()))
+        fn.execute(string.format("vsplit %s", meta_data:resolved_path()))
 
         if config.values.views.explorer.close_on_select then
           view.win:hide()
@@ -120,7 +120,7 @@ function M.n_horizontal_split(view)
       local recent_win = cache.get_entry("recent_win")
 
       if recent_win and api.nvim_win_is_valid(recent_win) then
-        fn.win_execute(recent_win, string.format("split %s", meta_data:resolved_path()))
+        fn.execute(string.format("split %s", meta_data:resolved_path()))
 
         if config.values.views.explorer.close_on_select then
           view.win:hide()
