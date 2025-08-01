@@ -13,9 +13,9 @@
 ---@alias FylerConfigMappingsExplorer
 ---| "CloseView" Close explorer view
 ---| "Select"    Select item under the cursor
----| "NewTab"    Open file under the cursor in new tab
----| "VerticalSplit"    Open file under the cursor in vertical split
----| "HorizontalSplit"    Open file under the cursor horizontal split
+---| "SelectTab"    Open file under the cursor in new tab
+---| "SelectVSplit"    Open file under the cursor in vertical split
+---| "SelectSplit"    Open file under the cursor horizontal split
 ---| false       Disable keymap
 
 ---@alias FylerConfigMappingsConfirm
@@ -72,9 +72,9 @@ local defaults = {
     explorer = {
       ["q"] = "CloseView",
       ["<CR>"] = "Select",
-      ["<C-t>"] = "NewTab",
-      ["<C-v>"] = "VerticalSplit",
-      ["<C-x>"] = "HorizontalSplit",
+      ["<C-t>"] = "SelectTab",
+      ["<C-v>"] = "SelectVSplit",
+      ["<C-x>"] = "SelectSplit",
     },
     confirm = {
       ["y"] = "Confirm",
@@ -326,4 +326,3 @@ function M.setup(config)
 end
 
 return M
-

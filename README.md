@@ -122,9 +122,9 @@ local defaults = {
     explorer = {
       ["q"] = "CloseView",
       ["<CR>"] = "Select",
-      ["<C-t>"] = "NewTab",
-      ["<C-v>"] = "VerticalSplit",
-      ["<C-x>"] = "HorizontalSplit",
+      ["<C-t>"] = "SelectTab",
+      ["<C-v>"] = "SelectVSplit",
+      ["<C-x>"] = "SelectSplit",
     },
     confirm = {
       ["y"] = "Confirm",

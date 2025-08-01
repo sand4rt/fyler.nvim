@@ -6,7 +6,6 @@ local fs = require("fyler.lib.fs")
 local store = require("fyler.views.explorer.store")
 
 local fn = vim.fn
-local api = vim.api
 
 ---@class FylerExplorerView
 ---@field cwd     string      - Directory path which act as a root
@@ -51,11 +50,11 @@ ExplorerView.open = a.async(function(self, opts)
     width    = win.width,
     win_opts = win.win_opts,
     mappings = {
-      [mappings["Select"]] = self:_action("n_select"),
-      [mappings["NewTab"]] = self:_action("n_new_tab"),
-      [mappings["VerticalSplit"]] = self:_action("n_vertical_split"),
-      [mappings["HorizontalSplit"]] = self:_action("n_horizontal_split"),
-      [mappings["CloseView"]] = self:_action("n_close_view"),
+      [mappings["CloseView"]]    = self:_action("n_close_view"),
+      [mappings["Select"]]       = self:_action("n_select"),
+      [mappings["SelectSplit"]]  = self:_action("n_select_split"),
+      [mappings["SelectTab"]]    = self:_action("n_select_tab"),
+      [mappings["SelectVSplit"]] = self:_action("n_select_vsplit"),
     },
     autocmds = {
       ["BufReadCmd"]   = self:_action("refreshview"),
@@ -73,8 +72,6 @@ ExplorerView.open = a.async(function(self, opts)
     render = self:_action("refreshview"),
   }
   -- stylua: ignore end
-
-  require("fyler.cache").set_entry("recent_win", api.nvim_get_current_win())
 
   self.win:show()
 end)

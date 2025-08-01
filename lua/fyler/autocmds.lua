@@ -17,6 +17,17 @@ function M.setup(opts)
 
   api.nvim_create_autocmd("BufEnter", {
     group = augroup,
+    callback = function(arg)
+      if arg.file == "" or arg.file:match("^fyler://*") then
+        return
+      end
+
+      require("fyler.cache").set_entry("recent_win", vim.fn.bufwinid(arg.buf))
+    end,
+  })
+
+  api.nvim_create_autocmd("BufEnter", {
+    group = augroup,
     callback = function(...)
       local cur_instance = require("fyler.views.explorer").instance
       if cur_instance then

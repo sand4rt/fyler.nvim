@@ -53,7 +53,7 @@ function M.n_select(view)
 end
 
 ---@param view FylerExplorerView
-function M.n_new_tab(view)
+function M.n_select_tab(view)
   return function()
     local key = regex.match_meta(api.nvim_get_current_line())
     if not key then
@@ -61,10 +61,7 @@ function M.n_new_tab(view)
     end
 
     local meta_data = store.get(key)
-    if meta_data:is_directory() then
-      view.fs_root:find(key):toggle()
-      api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
-    else
+    if not meta_data:is_directory() then
       local recent_win = cache.get_entry("recent_win")
 
       if recent_win and api.nvim_win_is_valid(recent_win) then
@@ -79,7 +76,7 @@ function M.n_new_tab(view)
 end
 
 ---@param view FylerExplorerView
-function M.n_vertical_split(view)
+function M.n_select_vsplit(view)
   return function()
     local key = regex.match_meta(api.nvim_get_current_line())
     if not key then
@@ -87,14 +84,12 @@ function M.n_vertical_split(view)
     end
 
     local meta_data = store.get(key)
-    if meta_data:is_directory() then
-      view.fs_root:find(key):toggle()
-      api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
-    else
+    if not meta_data:is_directory() then
       local recent_win = cache.get_entry("recent_win")
 
       if recent_win and api.nvim_win_is_valid(recent_win) then
-        fn.win_execute(recent_win, string.format("vsplit %s", meta_data:resolved_path()))
+        fn.win_gotoid(recent_win)
+        fn.execute(string.format("vsplit %s", meta_data:resolved_path()))
 
         if config.values.views.explorer.close_on_select then
           view.win:hide()
@@ -105,7 +100,7 @@ function M.n_vertical_split(view)
 end
 
 ---@param view FylerExplorerView
-function M.n_horizontal_split(view)
+function M.n_select_split(view)
   return function()
     local key = regex.match_meta(api.nvim_get_current_line())
     if not key then
@@ -113,14 +108,12 @@ function M.n_horizontal_split(view)
     end
 
     local meta_data = store.get(key)
-    if meta_data:is_directory() then
-      view.fs_root:find(key):toggle()
-      api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
-    else
+    if not meta_data:is_directory() then
       local recent_win = cache.get_entry("recent_win")
 
       if recent_win and api.nvim_win_is_valid(recent_win) then
-        fn.win_execute(recent_win, string.format("split %s", meta_data:resolved_path()))
+        fn.win_gotoid(recent_win)
+        fn.execute(string.format("split %s", meta_data:resolved_path()))
 
         if config.values.views.explorer.close_on_select then
           view.win:hide()
@@ -425,4 +418,3 @@ function M.draw_indentscope(view)
 end
 
 return M
-
