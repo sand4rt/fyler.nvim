@@ -73,6 +73,8 @@ ExplorerView.open = a.async(function(self, opts)
   }
   -- stylua: ignore end
 
+  require("fyler.cache").set_entry("recent_win", vim.api.nvim_get_current_win())
+
   self.win:show()
 end)
 
