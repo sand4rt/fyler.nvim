@@ -2,9 +2,7 @@ local fn = vim.fn
 
 local icon_providers = {
   ---@return string?, string?
-  ["none"] = function()
-    return "", ""
-  end,
+  ["none"] = function() return "", "" end,
   ---@param type string
   ---@param _ string
   ---@return string?, string?
@@ -22,9 +20,7 @@ local icon_providers = {
   ---@return string?, string?
   ["mini-icons"] = function(type, name)
     local success, miniicons = pcall(require, "mini.icons")
-    if not success then
-      return nil, nil
-    end
+    if not success then return nil, nil end
 
     return miniicons.get(type, name)
   end,
@@ -33,9 +29,7 @@ local icon_providers = {
   ---@return string?, string?
   ["nvim-web-devicons"] = function(type, name)
     local success, devicons = pcall(require, "nvim-web-devicons")
-    if not success then
-      return nil, nil
-    end
+    if not success then return nil, nil end
 
     local icon, hl = devicons.get_icon(name, fn.fnamemodify(name, ":e"))
     icon = (type == "directory" and "" or (icon or ""))
@@ -54,9 +48,7 @@ return setmetatable({}, {
 
     return function(...)
       local success, icon, hl = pcall(icon_provider, ...)
-      if not success then
-        return " ", ""
-      end
+      if not success then return " ", "" end
 
       return icon, hl
     end

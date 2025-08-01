@@ -3,9 +3,7 @@ local M = {}
 local api = vim.api
 
 ---@param dec integer
-local function to_hex(dec)
-  return string.format("%06X", math.max(0, math.min(0xFFFFFF, math.floor(dec))))
-end
+local function to_hex(dec) return string.format("%06X", math.max(0, math.min(0xFFFFFF, math.floor(dec)))) end
 
 ---@param name string
 ---@return string|nil
@@ -96,9 +94,7 @@ function M.setup(opts)
   }
   -- stylua: ignore end
 
-  if opts.on_highlights then
-    opts.on_highlights(hl_groups, palette)
-  end
+  if opts.on_highlights then opts.on_highlights(hl_groups, palette) end
 
   for key, val in pairs(hl_groups) do
     api.nvim_set_hl(0, key, val)

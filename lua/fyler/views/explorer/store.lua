@@ -10,14 +10,10 @@ function Metadata:is_directory()
   return self.type == "directory" or (self.type == "link" and self.link_type == "directory")
 end
 
-function Metadata:resolved_path()
-  return self.type == "link" and self.link_path or self.path
-end
+function Metadata:resolved_path() return self.type == "link" and self.link_path or self.path end
 
 ---@param key string
-function M.get(key)
-  return setmetatable(vim.deepcopy(store[key]), Metadata)
-end
+function M.get(key) return setmetatable(vim.deepcopy(store[key]), Metadata) end
 
 ---@param tbl table
 ---@return string

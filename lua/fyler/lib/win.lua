@@ -40,14 +40,10 @@ Win.__index = Win
 local api = vim.api
 
 ---@param name string
-local function get_namespace(name)
-  return api.nvim_create_namespace("Fyler" .. name)
-end
+local function get_namespace(name) return api.nvim_create_namespace("Fyler" .. name) end
 
 ---@param name string
-local function get_augroup(name)
-  return api.nvim_create_augroup("Fyler" .. name, { clear = true })
-end
+local function get_augroup(name) return api.nvim_create_augroup("Fyler" .. name, { clear = true }) end
 
 ---@class FylerWinOpts : FylerWin
 ---@field bufnr?      integer
@@ -99,19 +95,13 @@ local M = setmetatable({}, {
 })
 
 ---@return boolean
-function Win:has_valid_bufnr()
-  return type(self.bufnr) == "number" and api.nvim_buf_is_valid(self.bufnr)
-end
+function Win:has_valid_bufnr() return type(self.bufnr) == "number" and api.nvim_buf_is_valid(self.bufnr) end
 
 ---@return boolean
-function Win:has_valid_winid()
-  return type(self.winid) == "number" and api.nvim_win_is_valid(self.winid)
-end
+function Win:has_valid_winid() return type(self.winid) == "number" and api.nvim_win_is_valid(self.winid) end
 
 ---@return boolean
-function Win:is_visible()
-  return self:has_valid_bufnr() and self:has_valid_winid()
-end
+function Win:is_visible() return self:has_valid_bufnr() and self:has_valid_winid() end
 
 ---@return vim.api.keyset.win_config
 function Win:config()
@@ -139,29 +129,21 @@ function Win:config()
     error(string.format("(fyler.nvim) Invalid window kind `%s`", self.kind))
   end
 
-  if self.width then
-    winconfig.width = math.ceil(self.width * vim.o.columns)
-  end
+  if self.width then winconfig.width = math.ceil(self.width * vim.o.columns) end
 
-  if self.height then
-    winconfig.height = math.ceil(self.height * vim.o.lines)
-  end
+  if self.height then winconfig.height = math.ceil(self.height * vim.o.lines) end
 
   return winconfig
 end
 
 function Win:show()
-  if self:has_valid_winid() then
-    return
-  end
+  if self:has_valid_winid() then return end
 
   local recent_win = api.nvim_get_current_win()
   local win_config = self:config()
 
   self.bufnr = api.nvim_create_buf(false, true)
-  if self.render then
-    self.render()
-  end
+  if self.render then self.render() end
 
   api.nvim_buf_set_name(self.bufnr, self.bufname)
 
@@ -180,9 +162,7 @@ function Win:show()
 
     self.winid = api.nvim_get_current_win()
 
-    if not self.enter then
-      api.nvim_set_current_win(recent_win)
-    end
+    if not self.enter then api.nvim_set_current_win(recent_win) end
 
     api.nvim_win_set_buf(self.winid, self.bufnr)
   else
@@ -222,13 +202,9 @@ function Win:show()
 end
 
 function Win:hide()
-  if self:has_valid_winid() then
-    api.nvim_win_close(self.winid, true)
-  end
+  if self:has_valid_winid() then api.nvim_win_close(self.winid, true) end
 
-  if self:has_valid_bufnr() then
-    api.nvim_buf_delete(self.bufnr, { force = true })
-  end
+  if self:has_valid_bufnr() then api.nvim_buf_delete(self.bufnr, { force = true }) end
 end
 
 return M

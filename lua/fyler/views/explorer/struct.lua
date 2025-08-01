@@ -23,53 +23,41 @@ local M = setmetatable({}, {
   end,
 })
 
-function FSItem:toggle()
-  self.open = not self.open
-end
+function FSItem:toggle() self.open = not self.open end
 
 ---@param addr string
 ---@param meta string
 function FSItem:add_child(addr, meta)
   local target_node = self:find(addr)
-  if target_node then
-    table.insert(target_node.children, M(meta))
-  end
+  if target_node then table.insert(target_node.children, M(meta)) end
 end
 
 ---@param addr string
 ---@return FylerFSItem?
 function FSItem:find(addr)
-  if self.meta == addr then
-    return self
-  end
+  if self.meta == addr then return self end
 
   for _, child in ipairs(self.children) do
     local found = child:find(addr)
-    if found then
-      return found
-    end
+    if found then return found end
   end
 
   return nil
 end
 
 FSItem.update = a.async(function(self, cb)
-  if not self.open then
-    return cb()
-  end
+  if not self.open then return cb() end
 
   local meta_data = store.get(self.meta)
   local err, items = a.await(fs.ls, meta_data.path)
-  if err then
-    return cb()
-  end
+  if err then return cb() end
 
   self.children = vim
     .iter(self.children)
     :filter(function(child) ---@param child FylerFSItem
-      return vim.iter(items):any(function(item)
-        return item.path == store.get(child.meta).path and item.type == store.get(child.meta).type
-      end)
+      return vim.iter(items):any(
+        function(item) return item.path == store.get(child.meta).path and item.type == store.get(child.meta).type end
+      )
     end)
     :totable()
 

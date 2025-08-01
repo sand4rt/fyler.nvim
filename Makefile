@@ -3,7 +3,7 @@
 check: format lint test
 
 format:
-	stylua lua --config-path=.stylua.toml
+	stylua lua tests --config-path=.stylua.toml
 
 lint:
 	luacheck lua --globals vim

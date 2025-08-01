@@ -25,7 +25,6 @@ T["can create instance"] = function()
   }
 
   local win = require("fyler.lib.win")(opts)
-
   for key, val in pairs(opts) do
     test.expect.equality(win[key], val)
   end
@@ -59,7 +58,6 @@ T["can show and hide"] = function()
   win:show()
   test.expect.equality(win:has_valid_bufnr(), true)
   test.expect.equality(win:has_valid_winid(), true)
-
   win:hide()
   test.expect.equality(win:has_valid_bufnr(), false)
   test.expect.equality(win:has_valid_winid(), false)

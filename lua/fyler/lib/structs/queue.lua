@@ -6,9 +6,7 @@ local Queue = {}
 Queue.__index = Queue
 
 ---@param data any
-function Queue:enqueue(data)
-  self.items:insert(self.items:len() + 1, data)
-end
+function Queue:enqueue(data) self.items:insert(self.items:len() + 1, data) end
 
 ---@return any
 function Queue:dequeue()
@@ -26,13 +24,9 @@ function Queue:front()
 end
 
 ---@return boolean
-function Queue:is_empty()
-  return self.items:len() == 0
-end
+function Queue:is_empty() return self.items:len() == 0 end
 
 return setmetatable({}, {
   ---@return FylerQueue
-  __call = function()
-    return setmetatable({ items = List() }, Queue)
-  end,
+  __call = function() return setmetatable({ items = List() }, Queue) end,
 })

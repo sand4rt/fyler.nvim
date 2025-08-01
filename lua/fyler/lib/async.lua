@@ -6,16 +6,9 @@ local is_loop_running = false
 ---@param co thread
 ---@param ... any
 local function schedule(co, ...)
-  queue:enqueue {
-    args = { ... },
-    co = co,
-    started = false,
-  }
+  queue:enqueue { args = { ... }, co = co, started = false }
 
-  if is_loop_running then
-    return
-  end
-
+  if is_loop_running then return end
   is_loop_running = true
 
   local function loop()
@@ -29,37 +22,26 @@ local function schedule(co, ...)
 
     if status == "dead" then
       queue:dequeue()
-
-      vim.defer_fn(loop, 0)
     elseif status == "suspended" and front.started == false then
       local success = coroutine.resume(front.co, unpack(front.args))
-      if not success then
-        queue:dequeue()
-      end
-
+      if not success then queue:dequeue() end
       front.started = true
-
-      vim.defer_fn(loop, 0)
-    else
-      vim.defer_fn(loop, 10)
     end
+
+    vim.defer_fn(loop, 10)
   end
 
   vim.defer_fn(loop, 0)
 end
 
 function M.schedule_async(async_fn)
-  return function(...)
-    schedule(coroutine.create(async_fn), ...)
-  end
+  return function(...) schedule(coroutine.create(async_fn), ...) end
 end
 
 function M.async(async_fn)
   return function(...)
     local ok, err = coroutine.resume(coroutine.create(async_fn), ...)
-    if not ok then
-      error(err)
-    end
+    if not ok then error(err) end
   end
 end
 
@@ -70,9 +52,7 @@ function M.await(fn, ...)
   table.insert(
     args,
     vim.schedule_wrap(function(...)
-      if not thread then
-        return error("no coroutine is running")
-      end
+      if not thread then return error("no coroutine is running") end
 
       coroutine.resume(thread, ...)
     end)

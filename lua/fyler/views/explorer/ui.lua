@@ -53,9 +53,7 @@ local TREE_STRUCTURE
 ---@param cb fun(lines: FylerUiLine[])
 TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
   depth = depth or 0
-  if not tbl then
-    return cb {}
-  end
+  if not tbl then return cb {} end
 
   local lines = {}
   for _, item in ipairs(get_sorted(tbl)) do
@@ -70,13 +68,9 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
     end)()
 
     local git_symbol = (function()
-      if not status_map then
-        return nil
-      end
+      if not status_map then return nil end
 
-      if status_map[item.path] then
-        return status_map[item.path]
-      end
+      if status_map[item.path] then return status_map[item.path] end
 
       return nil
     end)()
@@ -142,8 +136,12 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
   return cb(lines)
 end)
 
-M.Explorer = a.async(function(tbl, cb)
-  return cb(a.await(TREE_STRUCTURE, tbl, config.values.views.explorer.git_status and a.await(git.status_map) or {}, 0))
-end)
+M.Explorer = a.async(
+  function(tbl, cb)
+    return cb(
+      a.await(TREE_STRUCTURE, tbl, config.values.views.explorer.git_status and a.await(git.status_map) or {}, 0)
+    )
+  end
+)
 
 return M

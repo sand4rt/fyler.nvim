@@ -233,9 +233,7 @@ end
 local function check_type(name, value, ref, allow_nil)
   local are_matched = (function()
     if type(ref) == "table" then
-      return vim.iter(ref):any(function(x)
-        return type(value) == x
-      end)
+      return vim.iter(ref):any(function(x) return type(value) == x end)
     elseif type(value) == ref then
       return true
     else
@@ -243,18 +241,14 @@ local function check_type(name, value, ref, allow_nil)
     end
   end)()
 
-  if are_matched or (ref == "callable" and vim.is_callable(value)) or (allow_nil and value == nil) then
-    return
-  end
+  if are_matched or (ref == "callable" and vim.is_callable(value)) or (allow_nil and value == nil) then return end
 
   error(string.format("(fyler.nvim) `%s` should be %s, not %s", name, ref, type(value)))
 end
 
 ---@param config? FylerConfig
 function M.setup(config)
-  if config == nil then
-    return
-  end
+  if config == nil then return end
 
   check_type("config", config, "table")
 

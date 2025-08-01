@@ -6,9 +6,7 @@ local Stack = {}
 Stack.__index = Stack
 
 ---@param data any
-function Stack:push(data)
-  self.items:insert(1, data)
-end
+function Stack:push(data) self.items:insert(1, data) end
 
 function Stack:pop()
   assert(not self:is_empty(), "stack is empty")
@@ -25,13 +23,9 @@ function Stack:top()
 end
 
 ---@return boolean
-function Stack:is_empty()
-  return self.items:len() == 0
-end
+function Stack:is_empty() return self.items:len() == 0 end
 
 return setmetatable({}, {
   ---@return FylerStack
-  __call = function()
-    return setmetatable({ items = List() }, Stack)
-  end,
+  __call = function() return setmetatable({ items = List() }, Stack) end,
 })

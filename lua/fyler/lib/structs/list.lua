@@ -42,15 +42,11 @@ function LinkedList:insert(pos, data)
 
   local start = self.node
   for _ = 1, pos - 2 do
-    if not start then
-      error("position is out of bound")
-    end
+    if not start then error("position is out of bound") end
     start = start.next
   end
 
-  if not start then
-    error("position is out of bound")
-  end
+  if not start then error("position is out of bound") end
 
   newNode.next = start.next
   start.next = newNode
@@ -60,9 +56,7 @@ end
 function LinkedList:erase(pos)
   assert(pos >= 1, "position must be 1 or greater")
 
-  if not self.node then
-    error("list is empty")
-  end
+  if not self.node then error("list is empty") end
 
   if pos == 1 then
     self.node = self.node.next
@@ -71,16 +65,12 @@ function LinkedList:erase(pos)
 
   local start = self.node
   for _ = 1, pos - 2 do
-    if not start or not start.next then
-      error("position is out of bound")
-    end
+    if not start or not start.next then error("position is out of bound") end
 
     start = start.next
   end
 
-  if not start or not start.next then
-    error("position is out of bound")
-  end
+  if not start or not start.next then error("position is out of bound") end
 
   start.next = start.next.next
 end
@@ -88,16 +78,12 @@ end
 ---@return table
 function LinkedList:totable()
   local tbl = {}
-  self:each(function(item)
-    table.insert(tbl, item)
-  end)
+  self:each(function(item) table.insert(tbl, item) end)
 
   return tbl
 end
 
 return setmetatable({}, {
   ---@return FylerLinkedList
-  __call = function()
-    return setmetatable({}, LinkedList)
-  end,
+  __call = function() return setmetatable({}, LinkedList) end,
 })

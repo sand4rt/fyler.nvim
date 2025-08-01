@@ -15,9 +15,7 @@ local M = {}
 
 ---@param tbl table
 function M.Confirm(tbl)
-  if not tbl then
-    return {}
-  end
+  if not tbl then return {} end
 
   return MESSAGE(tbl)
 end

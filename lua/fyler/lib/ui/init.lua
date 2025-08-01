@@ -30,9 +30,7 @@ end
 
 ---@param ui_lines FylerUiLine[]
 function Ui:_render(ui_lines)
-  if not self.win:has_valid_bufnr() then
-    return
-  end
+  if not self.win:has_valid_bufnr() then return end
 
   local was_modifiable = vim.bo[self.win.bufnr].modifiable
   local win_width = api.nvim_win_get_width(self.win.winid)
@@ -41,9 +39,7 @@ function Ui:_render(ui_lines)
   vim.bo[self.win.bufnr].modifiable = true
 
   for _, line in ipairs(ui_lines) do
-    local line_text = table.concat(vim.tbl_map(function(word)
-      return word.str
-    end, line.words))
+    local line_text = table.concat(vim.tbl_map(function(word) return word.str end, line.words))
 
     local margin = get_margin(win_width, line.align, line_text)
 
@@ -78,9 +74,7 @@ function Ui:_render(ui_lines)
     end
   end
 
-  if not was_modifiable then
-    vim.bo[self.win.bufnr].modifiable = false
-  end
+  if not was_modifiable then vim.bo[self.win.bufnr].modifiable = false end
 
   vim.bo[self.win.bufnr].modified = false
 end
@@ -90,9 +84,7 @@ function Ui:render(opts)
 
   vim.schedule(function()
     self:_render(opts.ui_lines)
-    if opts.on_render then
-      opts.on_render()
-    end
+    if opts.on_render then opts.on_render() end
   end)
 end
 

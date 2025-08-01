@@ -13,13 +13,9 @@ function M.tree_table_from_node(view)
     local sub_tbl = store.get(node.meta)
     sub_tbl.meta = node.meta
 
-    if sub_tbl:is_directory() then
-      sub_tbl.children = {}
-    end
+    if sub_tbl:is_directory() then sub_tbl.children = {} end
 
-    if not node.open then
-      return sub_tbl
-    end
+    if not node.open then return sub_tbl end
 
     for _, child in ipairs(node.children) do
       table.insert(sub_tbl.children, get_tbl(child))
@@ -34,15 +30,11 @@ end
 ---@param view FylerExplorerView
 ---@return table
 function M.tree_table_from_buffer(view)
-  if not view.win:has_valid_bufnr() then
-    return {}
-  end
+  if not view.win:has_valid_bufnr() then return {} end
 
   local buf_lines = vim
     .iter(api.nvim_buf_get_lines(view.win.bufnr, 0, -1, false))
-    :filter(function(buf_line)
-      return buf_line ~= ""
-    end)
+    :filter(function(buf_line) return buf_line ~= "" end)
     :totable()
 
   local root = vim.tbl_deep_extend("force", store.get(view.fs_root.meta), {
@@ -122,9 +114,7 @@ function M.get_diff(view)
   calculate_fs_actions(M.tree_table_from_buffer(view))
 
   for _, v in pairs(recent_tree_hash) do
-    if v then
-      table.insert(fs_actions.delete, v)
-    end
+    if v then table.insert(fs_actions.delete, v) end
   end
 
   return fs_actions

@@ -93,10 +93,7 @@ local M = {
 ---@return FylerExplorerView
 function M.get_instance(opts)
   if (not M.instance) or (M.instance.cwd ~= opts.cwd) then
-    M.instance = ExplorerView.new {
-      cwd = opts.cwd,
-      kind = opts.kind,
-    }
+    M.instance = ExplorerView.new { cwd = opts.cwd, kind = opts.kind }
   end
 
   return M.instance
@@ -109,9 +106,7 @@ function M.open(opts)
   opts.cwd = opts.cwd or fs.getcwd()
   opts.kind = opts.kind or config.get_view("explorer").kind
 
-  if M.instance and fn.winbufnr(M.instance.win.winid) == M.instance.win.bufnr then
-    M.instance.win:hide()
-  end
+  if M.instance and fn.winbufnr(M.instance.win.winid) == M.instance.win.bufnr then M.instance.win:hide() end
 
   M.get_instance(opts):open(opts)
 end
