@@ -40,7 +40,6 @@ function M.setup(config)
         vim.wo.conceallevel = 3
 
         fn.matchadd("Conceal", [[/\d\d\d\d\d ]])
-        fn.matchadd("Conceal", [[/\d\d\d\d\d [^/]*\zs/\ze]])
       end)
     end,
   })
