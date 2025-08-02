@@ -42,7 +42,7 @@ function M.match_contents(str) return M.match_id(str), M.match_name(str), M.matc
 
 ---@param lines string[]
 function M.filter_blank_lines(lines)
-  return vim.iter(lines):filter(function(line) return line == "" and false or true end):totable()
+  return vim.iter(lines):filter(function(line) return line ~= "" end):totable()
 end
 
 ---@param a table

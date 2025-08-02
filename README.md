@@ -123,8 +123,8 @@ local defaults = {
       ["q"] = "CloseView",
       ["<CR>"] = "Select",
       ["<C-t>"] = "SelectTab",
-      ["<C-v>"] = "SelectVSplit",
-      ["<C-x>"] = "SelectSplit",
+      ["|"] = "SelectVSplit",
+      ["-"] = "SelectSplit",
     },
     confirm = {
       ["y"] = "Confirm",
@@ -209,7 +209,6 @@ local defaults = {
           expandtab = true,
           filetype = "fyler",
           shiftwidth = 2,
-          syntax = "fyler",
         },
       -- Changes window kind
         kind = "float",
@@ -289,7 +288,7 @@ fyler.open({ cwd = "split_left_most" })
 
 ## TODOS
 
-- [x] Basic file operations `CREATE | DELETE | MOVE`
+- [x] Basic file operations `CREATE | DELETE | MOVE | COPY`
 - [x] User command to change behaviour on startup
 - [x] Hijack NETRW
 - [x] Track current buffer

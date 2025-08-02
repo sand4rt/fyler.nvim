@@ -29,7 +29,7 @@ function M.n_select(view)
     local key = util.match_id(api.nvim_get_current_line())
     if not key then return end
 
-    local entry = store.get(key)
+    local entry = store.get_entry(key)
     if entry:is_dir() then
       view.fs_root:find(key):toggle()
       api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
@@ -52,7 +52,7 @@ function M.n_select_tab(view)
     local key = util.match_id(api.nvim_get_current_line())
     if not key then return end
 
-    local entry = store.get(key)
+    local entry = store.get_entry(key)
     if not entry:is_dir() then
       local recent_win = cache.get_entry("recent_win")
 
@@ -71,7 +71,7 @@ function M.n_select_vsplit(view)
     local key = util.match_id(api.nvim_get_current_line())
     if not key then return end
 
-    local entry = store.get(key)
+    local entry = store.get_entry(key)
     if not entry:is_dir() then
       local recent_win = cache.get_entry("recent_win")
 
@@ -91,7 +91,7 @@ function M.n_select_split(view)
     local key = util.match_id(api.nvim_get_current_line())
     if not key then return end
 
-    local entry = store.get(key)
+    local entry = store.get_entry(key)
     if not entry:is_dir() then
       local recent_win = cache.get_entry("recent_win")
 
@@ -108,39 +108,59 @@ end
 ---@param tbl table
 ---@return table
 local function get_tbl(tbl)
-  local lines = { { { str = "", hl = "" } } }
-  if not vim.tbl_isempty(tbl.create) then
-    table.insert(lines, { { str = "# Creation", hl = "FylerConfirmGreen" } })
-    for _, change in ipairs(tbl.create) do
-      table.insert(lines, {
-        { str = "  | " },
-        { str = fs.relpath(fs.getcwd(), change), hl = "FylerConfirmGrey" },
-      })
-    end
-    table.insert(lines, { { str = "" } })
-  end
+  local lines = {}
 
-  if not vim.tbl_isempty(tbl.delete) then
-    table.insert(lines, { { str = "# Deletion", hl = "FylerConfirmRed" } })
-    for _, change in ipairs(tbl.delete) do
+  if not vim.tbl_isempty(tbl.copy) then
+    table.insert(lines, { { str = "COPY", hl = "FylerConfirmYellow" } })
+    for _, change in ipairs(tbl.copy) do
       table.insert(lines, {
-        { str = "  | " },
-        { str = fs.relpath(fs.getcwd(), change), hl = "FylerConfirmGrey" },
+        { str = "| " },
+        { str = fs.relpath(fs.getcwd(), change.src), hl = "FylerConfirmGrey" },
+        { str = " > " },
+        { str = fs.relpath(fs.getcwd(), change.dst), hl = "FylerConfirmGrey" },
       })
     end
     table.insert(lines, { { str = "" } })
   end
 
   if not vim.tbl_isempty(tbl.move) then
-    table.insert(lines, { { str = "# Migration", hl = "FylerConfirmYellow" } })
+    table.insert(lines, { { str = "MOVE", hl = "FylerConfirmYellow" } })
+
     for _, change in ipairs(tbl.move) do
       table.insert(lines, {
-        { str = "  | " },
+        { str = "| " },
         { str = fs.relpath(fs.getcwd(), change.src), hl = "FylerConfirmGrey" },
         { str = " > " },
         { str = fs.relpath(fs.getcwd(), change.dst), hl = "FylerConfirmGrey" },
       })
     end
+
+    table.insert(lines, { { str = "" } })
+  end
+
+  if not vim.tbl_isempty(tbl.create) then
+    table.insert(lines, { { str = "CREATE", hl = "FylerConfirmGreen" } })
+
+    for _, change in ipairs(tbl.create) do
+      table.insert(lines, {
+        { str = "| " },
+        { str = fs.relpath(fs.getcwd(), change), hl = "FylerConfirmGrey" },
+      })
+    end
+
+    table.insert(lines, { { str = "" } })
+  end
+
+  if not vim.tbl_isempty(tbl.delete) then
+    table.insert(lines, { { str = "DELETE", hl = "FylerConfirmRed" } })
+
+    for _, change in ipairs(tbl.delete) do
+      table.insert(lines, {
+        { str = "| " },
+        { str = fs.relpath(fs.getcwd(), change), hl = "FylerConfirmGrey" },
+      })
+    end
+
     table.insert(lines, { { str = "" } })
   end
 
@@ -162,9 +182,11 @@ end
 ---@param view FylerExplorerView
 function M.synchronize(view)
   return a.async(function()
-    local changes = algos.get_diff(view)
+    local changes = algos.compute_fs_actions(view)
     local can_sync = (function()
-      if #changes.create == 0 and #changes.delete == 0 and #changes.move == 0 then return true end
+      if #changes.create == 0 and #changes.delete == 0 and #changes.move == 0 and #changes.copy == 0 then
+        return true
+      end
 
       if not config.values.views.explorer.confirm_simple then
         return a.await(confirm_view.open, get_tbl(changes), "(y/n)")
@@ -176,6 +198,16 @@ function M.synchronize(view)
     end)()
 
     if can_sync then
+      for _, change in ipairs(changes.copy) do
+        local err, success = a.await(fs.copy, change.src, change.dst)
+        if not success then vim.schedule(function() vim.notify(err, vim.log.levels.ERROR) end) end
+      end
+
+      for _, change in ipairs(changes.move) do
+        local err, success = a.await(fs.move, change.src, change.dst)
+        if not success then vim.schedule(function() vim.notify(err, vim.log.levels.ERROR) end) end
+      end
+
       for _, change in ipairs(changes.create) do
         local err, success = a.await(fs.create, change)
         if not success then vim.schedule(function() vim.notify(err, vim.log.levels.ERROR) end) end
@@ -183,11 +215,6 @@ function M.synchronize(view)
 
       for _, change in ipairs(changes.delete) do
         local err, success = a.await(fs.delete, change)
-        if not success then vim.schedule(function() vim.notify(err, vim.log.levels.ERROR) end) end
-      end
-
-      for _, change in ipairs(changes.move) do
-        local err, success = a.await(fs.move, change.src, change.dst)
         if not success then vim.schedule(function() vim.notify(err, vim.log.levels.ERROR) end) end
       end
     end
@@ -203,14 +230,16 @@ function M.refreshview(view, on_render)
     if not (util.has_valid_winid(view.win) and util.has_valid_bufnr(view.win)) then return end
 
     a.await(view.fs_root.update, view.fs_root)
-
     vim.bo[view.win.bufnr].undolevels = -1
 
     view.win.ui:render {
       ui_lines = a.await(ui.Explorer, algos.tree_table_from_node(view).children),
       on_render = vim.schedule_wrap(function()
         if on_render then on_render() end
-        if util.has_valid_bufnr(view.win) then vim.bo[view.win.bufnr].undolevels = vim.go.undolevels end
+        if util.has_valid_bufnr(view.win) then
+          vim.bo[view.win.bufnr].undolevels = vim.go.undolevels
+          M.draw_indentscope(view)()
+        end
       end),
     }
   end)
@@ -264,11 +293,13 @@ function M.try_focus_buffer(view)
     a.await(focused_node.update, focused_node)
 
     for i, part in ipairs(parts) do
-      local child = vim.iter(focused_node.children):find(function(child) return store.get(child.id).name == part end)
+      local child = vim
+        .iter(focused_node.children)
+        :find(function(child) return store.get_entry(child.id).name == part end)
 
       if not child then break end
 
-      if store.get(child.id):is_dir() then
+      if store.get_entry(child.id):is_dir() then
         child.open = true
         a.await(child.update, child)
       end

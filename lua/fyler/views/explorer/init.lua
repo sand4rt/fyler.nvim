@@ -15,7 +15,7 @@ local ExplorerView = {}
 ExplorerView.__index = ExplorerView
 
 function ExplorerView.new(opts)
-  local fs_root = FSItem(store.set {
+  local fs_root = FSItem(store.set_entry {
     name = fn.fnamemodify(opts.cwd, ":t"),
     type = "directory",
     path = opts.cwd,

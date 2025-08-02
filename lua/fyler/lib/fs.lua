@@ -208,6 +208,68 @@ M.mv = a.async(function(src_path, dst_path, cb)
   return cb(nil, true)
 end)
 
+---@param src_path string
+---@param dst_path string
+---@param cb fun(err?: string, success: boolean)
+M.cp = a.async(function(src_path, dst_path, cb)
+  local stat_err, src_stat = a.await(uv.fs_stat, src_path)
+  if not src_stat then return cb(stat_err, false) end
+
+  if src_stat.type == "directory" then return cb("Source is a directory, use cp_r for recursive copy", false) end
+
+  local _, dst_stat = a.await(uv.fs_stat, dst_path)
+  if dst_stat then return cb("Destination path already exists", false) end
+
+  local copyfile_err, copyfile_success = a.await(uv.fs_copyfile, src_path, dst_path, nil)
+  if not copyfile_success then return cb(copyfile_err, false) end
+
+  return cb(nil, true)
+end)
+
+---@param src_path string
+---@param dst_path string
+---@param cb fun(err?: string, success: boolean)
+M.cp_r = a.async(function(src_path, dst_path, cb)
+  local stat_err, src_stat = a.await(uv.fs_stat, src_path)
+  if not src_stat then return cb(stat_err, false) end
+
+  local _, dst_stat = a.await(uv.fs_stat, dst_path)
+  if dst_stat then return cb("Destination path already exists", false) end
+
+  local stk = Stack()
+  stk:push {
+    dst_path = dst_path,
+    src_path = src_path,
+    type = src_stat.type,
+  }
+
+  while not stk:is_empty() do
+    local cur_entry = stk:pop()
+
+    if cur_entry.type == "directory" then
+      local mkdir_err, mkdir_success = a.await(M.mkdir_p, cur_entry.dst_path)
+      if not mkdir_success then return cb(mkdir_err, false) end
+
+      local ls_err, entries = a.await(M.ls, cur_entry.src_path)
+      if ls_err then return cb(ls_err, false) end
+
+      for _, entry in ipairs(entries) do
+        local dst_entry_path = M.joinpath(cur_entry.dst_path, entry.name)
+        stk:push {
+          src_path = entry.path,
+          dst_path = dst_entry_path,
+          type = entry.type,
+        }
+      end
+    else
+      local copyfile_err, copyfile_success = a.await(uv.fs_copyfile, cur_entry.src_path, cur_entry.dst_path, nil)
+      if not copyfile_success then return cb(copyfile_err, false) end
+    end
+  end
+
+  return cb(nil, true)
+end)
+
 ---@param path string
 ---@param cb fun(err?: string, success: boolean)
 M.create = a.async(function(path, cb)
@@ -283,6 +345,30 @@ M.move = a.async(function(src_path, dst_path, cb)
 
   local success, msg = pcall(api.nvim_buf_delete, src_buf, { force = true })
   if not success then return cb(msg, true) end
+
+  return cb(nil, true)
+end)
+
+---@param src_path string
+---@param dst_path string
+---@param cb fun(err?: string, success: boolean)
+M.copy = a.async(function(src_path, dst_path, cb)
+  local stat_err, src_stat = a.await(uv.fs_stat, src_path)
+  if not src_stat then return cb(stat_err, false) end
+
+  local _, dst_stat = a.await(uv.fs_stat, dst_path)
+  if dst_stat then return cb("Destination path already exists", false) end
+
+  local mkdirp_err, mkdirp_success = a.await(M.mkdir_p, fn.fnamemodify(dst_path, ":h"))
+  if not mkdirp_success then return cb(mkdirp_err, false) end
+
+  if src_stat.type == "directory" then
+    local cp_r_err, cp_r_success = a.await(M.cp_r, src_path, dst_path)
+    if not cp_r_success then return cb(cp_r_err, false) end
+  else
+    local copyfile_err, copyfile_success = a.await(uv.fs_copyfile, src_path, dst_path, nil)
+    if not copyfile_success then return cb(copyfile_err, false) end
+  end
 
   return cb(nil, true)
 end)
