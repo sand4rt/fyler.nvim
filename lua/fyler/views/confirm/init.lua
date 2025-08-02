@@ -1,6 +1,7 @@
 local Win = require("fyler.lib.win")
 local config = require("fyler.config")
 local ui = require("fyler.views.confirm.ui")
+local util = require("fyler.lib.util")
 
 ---@class FylerConfirmView
 ---@field win FylerWin
@@ -61,7 +62,7 @@ local M = {}
 M.open = vim.schedule_wrap(function(msg, chs, cb)
   if not M.instance then M.instance = setmetatable({}, FylerConfirmView) end
 
-  if M.instance.win and M.instance.win:has_valid_winid() then M.instance:close() end
+  if M.instance.win and util.has_valid_winid(M.instance.win) then M.instance:close() end
 
   M.instance:open(msg, chs, cb)
 end)

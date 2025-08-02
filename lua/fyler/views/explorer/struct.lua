@@ -3,18 +3,18 @@ local fs = require("fyler.lib.fs")
 local store = require("fyler.views.explorer.store")
 
 ---@class FylerFSItem
----@field meta string
+---@field id string
 ---@field open boolean
 ---@field children FylerFSItem[]
 local FSItem = {}
 FSItem.__index = FSItem
 
 local M = setmetatable({}, {
-  ---@param meta string
+  ---@param id string
   ---@return FylerFSItem
-  __call = function(_, meta)
+  __call = function(_, id)
     local instance = {
-      meta = meta,
+      id = id,
       open = false,
       children = {},
     }
@@ -26,16 +26,16 @@ local M = setmetatable({}, {
 function FSItem:toggle() self.open = not self.open end
 
 ---@param addr string
----@param meta string
-function FSItem:add_child(addr, meta)
+---@param id string
+function FSItem:add_child(addr, id)
   local target_node = self:find(addr)
-  if target_node then table.insert(target_node.children, M(meta)) end
+  if target_node then table.insert(target_node.children, M(id)) end
 end
 
 ---@param addr string
 ---@return FylerFSItem?
 function FSItem:find(addr)
-  if self.meta == addr then return self end
+  if self.id == addr then return self end
 
   for _, child in ipairs(self.children) do
     local found = child:find(addr)
@@ -48,15 +48,15 @@ end
 FSItem.update = a.async(function(self, cb)
   if not self.open then return cb() end
 
-  local meta_data = store.get(self.meta)
-  local err, items = a.await(fs.ls, meta_data.path)
+  local entry = store.get(self.id)
+  local err, items = a.await(fs.ls, entry.path)
   if err then return cb() end
 
   self.children = vim
     .iter(self.children)
     :filter(function(child) ---@param child FylerFSItem
       return vim.iter(items):any(
-        function(item) return item.path == store.get(child.meta).path and item.type == store.get(child.meta).type end
+        function(item) return item.path == store.get(child.id).path and item.type == store.get(child.id).type end
       )
     end)
     :totable()
@@ -64,10 +64,10 @@ FSItem.update = a.async(function(self, cb)
   for _, item in ipairs(items) do
     if
       not vim.iter(self.children):any(function(child) ---@param child FylerFSItem
-        return store.get(child.meta).path == item.path and store.get(child.meta).type == item.type
+        return store.get(child.id).path == item.path and store.get(child.id).type == item.type
       end)
     then
-      self:add_child(self.meta, store.set(item))
+      self:add_child(self.id, store.set(item))
     end
   end
 

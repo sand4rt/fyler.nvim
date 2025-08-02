@@ -4,9 +4,9 @@ local cache = require("fyler.cache")
 local config = require("fyler.config")
 local confirm_view = require("fyler.views.confirm")
 local fs = require("fyler.lib.fs")
-local regex = require("fyler.views.explorer.regex")
 local store = require("fyler.views.explorer.store")
 local ui = require("fyler.views.explorer.ui")
+local util = require("fyler.lib.util")
 
 local M = {}
 
@@ -26,18 +26,18 @@ end
 ---@param view FylerExplorerView
 function M.n_select(view)
   return function()
-    local key = regex.match_meta(api.nvim_get_current_line())
+    local key = util.match_id(api.nvim_get_current_line())
     if not key then return end
 
-    local meta_data = store.get(key)
-    if meta_data:is_directory() then
+    local entry = store.get(key)
+    if entry:is_dir() then
       view.fs_root:find(key):toggle()
       api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
     else
       local recent_win = cache.get_entry("recent_win")
 
       if recent_win and api.nvim_win_is_valid(recent_win) then
-        fn.win_execute(recent_win, string.format("edit %s", meta_data:resolved_path()))
+        fn.win_execute(recent_win, string.format("edit %s", entry:get_path()))
         fn.win_gotoid(recent_win)
 
         if config.values.views.explorer.close_on_select then view.win:hide() end
@@ -49,15 +49,15 @@ end
 ---@param view FylerExplorerView
 function M.n_select_tab(view)
   return function()
-    local key = regex.match_meta(api.nvim_get_current_line())
+    local key = util.match_id(api.nvim_get_current_line())
     if not key then return end
 
-    local meta_data = store.get(key)
-    if not meta_data:is_directory() then
+    local entry = store.get(key)
+    if not entry:is_dir() then
       local recent_win = cache.get_entry("recent_win")
 
       if recent_win and api.nvim_win_is_valid(recent_win) then
-        fn.execute(string.format("tabedit %s", meta_data:resolved_path()))
+        fn.execute(string.format("tabedit %s", entry:get_path()))
 
         if config.values.views.explorer.close_on_select then view.win:hide() end
       end
@@ -68,16 +68,16 @@ end
 ---@param view FylerExplorerView
 function M.n_select_vsplit(view)
   return function()
-    local key = regex.match_meta(api.nvim_get_current_line())
+    local key = util.match_id(api.nvim_get_current_line())
     if not key then return end
 
-    local meta_data = store.get(key)
-    if not meta_data:is_directory() then
+    local entry = store.get(key)
+    if not entry:is_dir() then
       local recent_win = cache.get_entry("recent_win")
 
       if recent_win and api.nvim_win_is_valid(recent_win) then
         fn.win_gotoid(recent_win)
-        fn.execute(string.format("vsplit %s", meta_data:resolved_path()))
+        fn.execute(string.format("vsplit %s", entry:get_path()))
 
         if config.values.views.explorer.close_on_select then view.win:hide() end
       end
@@ -88,16 +88,16 @@ end
 ---@param view FylerExplorerView
 function M.n_select_split(view)
   return function()
-    local key = regex.match_meta(api.nvim_get_current_line())
+    local key = util.match_id(api.nvim_get_current_line())
     if not key then return end
 
-    local meta_data = store.get(key)
-    if not meta_data:is_directory() then
+    local entry = store.get(key)
+    if not entry:is_dir() then
       local recent_win = cache.get_entry("recent_win")
 
       if recent_win and api.nvim_win_is_valid(recent_win) then
         fn.win_gotoid(recent_win)
-        fn.execute(string.format("split %s", meta_data:resolved_path()))
+        fn.execute(string.format("split %s", entry:get_path()))
 
         if config.values.views.explorer.close_on_select then view.win:hide() end
       end
@@ -200,7 +200,7 @@ end
 ---@param on_render function
 function M.refreshview(view, on_render)
   return a.async(function()
-    if not view.win:has_valid_bufnr() then return end
+    if not (util.has_valid_winid(view.win) and util.has_valid_bufnr(view.win)) then return end
 
     a.await(view.fs_root.update, view.fs_root)
 
@@ -208,15 +208,10 @@ function M.refreshview(view, on_render)
 
     view.win.ui:render {
       ui_lines = a.await(ui.Explorer, algos.tree_table_from_node(view).children),
-      on_render = function()
+      on_render = vim.schedule_wrap(function()
         if on_render then on_render() end
-
-        if not view.win:has_valid_bufnr() then return end
-
-        vim.bo[view.win.bufnr].undolevels = vim.go.undolevels
-        vim.bo[view.win.bufnr].syntax = "fyler"
-        vim.bo[view.win.bufnr].filetype = "fyler"
-      end,
+        if util.has_valid_bufnr(view.win) then vim.bo[view.win.bufnr].undolevels = vim.go.undolevels end
+      end),
     }
   end)
 end
@@ -224,11 +219,11 @@ end
 function M.constrain_cursor(view)
   return function()
     local cur = api.nvim_get_current_line()
-    local meta = regex.match_meta(cur)
-    if not meta then return end
+    local id = util.match_id(cur)
+    if not id then return end
 
-    local _, ub = string.find(cur, meta)
-    if not view.win:has_valid_winid() then return end
+    local _, ub = string.find(cur, id)
+    if not util.has_valid_winid(view.win) then return end
 
     local row, col = unpack(api.nvim_win_get_cursor(view.win.winid))
     if col <= ub then api.nvim_win_set_cursor(view.win.winid, { row, ub + 1 }) end
@@ -240,9 +235,7 @@ function M.try_focus_buffer(view)
   return a.schedule_async(function(arg)
     local explorer = require("fyler.views.explorer")
 
-    if not view.win:is_visible() then return end
-
-    if arg.file == "" then return end
+    if arg.file == "" or not util.has_valid_winid(view.win) then return end
 
     if string.match(arg.file, "^fyler://*") then
       local recent_win = cache.get_entry("recent_win")
@@ -271,11 +264,11 @@ function M.try_focus_buffer(view)
     a.await(focused_node.update, focused_node)
 
     for i, part in ipairs(parts) do
-      local child = vim.iter(focused_node.children):find(function(child) return store.get(child.meta).name == part end)
+      local child = vim.iter(focused_node.children):find(function(child) return store.get(child.id).name == part end)
 
       if not child then break end
 
-      if store.get(child.meta):is_directory() then
+      if store.get(child.id):is_dir() then
         child.open = true
         a.await(child.update, child)
       end
@@ -286,11 +279,11 @@ function M.try_focus_buffer(view)
     if last_visit ~= #parts then return end
 
     M.refreshview(view, function()
-      if not view.win:has_valid_winid() then return end
+      if not util.has_valid_winid(view.win) then return end
 
       local buf_lines = api.nvim_buf_get_lines(view.win.bufnr, 0, -1, false)
       for ln, buf_line in ipairs(buf_lines) do
-        if buf_line:find(focused_node.meta) then api.nvim_win_set_cursor(view.win.winid, { ln, 0 }) end
+        if buf_line:find(focused_node.id) then api.nvim_win_set_cursor(view.win.winid, { ln, 0 }) end
       end
     end)()
   end)
@@ -301,10 +294,10 @@ local extmark_namespace = api.nvim_create_namespace("FylerIndentScope")
 ---@param view FylerExplorerView
 function M.draw_indentscope(view)
   local function draw_line(ln)
-    if not view.win:has_valid_bufnr() then return end
+    if not util.has_valid_bufnr(view.win) then return end
 
     local cur_line = unpack(api.nvim_buf_get_lines(view.win.bufnr, ln - 1, ln, false))
-    local cur_indent = #regex.match_indent(cur_line)
+    local cur_indent = #util.match_indent(cur_line)
     if cur_indent == 0 then return end
 
     local indent_depth = math.floor(cur_indent * 0.5)
@@ -324,7 +317,7 @@ function M.draw_indentscope(view)
   end
 
   return function()
-    if not view.win:has_valid_bufnr() then return end
+    if not util.has_valid_bufnr(view.win) then return end
 
     if not config.values.views.explorer.indentscope.enabled then return end
 

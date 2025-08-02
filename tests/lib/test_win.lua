@@ -1,4 +1,5 @@
 local test = require("mini.test")
+local util = require("fyler.lib.util")
 local T = test.new_set()
 
 T["can create instance"] = function()
@@ -56,11 +57,11 @@ T["can show and hide"] = function()
   require("fyler.config").setup {}
 
   win:show()
-  test.expect.equality(win:has_valid_bufnr(), true)
-  test.expect.equality(win:has_valid_winid(), true)
+  test.expect.equality(util.has_valid_bufnr(win), true)
+  test.expect.equality(util.has_valid_winid(win), true)
   win:hide()
-  test.expect.equality(win:has_valid_bufnr(), false)
-  test.expect.equality(win:has_valid_winid(), false)
+  test.expect.equality(util.has_valid_bufnr(win), false)
+  test.expect.equality(util.has_valid_winid(win), false)
 end
 
 return T

@@ -35,9 +35,9 @@ local git_status_hl = setmetatable({
 
 local function get_sorted(tbl)
   table.sort(tbl, function(x, y)
-    if x:is_directory() and not y:is_directory() then
+    if x:is_dir() and not y:is_dir() then
       return true
-    elseif not x:is_directory() and y:is_directory() then
+    elseif not x:is_dir() and y:is_dir() then
       return false
     else
       return x.name < y.name
@@ -96,7 +96,7 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
             str = git_symbol and string.format(" %s ", git_symbol) or " ",
             hl = git_status_hl[git_symbol],
           },
-          { str = string.format("/%s", item.meta) },
+          { str = string.format("/%s", item.id) },
           {
             str = string.format(" %s", item.name),
             hl = (function()

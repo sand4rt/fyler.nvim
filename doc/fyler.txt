@@ -105,7 +105,6 @@ Fyler supports plenty of options to customize. Following are default values
             expandtab = true,
             filetype = "fyler",
             shiftwidth = 2,
-            syntax = "fyler",
           },
         -- Changes window kind
           kind = "float",

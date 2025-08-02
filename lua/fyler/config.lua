@@ -143,9 +143,7 @@ local defaults = {
           buflisted = false,
           buftype = "acwrite",
           expandtab = true,
-          filetype = "fyler",
           shiftwidth = 2,
-          syntax = "fyler",
         },
         kind = "float",
         kind_presets = {
@@ -179,8 +177,6 @@ local defaults = {
           },
         },
         win_opts = {
-          concealcursor = "nvic",
-          conceallevel = 3,
           cursorline = true,
           number = true,
           relativenumber = true,

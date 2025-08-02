@@ -1,3 +1,5 @@
+local util = require("fyler.lib.util")
+
 local Ui = require("fyler.lib.ui")
 
 ---@alias FylerWinKind
@@ -94,15 +96,6 @@ local M = setmetatable({}, {
   end,
 })
 
----@return boolean
-function Win:has_valid_bufnr() return type(self.bufnr) == "number" and api.nvim_buf_is_valid(self.bufnr) end
-
----@return boolean
-function Win:has_valid_winid() return type(self.winid) == "number" and api.nvim_win_is_valid(self.winid) end
-
----@return boolean
-function Win:is_visible() return self:has_valid_bufnr() and self:has_valid_winid() end
-
 ---@return vim.api.keyset.win_config
 function Win:config()
   local winconfig = {
@@ -137,13 +130,12 @@ function Win:config()
 end
 
 function Win:show()
-  if self:has_valid_winid() then return end
+  if util.has_valid_winid(self) then return end
 
   local recent_win = api.nvim_get_current_win()
   local win_config = self:config()
 
   self.bufnr = api.nvim_create_buf(false, true)
-  if self.render then self.render() end
 
   api.nvim_buf_set_name(self.bufnr, self.bufname)
 
@@ -169,8 +161,6 @@ function Win:show()
     self.winid = api.nvim_open_win(self.bufnr, self.enter, win_config)
   end
 
-  api.nvim_exec_autocmds("BufEnter", {})
-
   for key, val in pairs(self.mappings) do
     vim.keymap.set("n", key, val, { buffer = self.bufnr, silent = true, noremap = true })
   end
@@ -185,26 +175,20 @@ function Win:show()
   end
 
   for event, callback in pairs(self.autocmds) do
-    api.nvim_create_autocmd(event, {
-      group = self.augroup,
-      buffer = self.bufnr,
-      callback = callback,
-    })
+    api.nvim_create_autocmd(event, { group = self.augroup, buffer = self.bufnr, callback = callback })
   end
 
   for event, callback in pairs(self.user_autocmds) do
-    api.nvim_create_autocmd("User", {
-      pattern = event,
-      group = self.augroup,
-      callback = callback,
-    })
+    api.nvim_create_autocmd("User", { pattern = event, group = self.augroup, callback = callback })
   end
+
+  if self.render then self.render() end
 end
 
 function Win:hide()
-  if self:has_valid_winid() then api.nvim_win_close(self.winid, true) end
+  if util.has_valid_winid(self) then api.nvim_win_close(self.winid, true) end
 
-  if self:has_valid_bufnr() then api.nvim_buf_delete(self.bufnr, { force = true }) end
+  if util.has_valid_bufnr(self) then api.nvim_buf_delete(self.bufnr, { force = true }) end
 end
 
 return M

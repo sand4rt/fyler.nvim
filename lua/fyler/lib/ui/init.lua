@@ -1,3 +1,5 @@
+local util = require("fyler.lib.util")
+
 local api = vim.api
 
 ---@class FylerUi
@@ -30,7 +32,7 @@ end
 
 ---@param ui_lines FylerUiLine[]
 function Ui:_render(ui_lines)
-  if not self.win:has_valid_bufnr() then return end
+  if not util.has_valid_bufnr(self.win) then return end
 
   local was_modifiable = vim.bo[self.win.bufnr].modifiable
   local win_width = api.nvim_win_get_width(self.win.winid)
