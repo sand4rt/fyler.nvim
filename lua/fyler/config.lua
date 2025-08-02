@@ -73,8 +73,8 @@ local defaults = {
       ["q"] = "CloseView",
       ["<CR>"] = "Select",
       ["<C-t>"] = "SelectTab",
-      ["<C-v>"] = "SelectVSplit",
-      ["<C-x>"] = "SelectSplit",
+      ["|"] = "SelectVSplit",
+      ["-"] = "SelectSplit",
     },
     confirm = {
       ["y"] = "Confirm",

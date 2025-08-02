@@ -117,7 +117,7 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
           if item.type == "link" then
             table.insert(line, {
               hl = "FylerFSLink",
-              str = string.format(" %s", item.link_path),
+              str = string.format("@%s", item.link_path),
             })
           end
 
