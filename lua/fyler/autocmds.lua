@@ -31,11 +31,13 @@ function M.setup(config)
     })
   end
 
-  api.nvim_create_autocmd("BufEnter", {
+  api.nvim_create_autocmd("User", {
     group = augroup,
-    pattern = "fyler://*",
+    pattern = "FylerWinOpen",
     callback = function(arg)
-      api.nvim_win_call(fn.bufwinid(arg.buf), function()
+      if not arg.data.bufname:match("fyler://*") then return end
+
+      api.nvim_win_call(arg.data.win, function()
         vim.wo.concealcursor = "nvic"
         vim.wo.conceallevel = 3
 
