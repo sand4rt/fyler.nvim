@@ -50,4 +50,15 @@ end
 ---@return table
 function M.tbl_merge(a, b) return vim.tbl_deep_extend("force", a, b) end
 
+---@param tbl table
+---@return table
+function M.unique(tbl)
+  local res = {}
+  for i = 1, #tbl do
+    if tbl[i] and not vim.tbl_contains(res, tbl[i]) then table.insert(res, tbl[i]) end
+  end
+
+  return res
+end
+
 return M

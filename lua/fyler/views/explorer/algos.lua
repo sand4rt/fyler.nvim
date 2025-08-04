@@ -109,9 +109,7 @@ function M.compute_fs_actions(view)
   end
 
   for path, tbl in pairs(groups) do
-    tbl = tbl or {}
-
-    vim.list.unique(tbl)
+    tbl = util.unique(tbl)
 
     if #tbl == 1 and tbl[1] == path then goto continue end
 
