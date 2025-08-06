@@ -1,61 +1,34 @@
-local FSItem = require("fyler.views.explorer.struct")
+local TreeNode = require("fyler.views.explorer.struct")
 local Win = require("fyler.lib.win")
-local a = require("fyler.lib.async")
+local cache = require("fyler.cache")
 local config = require("fyler.config")
-local fs = require("fyler.lib.fs")
 local store = require("fyler.views.explorer.store")
+local util = require("fyler.lib.util")
 
+local M = {}
+
+local api = vim.api
 local fn = vim.fn
 
 ---@class FylerExplorerView
----@field cwd     string      - Directory path which act as a root
----@field fs_root FylerFSItem - Root |FylerFSItem| instance
----@field win     FylerWin    - Window instance
+---@field cwd string
+---@field root FylerTreeNode
+---@field win FylerWin
 local ExplorerView = {}
 ExplorerView.__index = ExplorerView
 
-function ExplorerView.new(opts)
-  local fs_root = FSItem(store.set_entry {
-    name = fn.fnamemodify(opts.cwd, ":t"),
-    type = "directory",
-    path = opts.cwd,
-  })
-
-  fs_root:toggle()
-
-  local instance = {
-    cwd = opts.cwd,
-    fs_root = fs_root,
-    kind = opts.kind,
-  }
-
-  setmetatable(instance, ExplorerView)
-
-  return instance
-end
-
-ExplorerView.open = a.async(function(self, opts)
-  local mappings = config.get_reverse_mappings("explorer")
-  local win = config.get_view("explorer", opts.kind).win
+---@param opts { cwd: string, enter: boolean, kind: FylerWinKind|string }
+function ExplorerView:open(opts)
+  local view_config = config.get_view_config("explorer", opts.kind)
+  local mappings = {}
+  util.tbl_each(
+    config.get_mappings("explorer"),
+    function(x, y) mappings[x] = self:_action(util.camel_to_snake(string.format("n%s", y))) end
+  )
+  cache.set_entry("recent_win", api.nvim_get_current_win())
 
   -- stylua: ignore start
-  self.win = Win {
-    border   = win.border,
-    buf_opts = win.buf_opts,
-    bufname  = string.format("fyler://%s", self.cwd),
-    enter    = opts.enter,
-    height   = win.height,
-    kind     = opts.kind or win.kind,
-    name     = "explorer",
-    width    = win.width,
-    win_opts = win.win_opts,
-    mappings = {
-      [mappings["CloseView"]]    = self:_action("n_close_view"),
-      [mappings["Select"]]       = self:_action("n_select"),
-      [mappings["SelectSplit"]]  = self:_action("n_select_split"),
-      [mappings["SelectTab"]]    = self:_action("n_select_tab"),
-      [mappings["SelectVSplit"]] = self:_action("n_select_vsplit"),
-    },
+  self.win = Win.new {
     autocmds = {
       ["BufReadCmd"]   = self:_action("refreshview"),
       ["BufWriteCmd"]  = self:_action("synchronize"),
@@ -65,52 +38,96 @@ ExplorerView.open = a.async(function(self, opts)
       ["TextChangedI"] = self:_action("draw_indentscope"),
       ["WinClosed"]    = self:_action("n_close_view"),
     },
+    border        = view_config.win.border,
+    buf_opts      = view_config.win.buf_opts,
+    bufname       = string.format("fyler://%s", opts.cwd),
+    enter         = opts.enter,
+    height        = view_config.win.height,
+    kind          = opts.kind,
+    mappings      = mappings,
+    name          = "Explorer",
+    render        = self:_action("refreshview"),
     user_autocmds = {
       ["RefreshView"] = self:_action("refreshview"),
       ["Synchronize"] = self:_action("synchronize"),
     },
-    render = self:_action("refreshview"),
+    width    = view_config.win.width,
+    win_opts = view_config.win.win_opts
   }
   -- stylua: ignore end
 
-  require("fyler.cache").set_entry("recent_win", vim.api.nvim_get_current_win())
-
   self.win:show()
-end)
-
----@param ... any
-function ExplorerView:_action(name, ...)
-  local action = require("fyler.views.explorer.actions")[name]
-
-  assert(action, string.format("%s action is not available", name))
-
-  return action(self, ...)
 end
 
-local M = {
-  instance = nil, ---@type FylerExplorerView
-}
+---@param name string
+function ExplorerView:_action(name)
+  local action = require("fyler.views.explorer.actions")[name]
+  assert(action, string.format("%s action is not available", name))
+  return action(self)
+end
 
----@param opts { cwd?: string, kind?: FylerWinKind }
+---@return boolean
+function ExplorerView:is_visible() return self.win and self.win:is_visible() end
+
+function ExplorerView:focus()
+  if self.win then self.win:focus() end
+end
+
+local instance_map = {}
+local current_dir = nil
+
+---@param cwd string
 ---@return FylerExplorerView
-function M.get_instance(opts)
-  if (not M.instance) or (M.instance.cwd ~= opts.cwd) then
-    M.instance = ExplorerView.new { cwd = opts.cwd, kind = opts.kind }
+function M.find_or_create(cwd)
+  if instance_map[cwd] then
+    current_dir = cwd
+    return instance_map[cwd]
   end
 
-  return M.instance
+  local instance = {
+    cwd = cwd,
+    root = TreeNode.new(store.set_entry {
+      name = fn.fnamemodify(cwd, ":t"),
+      path = cwd,
+      type = "directory",
+    }),
+  }
+
+  instance.root:toggle()
+  instance_map[cwd] = setmetatable(instance, ExplorerView)
+
+  return instance
 end
 
----@param opts? { enter?: boolean, cwd?: string, kind?: FylerWinKind }
+---@param cwd string
+---@return FylerExplorerView
+function M.get_instance(cwd)
+  if current_dir == cwd then return instance_map[current_dir] end
+
+  local current_instance = M.get_current_instance()
+  if current_instance then current_instance.win:hide() end
+
+  current_dir = cwd
+  instance_map[current_dir] = M.find_or_create(current_dir)
+
+  return instance_map[current_dir]
+end
+
+---@return FylerExplorerView|nil
+function M.get_current_instance()
+  if not current_dir then return nil end
+
+  return instance_map[current_dir]
+end
+
+---@param opts { cwd: string, enter: boolean, kind: FylerWinKind|string }
 function M.open(opts)
-  opts = opts or {}
-  opts.enter = opts.enter == nil and true or opts.enter
-  opts.cwd = opts.cwd or fs.getcwd()
-  opts.kind = opts.kind or config.get_view("explorer").kind
-
-  if M.instance and fn.winbufnr(M.instance.win.winid) == M.instance.win.bufnr then M.instance.win:hide() end
-
-  M.get_instance(opts):open(opts)
+  local instance = M.get_instance(opts.cwd)
+  if instance:is_visible() then
+    instance:focus()
+  else
+    instance:open(opts)
+  end
 end
 
 return M
