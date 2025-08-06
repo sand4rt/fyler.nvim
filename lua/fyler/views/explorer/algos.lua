@@ -137,22 +137,20 @@ function M.compute_fs_actions(view)
   for path, tbl in pairs(groups) do
     tbl = util.unique(tbl)
 
-    if #tbl == 1 and tbl[1] == path then goto continue end
+    if not (#tbl == 1 and tbl[1] == path) then
+      if util.if_any(tbl, function(x) return x == path end) then
+        util.tbl_each(tbl, function(x)
+          if path == x then return end
 
-    if util.if_any(tbl, function(x) return x == path end) then
-      util.tbl_each(tbl, function(x)
-        if path == x then return end
+          table.insert(actions.copy, { src = path, dst = x })
+        end)
+      else
+        table.insert(actions.move, { src = path, dst = tbl[1] })
+        table.remove(tbl, 1)
 
-        table.insert(actions.copy, { src = path, dst = x })
-      end)
-    else
-      table.insert(actions.move, { src = path, dst = tbl[1] })
-      table.remove(tbl, 1)
-
-      util.tbl_each(tbl, function(x) table.insert(actions.copy, { src = path, dst = x }) end)
+        util.tbl_each(tbl, function(x) table.insert(actions.copy, { src = path, dst = x }) end)
+      end
     end
-
-    ::continue::
   end
 
   return actions

@@ -103,7 +103,6 @@ function Win:focus()
   fn.win_gotoid(windows[1])
 end
 
----@return vim.api.keyset.win_config
 function Win:config()
   local winconfig = {
     style = "minimal",

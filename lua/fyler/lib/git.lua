@@ -9,7 +9,7 @@ local await = a.await
 
 ---@param cb fun(result: boolean)
 local is_git_repo = async(function(cb)
-  local out = await(vim.system, { "git", "rev-parse", "--is-inside-work-tree" }, nil) ---@type vim.SystemCompleted
+  local out = await(vim.system, { "git", "rev-parse", "--is-inside-work-tree" }, nil)
   return cb(string.match(out.stdout, "^(.*)\n$") == "true")
 end)
 
@@ -17,7 +17,7 @@ end)
 local git_status = async(function(cb)
   if not await(is_git_repo) then return cb(nil) end
 
-  local out = await(vim.system, { "git", "status", "--porcelain", "-z" }, nil) ---@type vim.SystemCompleted
+  local out = await(vim.system, { "git", "status", "--porcelain", "-z" }, nil)
   if not out.stdout then return cb(nil) end
 
   return cb(out.stdout)
@@ -25,7 +25,7 @@ end)
 
 ---@param cb fun(path: string|nil)
 local git_toplevel = async(function(cb)
-  local out = await(vim.system, { "git", "rev-parse", "--show-toplevel" }, nil) ---@type vim.SystemCompleted
+  local out = await(vim.system, { "git", "rev-parse", "--show-toplevel" }, nil)
   if not out.stdout then return cb(nil) end
 
   return cb(string.match(out.stdout, "^(.*)\n$"))

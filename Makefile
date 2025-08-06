@@ -3,10 +3,10 @@
 check: format lint test
 
 format:
-	stylua lua tests --config-path=.stylua.toml
+	stylua .
 
 lint:
-	luacheck lua --globals vim
+	selene --config selene/config.toml lua
 
 test:
-	nvim -l scripts/minitest.lua
+	nvim -l tests/init.lua

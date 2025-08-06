@@ -3,46 +3,36 @@ on:
   - push
   - pull_request
 jobs:
-  stylua:
-    name: StyLua
+  format:
+    name: Formatting
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout codebase
-        uses: actions/checkout@v4
-
-      - name: Format with stylua
-        uses: JohnnyMorganz/stylua-action@v4
+      - uses: actions/checkout@v4
+      - uses: JohnnyMorganz/stylua-action@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: latest
-          args: false
-
-      - run: |
-          stylua lua --config-path=.stylua.toml
-  luacheck:
-    name: Luacheck
+          args: --color always --check lua/ tests/
+  lint:
+    name: Linting
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout codebase
-        uses: actions/checkout@v4
-
-      - name: Prepare
-        run: |
-          sudo apt-get update
-          sudo apt-get install luarocks -y
-          sudo luarocks install luacheck
-
-      - name: Run Luacheck
-        run: luacheck lua/ --globals vim
-  tests:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: selene
+      - name: run linters
+        run: make lint
+  test:
+    name: Testing
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout codebase
-        uses: actions/checkout@v3
-
-      - name: Install Neovim
-        uses: folke/github/neovim@main
-
-      - name: Run Tests
+      - uses: actions/checkout@v3
+      - uses: folke/github/neovim@main
+      - name: Installing dependencies
         run: |
-          nvim -l scripts/minitest.lua
+          git config --global core.compression 0
+          git clone https://github.com/echasnovski/mini.test .tests/repos/mini.test
+      - name: Running tests
+        run: make test
