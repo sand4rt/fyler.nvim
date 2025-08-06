@@ -46,16 +46,16 @@ function M.setup(config)
     end,
   })
 
-  api.nvim_create_autocmd(
-    "ColorScheme",
-    { group = augroup, callback = function() require("fyler.lib.hls").setup() end }
-  )
+  api.nvim_create_autocmd("ColorScheme", {
+    group = augroup,
+    callback = function() require("fyler.lib.hls").setup() end,
+  })
 
   api.nvim_create_autocmd("BufEnter", {
     group = augroup,
-    callback = function(...)
+    callback = function(arg)
       local cur_instance = require("fyler.views.explorer").get_current_instance()
-      if cur_instance then cur_instance:_action("try_focus_buffer")(...) end
+      if cur_instance then cur_instance:_action("try_focus_buffer")(arg) end
     end,
   })
 

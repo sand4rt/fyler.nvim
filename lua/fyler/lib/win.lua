@@ -167,6 +167,7 @@ function Win:show()
     self.winid = api.nvim_open_win(self.bufnr, self.enter, win_config)
   end
 
+  api.nvim_exec_autocmds("BufEnter", {})
   api.nvim_exec_autocmds("User", {
     pattern = "FylerWinOpen",
     data = { win = self.winid, buf = self.bufnr, bufname = self.bufname },
