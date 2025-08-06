@@ -5,6 +5,9 @@ local List = require("fyler.lib.structs.list")
 local Queue = {}
 Queue.__index = Queue
 
+---@return FylerQueue
+function Queue.new() return setmetatable({ items = List.new() }, Queue) end
+
 ---@param data any
 function Queue:enqueue(data) self.items:insert(self.items:len() + 1, data) end
 
@@ -26,7 +29,4 @@ end
 ---@return boolean
 function Queue:is_empty() return self.items:len() == 0 end
 
-return setmetatable({}, {
-  ---@return FylerQueue
-  __call = function() return setmetatable({ items = List() }, Queue) end,
-})
+return Queue

@@ -1,11 +1,11 @@
 local fn = vim.fn
 
 local icon_providers = {
-  ---@return string?, string?
+  ---@return string|nil, string|nil
   ["none"] = function() return "", "" end,
   ---@param type string
   ---@param _ string
-  ---@return string?, string?
+  ---@return string|nil, string|nil
   ["minimal"] = function(type, _)
     if type == "directory" then
       return "D", "FylerFSDirectory"
@@ -17,7 +17,7 @@ local icon_providers = {
   end,
   ---@param type string
   ---@param name string
-  ---@return string?, string?
+  ---@return string|nil, string|nil
   ["mini-icons"] = function(type, name)
     local success, miniicons = pcall(require, "mini.icons")
     if not success then return nil, nil end
@@ -26,7 +26,7 @@ local icon_providers = {
   end,
   ---@param type string
   ---@param name string
-  ---@return string?, string?
+  ---@return string|nil, string|nil
   ["nvim-web-devicons"] = function(type, name)
     local success, devicons = pcall(require, "nvim-web-devicons")
     if not success then return nil, nil end

@@ -5,6 +5,9 @@ local List = require("fyler.lib.structs.list")
 local Stack = {}
 Stack.__index = Stack
 
+---@return FylerStack
+function Stack.new() return setmetatable({ items = List.new() }, Stack) end
+
 ---@param data any
 function Stack:push(data) self.items:insert(1, data) end
 
@@ -25,7 +28,4 @@ end
 ---@return boolean
 function Stack:is_empty() return self.items:len() == 0 end
 
-return setmetatable({}, {
-  ---@return FylerStack
-  __call = function() return setmetatable({ items = List() }, Stack) end,
-})
+return Stack

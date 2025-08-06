@@ -35,7 +35,7 @@ function M.setup(config)
     group = augroup,
     pattern = "FylerWinOpen",
     callback = function(arg)
-      if not arg.data.bufname:match("fyler://*") then return end
+      if not (arg.data.bufname and arg.data.bufname:match("fyler://*")) then return end
 
       api.nvim_win_call(arg.data.win, function()
         vim.wo.concealcursor = "nvic"
@@ -54,7 +54,7 @@ function M.setup(config)
   api.nvim_create_autocmd("BufEnter", {
     group = augroup,
     callback = function(...)
-      local cur_instance = require("fyler.views.explorer").instance
+      local cur_instance = require("fyler.views.explorer").get_current_instance()
       if cur_instance then cur_instance:_action("try_focus_buffer")(...) end
     end,
   })
@@ -68,8 +68,8 @@ function M.setup(config)
       if vim.fn.bufname(arg.buf) == explorer.win.bufname then return end
 
       if api.nvim_get_current_win() == explorer.win.winid then
-        for option, _ in pairs(require("fyler.config").get_view("explorer").win.win_opts) do
-          if not util.has_valid_winid(explorer.win) then return end
+        for option, _ in pairs(require("fyler.config").get_view_config("explorer").win.win_opts) do
+          if not explorer.win:has_valid_winid() then return end
 
           vim.wo[explorer.win.winid][option] = vim.w[explorer.win.winid][option]
         end
@@ -86,7 +86,7 @@ function M.setup(config)
         if stats and stats.type == "directory" then
           local cur_buf = api.nvim_get_current_buf()
 
-          if api.nvim_buf_is_valid(cur_buf) then api.nvim_buf_delete(cur_buf, { force = true }) end
+          if util.is_valid_bufnr(cur_buf) then api.nvim_buf_delete(cur_buf, { force = true }) end
 
           require("fyler").open { cwd = arg.file }
         end

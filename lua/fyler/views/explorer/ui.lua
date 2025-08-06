@@ -3,6 +3,9 @@ local components = require("fyler.lib.ui.components")
 local config = require("fyler.config")
 local git = require("fyler.lib.git")
 
+local async = a.async
+local await = a.await
+
 local icon_provider = (function()
   if type(config.values.icon_provider) == "function" then
     return config.values.icon_provider
@@ -49,9 +52,9 @@ end
 
 local TREE_STRUCTURE
 ---@param tbl table
----@param status_map? table
+---@param status_map table|nil
 ---@param cb fun(lines: FylerUiLine[])
-TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
+TREE_STRUCTURE = async(function(tbl, status_map, depth, cb)
   depth = depth or 0
   if not tbl then return cb {} end
 
@@ -77,7 +80,7 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
 
     table.insert(
       lines,
-      Line {
+      Line.new {
         words = {
           { str = string.rep("  ", depth) },
           {
@@ -127,7 +130,7 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
     )
 
     if item.children then
-      for _, line in ipairs(a.await(TREE_STRUCTURE, item.children, status_map, depth + 1)) do
+      for _, line in ipairs(await(TREE_STRUCTURE, item.children, status_map, depth + 1)) do
         table.insert(lines, line)
       end
     end
@@ -136,11 +139,9 @@ TREE_STRUCTURE = a.async(function(tbl, status_map, depth, cb)
   return cb(lines)
 end)
 
-M.Explorer = a.async(
+M.Explorer = async(
   function(tbl, cb)
-    return cb(
-      a.await(TREE_STRUCTURE, tbl, config.values.views.explorer.git_status and a.await(git.status_map) or {}, 0)
-    )
+    return cb(await(TREE_STRUCTURE, tbl, config.values.views.explorer.git_status and await(git.status_map) or {}, 0))
   end
 )
 

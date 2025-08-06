@@ -1,40 +1,42 @@
 local a = require("fyler.lib.async")
 local fs = require("fyler.lib.fs")
 local store = require("fyler.views.explorer.store")
+local util = require("fyler.lib.util")
 
----@class FylerFSItem
+local async = a.async
+local await = a.await
+
+---@class FylerTreeNode
 ---@field id string
 ---@field open boolean
----@field children FylerFSItem[]
-local FSItem = {}
-FSItem.__index = FSItem
+---@field children FylerTreeNode[]
+local TreeNode = {}
+TreeNode.__index = TreeNode
 
-local M = setmetatable({}, {
-  ---@param id string
-  ---@return FylerFSItem
-  __call = function(_, id)
-    local instance = {
-      id = id,
-      open = false,
-      children = {},
-    }
+---@param id string
+---@return FylerTreeNode
+function TreeNode.new(id)
+  local instance = {
+    id = id,
+    open = false,
+    children = {},
+  }
 
-    return setmetatable(instance, FSItem)
-  end,
-})
+  return setmetatable(instance, TreeNode)
+end
 
-function FSItem:toggle() self.open = not self.open end
+function TreeNode:toggle() self.open = not self.open end
 
 ---@param addr string
 ---@param id string
-function FSItem:add_child(addr, id)
+function TreeNode:add_child(addr, id)
   local target_node = self:find(addr)
-  if target_node then table.insert(target_node.children, M(id)) end
+  if target_node then table.insert(target_node.children, TreeNode.new(id)) end
 end
 
 ---@param addr string
----@return FylerFSItem?
-function FSItem:find(addr)
+---@return FylerTreeNode|nil
+function TreeNode:find(addr)
   if self.id == addr then return self end
 
   for _, child in ipairs(self.children) do
@@ -45,27 +47,27 @@ function FSItem:find(addr)
   return nil
 end
 
-FSItem.update = a.async(function(self, cb)
+TreeNode.update = async(function(self, cb)
   if not self.open then return cb() end
 
   local entry = store.get_entry(self.id)
-  local err, items = a.await(fs.ls, entry.path)
+  local err, items = await(fs.ls, entry.path)
   if err then return cb() end
 
-  self.children = vim
-    .iter(self.children)
-    :filter(function(child) ---@param child FylerFSItem
-      return vim.iter(items):any(
-        function(item)
-          return item.path == store.get_entry(child.id).path and item.type == store.get_entry(child.id).type
-        end
-      )
-    end)
-    :totable()
+  -- stylua: ignore start
+  self.children = util.tbl_filter(self.children, function(child)
+    return util.if_any(
+      items,
+      function(item)
+        return item.path == store.get_entry(child.id).path and item.type == store.get_entry(child.id).type
+      end
+    )
+  -- stylua: ignore end
+  end)
 
   for _, item in ipairs(items) do
     if
-      not vim.iter(self.children):any(function(child) ---@param child FylerFSItem
+      not util.if_any(self.children, function(child) ---@param child FylerTreeNode
         return store.get_entry(child.id).path == item.path and store.get_entry(child.id).type == item.type
       end)
     then
@@ -74,10 +76,10 @@ FSItem.update = a.async(function(self, cb)
   end
 
   for _, child in ipairs(self.children) do
-    a.await(child.update, child)
+    await(child.update, child)
   end
 
   return cb()
 end)
 
-return M
+return TreeNode

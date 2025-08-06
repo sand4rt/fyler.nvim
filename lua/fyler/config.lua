@@ -1,67 +1,68 @@
+local util = require("fyler.lib.util")
 ---Defines icon provider to various views. It is a function with following definition:
 ---```
 ---fun(type: string, name: string): string, string
 ---```
 ---Builtin options: `mini-icons`, `nvim-web-devicons`
----@alias FylerConfigIconProvider "mini-icons" | "nvim-web-devicons" | fun(type: string, name: string): string, string
+---@alias FylerConfigIconProvider "mini-icons"| "nvim-web-devicons"|fun(type: string, name: string): string, string
 
 ---@class FylerConfigIndentScope
 ---@field enabled boolean Enable or disable indentation markers
----@field group   string  Change highlight group
----@field marker  string  Change marker char
+---@field group string Change highlight group
+---@field marker string Change marker char
 
 ---@alias FylerConfigMappingsExplorer
 ---| "CloseView" Close explorer view
----| "Select"    Select item under the cursor
----| "SelectTab"    Open file under the cursor in new tab
----| "SelectVSplit"    Open file under the cursor in vertical split
----| "SelectSplit"    Open file under the cursor horizontal split
----| false       Disable keymap
+---| "Select" Select item under the cursor
+---| "SelectTab" Open file under the cursor in new tab
+---| "SelectVSplit" Open file under the cursor in vertical split
+---| "SelectSplit" Open file under the cursor horizontal split
+---| false Disable keymap
 
 ---@alias FylerConfigMappingsConfirm
 ---| "Confirm" Confirm actions
 ---| "Discard" Discard actions
----| false     Disable keymap
+---| false Disable keymap
 
 ---@class FylerConfigMappings
----@field confirm  table<string, FylerConfigMappingsConfirm>
+---@field confirm table<string, FylerConfigMappingsConfirm>
 ---@field explorer table<string, FylerConfigMappingsExplorer>
 
 ---@alias FylerConfigViewWinKindPreset { height: number, width: number }
 
 ---@class FylerConfigViewWin
----@field border       string                                      Window border style (for more info ':help winborder')
----@field buf_opts     table<string, any>                          Buffer options
----@field kind         FylerWinKind                                Window kind
+---@field border string Window border style (for more info ':help winborder')
+---@field buf_opts table<string, any> Buffer options
+---@field kind FylerWinKind Window kind
 ---@field kind_presets table<string, FylerConfigViewWinKindPreset> Window kind
----@field win_opts     table<string, any>                          Window options
+---@field win_opts table<string, any> Window options
 
 ---@class FylerConfigViewConfirm
----@field win  FylerConfigViewWin
+---@field win FylerConfigViewWin
 
 ---@class FylerConfigViewExplorer
----@field close_on_select  boolean
----@field confirm_simple   boolean
+---@field close_on_select boolean
+---@field confirm_simple boolean
 ---@field default_explorer boolean
----@field git_status       boolean
----@field indentscope      FylerConfigIndentScope
----@field win              FylerConfigViewWin
+---@field git_status boolean
+---@field indentscope FylerConfigIndentScope
+---@field win FylerConfigViewWin
 
 ---@class FylerConfigViews
----@field confirm  FylerConfigViewConfirm
+---@field confirm FylerConfigViewConfirm
 ---@field explorer FylerConfigViewExplorer
 
 ---@class FylerConfigDefaults
 ---@field icon_provider FylerConfigIconProvider
----@field mappings      FylerConfigMappings
+---@field mappings FylerConfigMappings
 ---@field on_highlights fun(groups: table, palette: table): nil  How to change highlight groups
----@field views         FylerConfigViews
+---@field views FylerConfigViews
 
 ---@class FylerConfig : FylerConfigDefaults
----@field icon_provider? FylerConfigIconProvider
----@field mappings?      FylerConfigMappings
----@field on_highlights? fun(groups: table, palette: table): nil
----@field views?         FylerConfigViews
+---@field icon_provider FylerConfigIconProvider|nil
+---@field mappings FylerConfigMappings|nil
+---@field on_highlights fun(groups: table, palette: table)|nil
+---@field views FylerConfigViews|nil
 
 local M = {}
 
@@ -188,11 +189,10 @@ local defaults = {
   },
 }
 
----@param name  string
----@param kind? FylerWinKind
-function M.get_view(name, kind)
+---@param name string
+---@param kind FylerWinKind|nil
+function M.get_view_config(name, kind)
   assert(name, "name is required")
-
   local view = M.values.views[name]
   local preset = view.win.kind_presets[kind or view.win.kind]
   view.win.height = preset.height
@@ -204,32 +204,17 @@ end
 ---@param name string
 function M.get_mappings(name)
   assert(name, "name is required")
-
   return M.values.mappings[name]
 end
 
 ---@param name string
-function M.get_reverse_mappings(name)
-  assert(name, "name is required")
-
-  local mappings = M.get_mappings(name)
-  local reverse_mappings = {}
-
-  for key, val in pairs(mappings) do
-    reverse_mappings[val] = key
-  end
-
-  return reverse_mappings
-end
-
----@param name       string
----@param value      any
----@param ref        string|string[]
----@param allow_nil? boolean
+---@param value any
+---@param ref string|string[]
+---@param allow_nil boolean|nil
 local function check_type(name, value, ref, allow_nil)
   local are_matched = (function()
     if type(ref) == "table" then
-      return vim.iter(ref):any(function(x) return type(value) == x end)
+      return util.if_any(ref, function(x) return type(value) == x end)
     elseif type(value) == ref then
       return true
     else
@@ -242,7 +227,7 @@ local function check_type(name, value, ref, allow_nil)
   error(string.format("(fyler.nvim) `%s` should be %s, not %s", name, ref, type(value)))
 end
 
----@param config? FylerConfig
+---@param config FylerConfig|nil
 function M.setup(config)
   if config == nil then return end
 

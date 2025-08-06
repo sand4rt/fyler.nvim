@@ -8,37 +8,37 @@ local util = require("fyler.lib.util")
 local FylerConfirmView = {}
 FylerConfirmView.__index = FylerConfirmView
 
----@param msg { str: string, hl: string }[]
----@param chs string
----@param cb fun(c: boolean)
-function FylerConfirmView:open(msg, chs, cb)
-  local mappings = config.get_reverse_mappings("confirm")
-  local win = config.get_view("confirm").win
+---@param message { str: string, hl: string }[]
+---@param choices string
+---@param on_choice fun(choice: boolean)
+function FylerConfirmView:open(message, choices, on_choice)
+  local view_config = config.get_view_config("confirm")
+  local mappings = {}
+  util.tbl_each(
+    config.get_mappings("confirm"),
+    function(x, y) mappings[x] = self:_action(util.camel_to_snake(string.format("n%s", y)), on_choice) end
+  )
 
-  --stylua: ignore start
-  self.win = Win {
-    border   = win.border,
-    buf_opts = win.buf_opts,
-    bufname  = "confirm",
-    enter    = true,
-    height   = win.height,
-    kind     = win.kind,
-    name     = "confirm",
-    title    = string.format(" Confirm %s ", chs),
-    width    = win.width,
-    win_opts = win.win_opts,
-    mappings = {
-      [mappings["Confirm"]] = self:_action("n_confirm", cb),
-      [mappings["Discard"]] = self:_action("n_discard", cb),
-    },
+  -- stylua: ignore start
+  self.win = Win.new {
     autocmds = {
-      ["QuitPre"] = self:_action("n_close_view", cb),
+      ["QuitPre"] = self:_action("n_close_view", on_choice),
     },
+    border   = view_config.win.border,
+    buf_opts = view_config.win.buf_opts,
+    enter    = true,
+    height   = view_config.win.height,
+    kind     = view_config.win.kind,
+    name     = "Confirm",
+    mappings = mappings,
     render = function()
-      self.win.ui:render({ ui_lines = ui.Confirm(msg) })
+      self.win.ui:render({ ui_lines = ui.Confirm(message) })
     end,
+    title    = string.format(" Confirm %s ", choices),
+    width    = view_config.win.width,
+    win_opts = view_config.win.win_opts,
   }
-  --stylua: ignore end
+  -- stylua: ignore end
 
   self.win:show()
 end
@@ -48,7 +48,6 @@ function FylerConfirmView:close() self.win:hide() end
 ---@param name string
 function FylerConfirmView:_action(name, ...)
   local action = require("fyler.views.confirm.actions")[name]
-
   assert(action, string.format("%s action is not available", name))
 
   return action(self, ...)
@@ -56,15 +55,11 @@ end
 
 local M = {}
 
----@param msg { str: string, hl: string }[]
----@param chs string
----@param cb fun(c: boolean)
-M.open = vim.schedule_wrap(function(msg, chs, cb)
-  if not M.instance then M.instance = setmetatable({}, FylerConfirmView) end
-
-  if M.instance.win and util.has_valid_winid(M.instance.win) then M.instance:close() end
-
-  M.instance:open(msg, chs, cb)
-end)
+M.open = vim.schedule_wrap(
+  ---@param message { str: string, hl: string }[]
+  ---@param choices string
+  ---@param on_choice fun(c: boolean)
+  function(message, choices, on_choice) setmetatable({}, FylerConfirmView):open(message, choices, on_choice) end
+)
 
 return M
