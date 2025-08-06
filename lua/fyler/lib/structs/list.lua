@@ -4,10 +4,13 @@ local LinkedList = {}
 LinkedList.__index = LinkedList
 
 ---@class FylerLinkedListNode
----@field next? FylerLinkedListNode
----@field data  any
+---@field next FylerLinkedListNode|nil
+---@field data any
 local LinkedListNode = {}
 LinkedListNode.__index = LinkedListNode
+
+---@return FylerLinkedList
+function LinkedList.new() return setmetatable({}, LinkedList) end
 
 ---@return integer
 function LinkedList:len()
@@ -83,7 +86,4 @@ function LinkedList:totable()
   return tbl
 end
 
-return setmetatable({}, {
-  ---@return FylerLinkedList
-  __call = function() return setmetatable({}, LinkedList) end,
-})
+return LinkedList

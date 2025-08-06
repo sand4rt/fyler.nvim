@@ -5,7 +5,7 @@ local Line = components.Line
 local function MESSAGE(tbl)
   local lines = {}
   for _, line in ipairs(tbl or {}) do
-    table.insert(lines, Line { words = line })
+    table.insert(lines, Line.new { words = line })
   end
 
   return lines

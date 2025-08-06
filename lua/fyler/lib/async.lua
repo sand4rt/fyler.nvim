@@ -1,6 +1,7 @@
 local M = {}
 
-local queue = require("fyler.lib.structs.queue")() ---@type FylerQueue
+local queue = require("fyler.lib.structs.queue").new() ---@type FylerQueue
+local util = require("fyler.lib.util")
 local is_loop_running = false
 
 ---@param co thread
@@ -23,7 +24,7 @@ local function schedule(co, ...)
     if status == "dead" then
       queue:dequeue()
     elseif status == "suspended" and front.started == false then
-      local success = coroutine.resume(front.co, unpack(front.args))
+      local success = coroutine.resume(front.co, util.unpack(front.args))
       if not success then queue:dequeue() end
       front.started = true
     end
@@ -58,7 +59,7 @@ function M.await(fn, ...)
     end)
   )
 
-  fn(unpack(args))
+  fn(util.unpack(args))
 
   return coroutine.yield()
 end

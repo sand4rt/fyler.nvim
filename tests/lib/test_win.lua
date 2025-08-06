@@ -25,7 +25,7 @@ T["can create instance"] = function()
     mappings = {},
   }
 
-  local win = require("fyler.lib.win")(opts)
+  local win = require("fyler.lib.win").new(opts)
   for key, val in pairs(opts) do
     test.expect.equality(win[key], val)
   end
@@ -44,7 +44,7 @@ T["can show and hide"] = function()
     "split_right_most",
   }
 
-  local win = require("fyler.lib.win") {
+  local win = require("fyler.lib.win").new {
     name = "explorer",
     bufname = "fyler://foo",
     kind = kinds[math.random(1, 5)],
@@ -57,11 +57,11 @@ T["can show and hide"] = function()
   require("fyler.config").setup {}
 
   win:show()
-  test.expect.equality(util.has_valid_bufnr(win), true)
-  test.expect.equality(util.has_valid_winid(win), true)
+  test.expect.equality(win:has_valid_bufnr(), true)
+  test.expect.equality(win:has_valid_winid(), true)
   win:hide()
-  test.expect.equality(util.has_valid_bufnr(win), false)
-  test.expect.equality(util.has_valid_winid(win), false)
+  test.expect.equality(win:has_valid_bufnr(), false)
+  test.expect.equality(win:has_valid_winid(), false)
 end
 
 return T

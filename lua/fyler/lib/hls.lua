@@ -32,18 +32,18 @@ local function get_bg(name)
 end
 
 ---@class FylerColorPalette
----@field bg        string
----@field black     string
----@field blue      string
----@field cyan      string
+---@field bg string
+---@field black string
+---@field blue string
+---@field cyan string
 ---@field dark_grey string
----@field fg        string
----@field green     string
----@field grey      string
----@field orange    string
----@field red       string
----@field white     string
----@field yellow    string
+---@field fg string
+---@field green string
+---@field grey string
+---@field orange string
+---@field red string
+---@field white string
+---@field yellow string
 
 ---@return FylerColorPalette
 local function build_palette()
@@ -66,7 +66,7 @@ local function build_palette()
   -- stylua: ignore end
 end
 
----@param opts? FylerConfig
+---@param opts FylerConfig|nil
 function M.setup(opts)
   opts = opts or {}
 

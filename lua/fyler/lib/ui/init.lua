@@ -1,5 +1,3 @@
-local util = require("fyler.lib.util")
-
 local api = vim.api
 
 ---@class FylerUi
@@ -7,15 +5,13 @@ local api = vim.api
 local Ui = {}
 Ui.__index = Ui
 
-local M = setmetatable({}, {
-  ---@param win FylerWin
-  ---@return FylerUi
-  __call = function(_, win)
-    assert(win, "win is required")
+---@param win FylerWin
+---@return FylerUi
+function Ui.new(win)
+  assert(win, "win is required")
 
-    return setmetatable({ win = win }, Ui)
-  end,
-})
+  return setmetatable({ win = win }, Ui)
+end
 
 ---@param align FylerUiLineAlign
 ---@param line string
@@ -32,7 +28,7 @@ end
 
 ---@param ui_lines FylerUiLine[]
 function Ui:_render(ui_lines)
-  if not util.has_valid_bufnr(self.win) then return end
+  if not self.win:has_valid_bufnr() then return end
 
   local was_modifiable = vim.bo[self.win.bufnr].modifiable
   local win_width = api.nvim_win_get_width(self.win.winid)
@@ -90,4 +86,4 @@ function Ui:render(opts)
   end)
 end
 
-return M
+return Ui

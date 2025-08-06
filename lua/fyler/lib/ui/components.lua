@@ -3,8 +3,8 @@
 ---| "start"
 ---| "center"
 
----@alias FylerUiWord { str: string, hl?: string }
----@alias FylerUiMark { str: string, hl?: string, id: string }
+---@alias FylerUiWord { str: string, hl: string|nil }
+---@alias FylerUiMark { str: string, hl: string|nil, id: string }
 
 ---@class FylerUiLine
 ---@field align FylerUiLineAlign
@@ -13,20 +13,18 @@
 local Line = {}
 Line.__index = Line
 
-return {
-  Line = setmetatable({}, {
-    ---@param opts { words: FylerUiWord[], marks: FylerUiMark[], align?: FylerUiLineAlign }
-    ---@return FylerUiLine
-    __call = function(_, opts)
-      local instance = {
-        words = opts.words or {},
-        align = opts.align or "start",
-        marks = opts.marks or {},
-      }
+---@param opts { words: FylerUiWord[], marks: FylerUiMark[], align: FylerUiLineAlign|nil }
+---@return FylerUiLine
+function Line.new(opts)
+  local instance = {
+    words = opts.words or {},
+    align = opts.align or "start",
+    marks = opts.marks or {},
+  }
 
-      setmetatable(instance, Line)
+  setmetatable(instance, Line)
 
-      return instance
-    end,
-  }),
-}
+  return instance
+end
+
+return { Line = Line }
