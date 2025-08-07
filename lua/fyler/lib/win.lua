@@ -113,13 +113,13 @@ function Win:config()
 
   if self.kind:match("^split_") then
     winconfig.split = self.kind:match("^split_(.*)")
+  elseif self.kind:match("^float") then
+    winconfig.relative = "editor"
+    winconfig.border = self.border
     winconfig.title = self.title
     winconfig.title_pos = self.title_pos
     winconfig.footer = self.footer
     winconfig.footer_pos = self.footer_pos
-  elseif self.kind:match("^float") then
-    winconfig.relative = "editor"
-    winconfig.border = self.border
     winconfig.row = 0
     winconfig.col = 0
 

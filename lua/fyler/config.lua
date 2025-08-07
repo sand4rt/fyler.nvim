@@ -197,7 +197,7 @@ local defaults = {
 ---@param kind FylerWinKind|nil
 function M.get_view_config(name, kind)
   assert(name, "name is required")
-  local view = M.values.views[name]
+  local view = vim.deepcopy(M.values.views[name])
   local preset = view.win.kind_presets[kind or view.win.kind]
   view.win = util.tbl_merge_keep(view.win, preset)
 

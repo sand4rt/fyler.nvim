@@ -149,32 +149,34 @@ local defaults = {
         -- Changes window kind preset
         kind_presets = {
           float = {
-            height = 0.4,
-            width = 0.5,
+            height = "0.4rel",
+            width = "0.5rel",
+            top = "0.3rel",
+            left = "0.25rel",
           },
           split_above = {
-            height = 0.5,
+            height = "0.5rel",
           },
           split_above_all = {
-            height = 0.5,
+            height = "0.5rel",
           },
           split_below = {
-            height = 0.5,
+            height = "0.5rel",
           },
           split_below_all = {
-            height = 0.5,
+            height = "0.5rel",
           },
           split_left = {
-            width = 0.5,
+            width = "0.5rel",
           },
           split_left_most = {
-            width = 0.5,
+            width = "0.5rel",
           },
           split_right = {
-            width = 0.5,
+            width = "0.5rel",
           },
           split_right_most = {
-            width = 0.5,
+            width = "0.5rel",
           },
         },
         -- Changes window options
@@ -215,32 +217,34 @@ local defaults = {
       -- Changes window kind preset
         kind_presets = {
           float = {
-            height = 0.7,
-            width = 0.7,
+            height = "0.7rel",
+            width = "0.7rel",
+            top = "0.15rel",
+            left = "0.15rel",
           },
           split_above = {
-            height = 0.7,
+            height = "0.7rel",
           },
           split_above_all = {
-            height = 0.7,
+            height = "0.7rel",
           },
           split_below = {
-            height = 0.7,
+            height = "0.7rel",
           },
           split_below_all = {
-            height = 0.7,
+            height = "0.7rel",
           },
           split_left = {
-            width = 0.3,
+            width = "0.3rel",
           },
           split_left_most = {
-            width = 0.3,
+            width = "0.3rel",
           },
           split_right = {
-            width = 0.3,
+            width = "0.3rel",
           },
           split_right_most = {
-            width = 0.3,
+            width = "0.3rel",
           },
         },
       -- Changes window options
