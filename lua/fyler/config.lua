@@ -28,7 +28,7 @@ local util = require("fyler.lib.util")
 ---@field confirm table<string, FylerConfigMappingsConfirm>
 ---@field explorer table<string, FylerConfigMappingsExplorer>
 
----@alias FylerConfigViewWinKindPreset { height: number, width: number }
+---@alias FylerConfigViewWinKindPreset { height: string, width: string }
 
 ---@class FylerConfigViewWin
 ---@field border string Window border style (for more info ':help winborder')
@@ -94,32 +94,34 @@ local defaults = {
         kind = "float",
         kind_presets = {
           float = {
-            height = 0.4,
-            width = 0.5,
+            height = "0.4rel",
+            width = "0.5rel",
+            top = "0.3rel",
+            left = "0.25rel",
           },
           split_above = {
-            height = 0.5,
+            height = "0.5rel",
           },
           split_above_all = {
-            height = 0.5,
+            height = "0.5rel",
           },
           split_below = {
-            height = 0.5,
+            height = "0.5rel",
           },
           split_below_all = {
-            height = 0.5,
+            height = "0.5rel",
           },
           split_left = {
-            width = 0.5,
+            width = "0.5rel",
           },
           split_left_most = {
-            width = 0.5,
+            width = "0.5rel",
           },
           split_right = {
-            width = 0.5,
+            width = "0.5rel",
           },
           split_right_most = {
-            width = 0.5,
+            width = "0.5rel",
           },
         },
         win_opts = {
@@ -149,32 +151,34 @@ local defaults = {
         kind = "float",
         kind_presets = {
           float = {
-            height = 0.7,
-            width = 0.7,
+            height = "0.7rel",
+            width = "0.7rel",
+            top = "0.15rel",
+            left = "0.15rel",
           },
           split_above = {
-            height = 0.7,
+            height = "0.7rel",
           },
           split_above_all = {
-            height = 0.7,
+            height = "0.7rel",
           },
           split_below = {
-            height = 0.7,
+            height = "0.7rel",
           },
           split_below_all = {
-            height = 0.7,
+            height = "0.7rel",
           },
           split_left = {
-            width = 0.3,
+            width = "0.3rel",
           },
           split_left_most = {
-            width = 0.3,
+            width = "0.3rel",
           },
           split_right = {
-            width = 0.3,
+            width = "0.3rel",
           },
           split_right_most = {
-            width = 0.3,
+            width = "0.3rel",
           },
         },
         win_opts = {
@@ -195,8 +199,7 @@ function M.get_view_config(name, kind)
   assert(name, "name is required")
   local view = M.values.views[name]
   local preset = view.win.kind_presets[kind or view.win.kind]
-  view.win.height = preset.height
-  view.win.width = preset.width
+  view.win = util.tbl_merge_keep(view.win, preset)
 
   return view
 end
@@ -262,13 +265,13 @@ function M.setup(config)
       check_type(
         string.format("config.views.%s.%s.height", view_name, kind_preset_name),
         kind_preset.height,
-        "number",
+        "string",
         kind_preset_name ~= "float"
       )
       check_type(
         string.format("config.views.%s.%s.width", view_name, kind_preset_name),
         kind_preset.width,
-        "number",
+        "string",
         kind_preset_name ~= "float"
       )
     end

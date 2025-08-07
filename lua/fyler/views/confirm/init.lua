@@ -25,16 +25,20 @@ function FylerConfirmView:open(message, choices, on_choice)
       ["QuitPre"] = self:_action("n_close_view", on_choice),
     },
     border   = view_config.win.border,
+    bottom   = view_config.win.bottom,
     buf_opts = view_config.win.buf_opts,
     enter    = true,
     height   = view_config.win.height,
     kind     = view_config.win.kind,
+    left     = view_config.win.left,
     name     = "Confirm",
     mappings = mappings,
     render = function()
       self.win.ui:render({ ui_lines = ui.Confirm(message) })
     end,
+    right    = view_config.win.right,
     title    = string.format(" Confirm %s ", choices),
+    top      = view_config.win.top,
     width    = view_config.win.width,
     win_opts = view_config.win.win_opts,
   }

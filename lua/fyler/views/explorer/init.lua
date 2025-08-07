@@ -39,20 +39,24 @@ function ExplorerView:open(opts)
       ["WinClosed"]    = self:_action("n_close_view"),
     },
     border        = view_config.win.border,
+    bottom        = view_config.win.bottom,
     buf_opts      = view_config.win.buf_opts,
     bufname       = string.format("fyler://%s", opts.cwd),
     enter         = opts.enter,
     height        = view_config.win.height,
     kind          = opts.kind,
+    left          = view_config.win.left,
     mappings      = mappings,
     name          = "Explorer",
     render        = self:_action("refreshview"),
+    right         = view_config.win.right,
     user_autocmds = {
       ["RefreshView"] = self:_action("refreshview"),
       ["Synchronize"] = self:_action("synchronize"),
     },
-    width    = view_config.win.width,
-    win_opts = view_config.win.win_opts
+    top           = view_config.win.top,
+    width         = view_config.win.width,
+    win_opts      = view_config.win.win_opts
   }
   -- stylua: ignore end
 

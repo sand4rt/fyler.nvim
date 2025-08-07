@@ -1,4 +1,5 @@
 local Ui = require("fyler.lib.ui")
+local util = require("fyler.lib.util")
 
 ---@alias FylerWinKind
 ---| "float"
@@ -15,25 +16,29 @@ local Ui = require("fyler.lib.ui")
 ---@field augroup string
 ---@field autocmds table
 ---@field border string|string[]
+---@field bottom string|nil
+---@field buf_opts table
 ---@field bufname string
 ---@field bufnr integer|nil
----@field buf_opts table
 ---@field enter boolean
 ---@field footer string|string[]|nil
 ---@field footer_pos string|nil
----@field height number
+---@field height string
 ---@field kind FylerWinKind
+---@field left string|nil
 ---@field mappings table
 ---@field name string
 ---@field namespace integer
 ---@field render function|nil
+---@field right string|nil
 ---@field title string|string[]|nil
 ---@field title_pos string|nil
+---@field top string|nil
 ---@field ui FylerUi
 ---@field user_autocmds table
----@field width number
----@field winid integer|nil
+---@field width string
 ---@field win_opts table
+---@field winid integer|nil
 local Win = {}
 Win.__index = Win
 
@@ -53,27 +58,17 @@ function Win.new(opts)
   assert(opts.name, "name is required field")
 
   -- stylua: ignore start
-  local instance = {
+  local instance = util.tbl_merge_keep(opts, {
     augroup       = get_augroup(opts.name),
-    autocmds      = opts.autocmds or {},
-    border        = opts.border,
-    bufname       = opts.bufname,
-    buf_opts      = opts.buf_opts or {},
-    enter         = opts.enter,
-    footer        = opts.footer,
-    footer_pos    = opts.footer_pos,
-    height        = opts.height,
-    kind          = opts.kind or "float",
-    mappings      = opts.mappings or {},
-    name          = opts.name or "",
+    autocmds      = {},
+    buf_opts      = {},
+    kind          = "float",
+    mappings      = {},
+    name          = "",
     namespace     = get_namespace(opts.name),
-    render        = opts.render,
-    title         = opts.title,
-    title_pos     = opts.title_pos,
-    user_autocmds = opts.user_autocmds or {},
-    width         = opts.width,
-    win_opts      = opts.win_opts or {},
-  }
+    user_autocmds = {},
+    win_opts      = {},
+  })
   -- stylua: ignore end
 
   instance.ui = Ui.new(instance)
@@ -107,30 +102,97 @@ function Win:config()
   local winconfig = {
     style = "minimal",
     noautocmd = true,
-    title = self.title,
-    title_pos = self.title_pos,
-    footer = self.footer,
-    footer_pos = self.footer_pos,
   }
+
+  ---@param str string
+  local function destructure(str)
+    if not str:match("[%d%.]+[%a]+") then return 0, 0 end
+    local v, u = string.match(str, "([%d%.]+)([%a]+)")
+    return tonumber(v), u
+  end
 
   if self.kind:match("^split_") then
     winconfig.split = self.kind:match("^split_(.*)")
-    winconfig.title = nil
-    winconfig.title_pos = nil
-    winconfig.footer = nil
-    winconfig.footer_pos = nil
+    winconfig.title = self.title
+    winconfig.title_pos = self.title_pos
+    winconfig.footer = self.footer
+    winconfig.footer_pos = self.footer_pos
   elseif self.kind:match("^float") then
     winconfig.relative = "editor"
     winconfig.border = self.border
-    winconfig.col = math.floor((1 - self.width) * 0.5 * vim.o.columns)
-    winconfig.row = math.floor((1 - self.height) * 0.5 * vim.o.lines)
+    winconfig.row = 0
+    winconfig.col = 0
+
+    if self.top and self.top ~= "none" then
+      local value, unit = destructure(self.top)
+      if unit == "rel" then
+        winconfig.row = math.ceil(value * vim.o.lines)
+      elseif unit == "abs" then
+        winconfig.row = value
+      else
+        error(string.format("(fyler.nvim) Unknown unit '%s'", unit))
+      end
+    end
+
+    if self.right and self.right ~= "none" then
+      local rv, ru = destructure(self.right)
+      local wv = destructure(self.width)
+      if ru == "rel" then
+        winconfig.col = math.ceil((1 - rv - wv) * vim.o.columns)
+      elseif ru == "abs" then
+        winconfig.col = (vim.o.columns - rv - wv)
+      else
+        error(string.format("(fyler.nvim) Unknown unit '%s'", ru))
+      end
+    end
+
+    if self.bottom and self.bottom ~= "none" then
+      local value, unit = destructure(self.bottom)
+      local hv = destructure(self.height)
+      if unit == "rel" then
+        winconfig.row = math.ceil((1 - value - hv) * vim.o.lines)
+      elseif unit == "abs" then
+        winconfig.row = (vim.o.lines - value - hv)
+      else
+        error(string.format("(fyler.nvim) Unknown unit '%s'", unit))
+      end
+    end
+
+    if self.left and self.left ~= "none" then
+      local value, unit = destructure(self.left)
+      if unit == "rel" then
+        winconfig.col = math.ceil(value * vim.o.columns)
+      elseif unit == "abs" then
+        winconfig.col = value
+      else
+        error(string.format("(fyler.nvim) Unknown unit '%s'", unit))
+      end
+    end
   else
     error(string.format("(fyler.nvim) Invalid window kind `%s`", self.kind))
   end
 
-  if self.width then winconfig.width = math.ceil(self.width * vim.o.columns) end
+  if self.width then
+    local value, unit = destructure(self.width)
+    if unit == "rel" then
+      winconfig.width = math.ceil(value * vim.o.columns)
+    elseif unit == "abs" then
+      winconfig.width = value
+    else
+      error(string.format("(fyler.nvim) Unknown unit '%s'", unit))
+    end
+  end
 
-  if self.height then winconfig.height = math.ceil(self.height * vim.o.lines) end
+  if self.height then
+    local value, unit = destructure(self.height)
+    if unit == "rel" then
+      winconfig.height = math.ceil(value * vim.o.lines)
+    elseif unit == "abs" then
+      winconfig.height = value
+    else
+      error(string.format("(fyler.nvim) Unknown unit '%s'", unit))
+    end
+  end
 
   return winconfig
 end
