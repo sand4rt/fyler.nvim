@@ -1,5 +1,4 @@
 local test = require("mini.test")
-local util = require("fyler.lib.util")
 local T = test.new_set()
 
 T["can create instance"] = function()
@@ -48,8 +47,8 @@ T["can show and hide"] = function()
     name = "explorer",
     bufname = "fyler://foo",
     kind = kinds[math.random(1, 5)],
-    width = 0.8,
-    height = 0.8,
+    width = "0.8rel",
+    height = "0.8rel",
     enter = true,
     mappings = {},
   }
