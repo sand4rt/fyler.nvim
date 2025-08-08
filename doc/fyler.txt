@@ -14,6 +14,10 @@ Fyler supports plenty of options to customize. Following are default values
 
 >lua
   local defaults = {
+    hooks = {
+      on_delete = function(path) end,
+      on_rename = function(src_path, dst_path) end,
+    },
     -- Changes icon provider
     icon_provider = "mini-icons",
     -- Changes mappings for associated view

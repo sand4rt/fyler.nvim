@@ -1,5 +1,6 @@
 local List = require("fyler.lib.structs.list")
 local Stack = require("fyler.lib.structs.stack")
+local hooks = require("fyler.hooks")
 local util = require("fyler.lib.util")
 
 local a = require("fyler.lib.async")
@@ -9,7 +10,6 @@ local M = {}
 local async = a.async
 local await = a.await
 
-local api = vim.api
 local fn = vim.fn
 local uv = vim.uv or vim.loop
 
@@ -287,34 +287,13 @@ M.create = async(function(path, cb)
   return cb(nil, true)
 end)
 
-local function get_alt_buf(for_buf)
-  for _, buf in ipairs(api.nvim_list_bufs()) do
-    if util.is_valid_bufnr(buf) and buf ~= for_buf then return buf end
-  end
-
-  return api.nvim_create_buf(false, true)
-end
-
 ---@param path string
 ---@param cb fun(err: string|nil, success: boolean)
 M.delete = async(function(path, cb)
   local rm_r_err, rm_r_success = await(M.rm_r, path)
   if not rm_r_success then return cb(rm_r_err, false) end
 
-  local buf = fn.bufnr(path)
-  if buf == -1 then return cb("Unable to find buffer to delete", true) end
-
-  local alt = get_alt_buf(buf)
-  for _, win in ipairs(api.nvim_list_wins()) do
-    if util.is_valid_winid(win) and vim.api.nvim_win_get_buf(win) == buf then
-      if alt < 1 or alt == buf then alt = api.nvim_create_buf(true, false) end
-
-      api.nvim_win_set_buf(win, alt)
-    end
-  end
-
-  local success, msg = pcall(api.nvim_buf_delete, buf, { force = true })
-  if not success then return cb(msg, true) end
+  hooks.on_delete(path)
 
   return cb(nil, true)
 end)
@@ -329,19 +308,7 @@ M.move = async(function(src_path, dst_path, cb)
   local mv_err, mv_success = await(M.mv, src_path, dst_path)
   if not mv_success then return cb(mv_err, false) end
 
-  local src_buf = fn.bufnr(src_path)
-  if src_buf == -1 then return cb("unable to find moved buffer", true) end
-
-  local dst_buf = fn.bufadd(dst_path)
-  fn.bufload(dst_buf)
-  vim.bo[dst_buf].buflisted = true
-
-  for _, win in ipairs(api.nvim_list_wins()) do
-    if util.is_valid_winid(win) and vim.api.nvim_win_get_buf(win) == src_buf then api.nvim_win_set_buf(win, dst_buf) end
-  end
-
-  local success, msg = pcall(api.nvim_buf_delete, src_buf, { force = true })
-  if not success then return cb(msg, true) end
+  hooks.on_rename(src_path, dst_path)
 
   return cb(nil, true)
 end)
