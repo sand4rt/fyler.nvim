@@ -10,8 +10,9 @@ function M.setup(custom_config)
   local config = require("fyler.config")
   config.setup(custom_config)
 
-  require("fyler.lib.hls").setup(config)
   require("fyler.autocmds").setup(config)
+  require("fyler.hooks").setup(config)
+  require("fyler.lib.hls").setup(config)
 
   did_setup = true
 

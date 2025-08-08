@@ -115,6 +115,10 @@ add({
 
 ```lua
 local defaults = {
+  hooks = {
+    on_delete = function(path) end,
+    on_rename = function(src_path, dst_path) end,
+  },
   -- Changes icon provider
   icon_provider = "mini-icons",
   -- Changes mappings for associated view
@@ -295,17 +299,17 @@ fyler.open({ cwd = "split_left_most" })
 
 ## TODOS
 
-- [x] Basic file operations `CREATE | DELETE | MOVE | COPY`
-- [x] User command to change behaviour on startup
-- [x] Hijack NETRW
-- [x] Track current buffer
+- [x] Basic operations `CREATE | DELETE | MOVE | COPY`
 - [x] GIT integration
 - [x] Indentation guides
-- [x] Buffer-Explorer synchronization
+- [x] LSP integration
+- [x] NETRW Hijacking
+- [x] Public APIs
+- [x] Track current buffer
+- [x] User command
 - [ ] File system watching
-- [ ] LSP integration
-- [ ] SSH integration
 - [ ] Fuzzy finding
+- [ ] SSH integration
 
 ## Have problems with fyler.nvim?
 
