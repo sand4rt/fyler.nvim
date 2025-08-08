@@ -10,6 +10,9 @@ local M = {}
 local api = vim.api
 local fn = vim.fn
 
+local instance_map = {}
+local current_dir = nil
+
 ---@class FylerExplorerView
 ---@field cwd string
 ---@field root FylerTreeNode
@@ -25,7 +28,9 @@ function ExplorerView:open(opts)
     config.get_mappings("explorer"),
     function(x, y) mappings[x] = self:_action(util.camel_to_snake(string.format("n%s", y))) end
   )
+
   cache.set_entry("recent_win", api.nvim_get_current_win())
+  current_dir = opts.cwd
 
   -- stylua: ignore start
   self.win = Win.new {
@@ -76,9 +81,6 @@ function ExplorerView:is_visible() return self.win and self.win:is_visible() end
 function ExplorerView:focus()
   if self.win then self.win:focus() end
 end
-
-local instance_map = {}
-local current_dir = nil
 
 ---@param cwd string
 ---@return FylerExplorerView

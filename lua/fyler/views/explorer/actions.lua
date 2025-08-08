@@ -108,19 +108,68 @@ function M.n_select_split(view)
   end
 end
 
+---@param view FylerExplorerView
+function M.n_goto_parent(view)
+  return function()
+    local parent_dir = fn.fnamemodify(view.cwd, ":h")
+    if parent_dir == view.cwd then return end
+
+    M.n_close_view(view)()
+
+    local instance = require("fyler.views.explorer").find_or_create(parent_dir)
+    if not util.if_any(instance.root.children, function(child) return child.id == view.root.id end) then
+      instance.root:add_child(instance.root.id, view.root)
+    end
+
+    instance:open {
+      cwd = parent_dir,
+      enter = true,
+      kind = view.win.kind,
+    }
+
+    api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
+  end
+end
+
+---@param view FylerExplorerView
+function M.n_goto_cwd(view)
+  return function()
+    if view.cwd == fs.getcwd() then return end
+
+    local cwd = fs.getcwd()
+    local id = store.find_entry(function(_, y) return y.path == cwd end)
+    local cwd_node = view.root:find(id)
+
+    local instance = require("fyler.views.explorer").find_or_create(cwd)
+    if cwd_node then instance.root = cwd_node end
+
+    M.n_close_view(view)()
+
+    instance:open {
+      cwd = fs.getcwd(),
+      enter = true,
+      kind = view.win.kind,
+    }
+
+    api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
+  end
+end
+
+---@param view FylerExplorerView
 ---@param tbl table
 ---@return table
-local function get_tbl(tbl)
+local function get_tbl(view, tbl)
   local lines = {}
+  if not view then return lines end
 
   if not vim.tbl_isempty(tbl.copy) then
     table.insert(lines, { { str = "COPY", hl = "FylerConfirmYellow" } })
     for _, change in ipairs(tbl.copy) do
       table.insert(lines, {
         { str = "| " },
-        { str = fs.relpath(fs.getcwd(), change.src), hl = "FylerConfirmGrey" },
+        { str = fs.relpath(view.cwd, change.src), hl = "FylerConfirmGrey" },
         { str = " > " },
-        { str = fs.relpath(fs.getcwd(), change.dst), hl = "FylerConfirmGrey" },
+        { str = fs.relpath(view.cwd, change.dst), hl = "FylerConfirmGrey" },
       })
     end
     table.insert(lines, { { str = "" } })
@@ -132,9 +181,9 @@ local function get_tbl(tbl)
     for _, change in ipairs(tbl.move) do
       table.insert(lines, {
         { str = "| " },
-        { str = fs.relpath(fs.getcwd(), change.src), hl = "FylerConfirmGrey" },
+        { str = fs.relpath(view.cwd, change.src), hl = "FylerConfirmGrey" },
         { str = " > " },
-        { str = fs.relpath(fs.getcwd(), change.dst), hl = "FylerConfirmGrey" },
+        { str = fs.relpath(view.cwd, change.dst), hl = "FylerConfirmGrey" },
       })
     end
 
@@ -147,7 +196,7 @@ local function get_tbl(tbl)
     for _, change in ipairs(tbl.create) do
       table.insert(lines, {
         { str = "| " },
-        { str = fs.relpath(fs.getcwd(), change), hl = "FylerConfirmGrey" },
+        { str = fs.relpath(view.cwd, change), hl = "FylerConfirmGrey" },
       })
     end
 
@@ -160,7 +209,7 @@ local function get_tbl(tbl)
     for _, change in ipairs(tbl.delete) do
       table.insert(lines, {
         { str = "| " },
-        { str = fs.relpath(fs.getcwd(), change), hl = "FylerConfirmGrey" },
+        { str = fs.relpath(view.cwd, change), hl = "FylerConfirmGrey" },
       })
     end
 
@@ -194,12 +243,12 @@ function M.synchronize(view)
       end
 
       if not config.values.views.explorer.confirm_simple then
-        return await(confirm_view.open, get_tbl(changes), "(y/n)")
+        return await(confirm_view.open, get_tbl(view, changes), "(y/n)")
       end
 
       if can_bypass(changes) then return true end
 
-      return await(confirm_view.open, get_tbl(changes), "(y/n)")
+      return await(confirm_view.open, get_tbl(view, changes), "(y/n)")
     end)()
 
     if can_sync then
@@ -267,11 +316,16 @@ end
 ---@param view FylerExplorerView
 function M.try_focus_buffer(view)
   return schedule_async(function(arg)
-    if arg.file == "" or not view.win:has_valid_winid() then return end
+    if arg.file == "" then return end
+
+    if not view.win:has_valid_winid() then return end
 
     if string.match(arg.file, "^fyler://*") then
       local recent_win = cache.get_entry("recent_win")
-      if (type(recent_win) ~= "number") or (not util.is_valid_winid(recent_win)) then return end
+
+      if type(recent_win) ~= "number" then return end
+
+      if not util.is_valid_winid(recent_win) then return end
 
       local recent_bufname = fn.bufname(api.nvim_win_get_buf(recent_win))
       if recent_bufname == "" or string.match(recent_bufname, "^fyler://*") then return end

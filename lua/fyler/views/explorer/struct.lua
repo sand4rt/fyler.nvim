@@ -28,10 +28,10 @@ end
 function TreeNode:toggle() self.open = not self.open end
 
 ---@param addr string
----@param id string
-function TreeNode:add_child(addr, id)
+---@param child FylerTreeNode
+function TreeNode:add_child(addr, child)
   local target_node = self:find(addr)
-  if target_node then table.insert(target_node.children, TreeNode.new(id)) end
+  if target_node then table.insert(target_node.children, child) end
 end
 
 ---@param addr string
@@ -71,7 +71,7 @@ TreeNode.update = async(function(self, cb)
         return store.get_entry(child.id).path == item.path and store.get_entry(child.id).type == item.type
       end)
     then
-      self:add_child(self.id, store.set_entry(item))
+      self:add_child(self.id, TreeNode.new(store.set_entry(item)))
     end
   end
 

@@ -1,3 +1,5 @@
+local util = require("fyler.lib.util")
+
 local M = {}
 
 local count = 0
@@ -17,7 +19,13 @@ function Entry:is_dir()
 end
 
 ---@return string
-function Entry:get_path() return self.type == "link" and self.link_path or self.path end
+function Entry:get_path()
+  if self.type == "link" then
+    return self.link_path
+  else
+    return self.path
+  end
+end
 
 ---@param key string
 function M.get_entry(key) return setmetatable(vim.deepcopy(store[key]), Entry) end
@@ -30,6 +38,9 @@ function M.set_entry(tbl)
   store[id] = tbl
   return id
 end
+
+---@param fn function
+function M.find_entry(fn) return util.tbl_find(store, fn) end
 
 function M.debug()
   for k, v in pairs(store) do

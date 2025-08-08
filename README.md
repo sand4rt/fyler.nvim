@@ -125,6 +125,8 @@ local defaults = {
       ["<C-t>"] = "SelectTab",
       ["|"] = "SelectVSplit",
       ["-"] = "SelectSplit",
+      ["^"] = "GotoParent",
+      ["="] = "GotoCwd",
     },
     confirm = {
       ["y"] = "Confirm",
