@@ -1,8 +1,8 @@
 local util = require("fyler.lib.util")
 
 ---@class FylerConfigHooks
----@field on_delete fun(path: string)
----@field on_rename fun(src_path: string, dst_path: string)
+---@field on_delete fun(path: string)|nil
+---@field on_rename fun(src_path: string, dst_path: string)|nil
 
 ---Defines icon provider to various views. It is a function with following definition:
 ---```
@@ -59,7 +59,7 @@ local util = require("fyler.lib.util")
 ---@field explorer FylerConfigViewExplorer
 
 ---@class FylerConfigDefaults
----field hooks FylerConfigHooks
+---@field hooks FylerConfigHooks
 ---@field icon_provider FylerConfigIconProvider
 ---@field mappings FylerConfigMappings
 ---@field on_highlights fun(groups: table, palette: table): nil  How to change highlight groups
