@@ -126,8 +126,6 @@ function M.n_goto_parent(view)
       enter = true,
       kind = view.win.kind,
     }
-
-    api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
   end
 end
 
@@ -150,8 +148,28 @@ function M.n_goto_cwd(view)
       enter = true,
       kind = view.win.kind,
     }
+  end
+end
 
-    api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
+---@param view FylerExplorerView
+function M.n_goto_node(view)
+  return function()
+    local id = algos.match_id(api.nvim_get_current_line())
+    if not id then return end
+
+    local entry = store.get_entry(id)
+    if entry:is_dir() then
+      M.n_close_view(view)()
+
+      local instance = require("fyler.views.explorer").find_or_create(entry:get_path())
+      instance:open {
+        cwd = entry:get_path(),
+        enter = true,
+        kind = view.win.kind,
+      }
+    else
+      M.n_select(view)()
+    end
   end
 end
 

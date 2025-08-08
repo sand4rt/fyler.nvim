@@ -127,6 +127,7 @@ local defaults = {
       ["-"] = "SelectSplit",
       ["^"] = "GotoParent",
       ["="] = "GotoCwd",
+      ["."] = "GotoNode",
     },
     confirm = {
       ["y"] = "Confirm",

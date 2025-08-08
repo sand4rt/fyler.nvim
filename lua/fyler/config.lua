@@ -18,13 +18,12 @@ local util = require("fyler.lib.util")
 ---| "SelectVSplit" Open file under the cursor in vertical split
 ---| "SelectSplit" Open file under the cursor horizontal split
 ---| "GotoParent" Jump to parent directory
----| "GotoCwd" Jump current working directory
----| false Disable keymap
+---| "GotoCwd" Jump to current working directory
+---| "GotoNode" Jump to node under cursor
 
 ---@alias FylerConfigMappingsConfirm
 ---| "Confirm" Confirm actions
 ---| "Discard" Discard actions
----| false Disable keymap
 
 ---@class FylerConfigMappings
 ---@field confirm table<string, FylerConfigMappingsConfirm>
@@ -80,6 +79,7 @@ local defaults = {
       ["-"] = "SelectSplit",
       ["^"] = "GotoParent",
       ["="] = "GotoCwd",
+      ["."] = "GotoNode",
     },
     confirm = {
       ["y"] = "Confirm",
