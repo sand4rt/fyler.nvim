@@ -17,6 +17,8 @@ local util = require("fyler.lib.util")
 ---| "SelectTab" Open file under the cursor in new tab
 ---| "SelectVSplit" Open file under the cursor in vertical split
 ---| "SelectSplit" Open file under the cursor horizontal split
+---| "GotoParent" Jump to parent directory
+---| "GotoCwd" Jump current working directory
 ---| false Disable keymap
 
 ---@alias FylerConfigMappingsConfirm
@@ -76,6 +78,8 @@ local defaults = {
       ["<C-t>"] = "SelectTab",
       ["|"] = "SelectVSplit",
       ["-"] = "SelectSplit",
+      ["^"] = "GotoParent",
+      ["="] = "GotoCwd",
     },
     confirm = {
       ["y"] = "Confirm",
