@@ -9,7 +9,7 @@ local api = vim.api
 
 ---@param str string
 ---@return string
-function M.match_id(str) return str:match(" /(%d%d%d%d%d)") end
+function M.match_id(str) return str:match("/(%d%d%d%d%d) ") end
 
 ---@param str string
 ---@return string

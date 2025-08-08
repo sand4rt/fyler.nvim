@@ -84,7 +84,7 @@ TREE_STRUCTURE = async(function(tbl, status_map, depth, cb)
         words = {
           { str = string.rep("  ", depth) },
           {
-            str = icon,
+            str = icon == "" and "" or icon .. " ",
             hl = (function()
               if item.type == "directory" then
                 return "FylerFSDirectory"
@@ -96,7 +96,7 @@ TREE_STRUCTURE = async(function(tbl, status_map, depth, cb)
             end)(),
           },
           {
-            str = git_symbol and string.format(" %s ", git_symbol) or " ",
+            str = git_symbol and string.format("%s ", git_symbol) or "",
             hl = git_status_hl[git_symbol],
           },
           { str = string.format("/%s", item.id) },
