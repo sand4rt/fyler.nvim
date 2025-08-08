@@ -24,8 +24,11 @@ local function schedule(co, ...)
     if status == "dead" then
       queue:dequeue()
     elseif status == "suspended" and front.started == false then
-      local success = coroutine.resume(front.co, util.unpack(front.args))
-      if not success then queue:dequeue() end
+      local success, err = coroutine.resume(front.co, util.unpack(front.args))
+      if not success then
+        vim.notify("Async error: " .. tostring(err), vim.log.levels.ERROR)
+        queue:dequeue()
+      end
       front.started = true
     end
 
@@ -55,7 +58,8 @@ function M.await(fn, ...)
     vim.schedule_wrap(function(...)
       if not thread then return error("no coroutine is running") end
 
-      coroutine.resume(thread, ...)
+      local success, err = coroutine.resume(thread, ...)
+      if not success then vim.notify("Async error: " .. tostring(err), vim.log.levels.ERROR) end
     end)
   )
 
