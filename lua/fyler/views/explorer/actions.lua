@@ -299,9 +299,9 @@ end
 ---@param on_render function
 function M.refreshview(view, on_render)
   return async(function()
-    if not (view.win:has_valid_winid() and view.win:has_valid_bufnr()) then return end
-
     await(view.root.update, view.root)
+
+    if not (view.win:has_valid_winid() and view.win:has_valid_bufnr()) then return end
     vim.bo[view.win.bufnr].undolevels = -1
 
     view.win.ui:render {

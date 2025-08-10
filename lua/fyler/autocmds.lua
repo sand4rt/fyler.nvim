@@ -1,10 +1,7 @@
-local util = require("fyler.lib.util")
-
 local M = {}
 
 local api = vim.api
 local fn = vim.fn
-local uv = vim.uv or vim.loop
 
 local augroup = api.nvim_create_augroup("Fyler", { clear = true })
 
@@ -76,23 +73,6 @@ function M.setup(config)
       end
     end),
   })
-
-  if config.values.views.explorer.default_explorer then
-    api.nvim_create_autocmd("BufEnter", {
-      group = augroup,
-      callback = function(arg)
-        local stats = uv.fs_stat(arg.file)
-
-        if stats and stats.type == "directory" then
-          local cur_buf = api.nvim_get_current_buf()
-
-          if util.is_valid_bufnr(cur_buf) then api.nvim_buf_delete(cur_buf, { force = true }) end
-
-          require("fyler").open { cwd = arg.file }
-        end
-      end,
-    })
-  end
 end
 
 return M

@@ -1,3 +1,8 @@
+# Temporary test directory
 .tests
 
-scratch
+# Quick testing directory for local development
+.scratch
+
+# Take notes for any potential thing to remember
+.notes
