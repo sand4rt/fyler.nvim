@@ -341,8 +341,6 @@ function M.try_focus_buffer(view)
     if string.match(arg.file, "^fyler://*") then
       local recent_win = cache.get_entry("recent_win")
 
-      if type(recent_win) ~= "number" then return end
-
       if not util.is_valid_winid(recent_win) then return end
 
       local recent_bufname = fn.bufname(api.nvim_win_get_buf(recent_win))
