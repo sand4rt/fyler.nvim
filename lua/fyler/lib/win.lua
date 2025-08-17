@@ -29,6 +29,8 @@ local util = require("fyler.lib.util")
 ---@field mappings table
 ---@field name string
 ---@field namespace integer
+---@field old_buf integer|nil
+---@field old_win integer|nil
 ---@field render function|nil
 ---@field right string|nil
 ---@field title string|string[]|nil
@@ -200,7 +202,9 @@ end
 function Win:show()
   if self:has_valid_winid() then return end
 
-  local recent_win = api.nvim_get_current_win()
+  self.old_buf = api.nvim_get_current_buf()
+  self.old_win = api.nvim_get_current_win()
+
   local win_config = self:config()
 
   self.bufnr = api.nvim_create_buf(false, true)
@@ -222,7 +226,7 @@ function Win:show()
 
     self.winid = api.nvim_get_current_win()
 
-    if not self.enter then api.nvim_set_current_win(recent_win) end
+    if not self.enter then api.nvim_set_current_win(self.old_win) end
 
     api.nvim_win_set_buf(self.winid, self.bufnr)
   else
