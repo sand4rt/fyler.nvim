@@ -17,12 +17,7 @@ local api = vim.api
 
 ---@param view table
 function M.n_close_view(view)
-  return function()
-    local success = pcall(api.nvim_win_close, view.win.winid, true)
-    if not success then api.nvim_win_set_buf(view.win.winid, fn.bufnr("#", true)) end
-
-    pcall(api.nvim_buf_delete, view.win.bufnr, { force = true })
-  end
+  return function() view.win:hide() end
 end
 
 ---@param view FylerExplorerView
@@ -36,11 +31,11 @@ function M.n_select(view)
       view.root:find(key):toggle()
       api.nvim_exec_autocmds("User", { pattern = "RefreshView" })
     else
-      if util.is_valid_winid(view.win.old_win) then
-        fn.win_execute(view.win.old_win, string.format("edit %s", entry:get_path()))
-        fn.win_gotoid(view.win.old_win)
-
+      if util.is_valid_winid(view.win.old_winid) then
         if config.values.views.explorer.close_on_select then view.win:hide() end
+
+        fn.win_execute(view.win.old_winid, string.format("edit %s", entry:get_path()))
+        fn.win_gotoid(view.win.old_winid)
       end
     end
   end
@@ -54,10 +49,10 @@ function M.n_select_tab(view)
 
     local entry = store.get_entry(key)
     if not entry:is_dir() then
-      if util.is_valid_winid(view.win.old_win) then
-        fn.execute(string.format("tabedit %s", entry:get_path()))
-
+      if util.is_valid_winid(view.win.old_winid) then
         if config.values.views.explorer.close_on_select then view.win:hide() end
+
+        fn.execute(string.format("tabedit %s", entry:get_path()))
       end
     end
   end
@@ -71,11 +66,11 @@ function M.n_select_v_split(view)
 
     local entry = store.get_entry(key)
     if not entry:is_dir() then
-      if util.is_valid_winid(view.win.old_win) then
-        fn.win_gotoid(view.win.old_win)
-        fn.execute(string.format("vsplit %s", entry:get_path()))
-
+      if util.is_valid_winid(view.win.old_winid) then
         if config.values.views.explorer.close_on_select then view.win:hide() end
+
+        fn.win_gotoid(view.win.old_winid)
+        fn.execute(string.format("vsplit %s", entry:get_path()))
       end
     end
   end
@@ -89,11 +84,11 @@ function M.n_select_split(view)
 
     local entry = store.get_entry(key)
     if not entry:is_dir() then
-      if util.is_valid_winid(view.win.old_win) then
-        fn.win_gotoid(view.win.old_win)
-        fn.execute(string.format("split %s", entry:get_path()))
-
+      if util.is_valid_winid(view.win.old_winid) then
         if config.values.views.explorer.close_on_select then view.win:hide() end
+
+        fn.win_gotoid(view.win.old_winid)
+        fn.execute(string.format("split %s", entry:get_path()))
       end
     end
   end
@@ -330,12 +325,12 @@ function M.try_focus_buffer(view)
     if not view.win:has_valid_winid() then return end
 
     if string.match(arg.file, "^fyler://*") then
-      if not util.is_valid_winid(view.win.old_win) then return end
+      if not util.is_valid_winid(view.win.old_winid) then return end
 
-      local recent_bufname = fn.bufname(api.nvim_win_get_buf(view.win.old_win))
-      if recent_bufname == "" or string.match(recent_bufname, "^fyler://*") then return end
+      local old_bufname = fn.bufname(api.nvim_win_get_buf(view.win.old_winid))
+      if old_bufname == "" or string.match(old_bufname, "^fyler://*") then return end
 
-      arg.file = fs.abspath(recent_bufname)
+      arg.file = fs.abspath(old_bufname)
     end
 
     if not vim.startswith(arg.file, view.cwd) then

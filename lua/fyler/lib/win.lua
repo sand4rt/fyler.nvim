@@ -3,6 +3,7 @@ local util = require("fyler.lib.util")
 
 ---@alias FylerWinKind
 ---| "float"
+---| "replace"
 ---| "split_above"
 ---| "split_above_all"
 ---| "split_below"
@@ -29,8 +30,8 @@ local util = require("fyler.lib.util")
 ---@field mappings table
 ---@field name string
 ---@field namespace integer
----@field old_buf integer|nil
----@field old_win integer|nil
+---@field old_bufnr integer|nil
+---@field old_winid integer|nil
 ---@field render function|nil
 ---@field right string|nil
 ---@field title string|string[]|nil
@@ -48,9 +49,11 @@ local api = vim.api
 local fn = vim.fn
 
 ---@param name string
+---@return integer
 local function get_namespace(name) return api.nvim_create_namespace("Fyler" .. name) end
 
 ---@param name string
+---@return integer
 local function get_augroup(name) return api.nvim_create_augroup("Fyler" .. name, { clear = true }) end
 
 ---@return FylerWin
@@ -115,6 +118,8 @@ function Win:config()
 
   if self.kind:match("^split_") then
     winconfig.split = self.kind:match("^split_(.*)")
+  elseif self.kind:match("^replace") then
+    return winconfig
   elseif self.kind:match("^float") then
     winconfig.relative = "editor"
     winconfig.border = self.border
@@ -202,13 +207,12 @@ end
 function Win:show()
   if self:has_valid_winid() then return end
 
-  self.old_buf = api.nvim_get_current_buf()
-  self.old_win = api.nvim_get_current_win()
+  self.old_bufnr = api.nvim_get_current_buf()
+  self.old_winid = api.nvim_get_current_win()
 
   local win_config = self:config()
 
   self.bufnr = api.nvim_create_buf(false, true)
-
   if self.bufname then api.nvim_buf_set_name(self.bufnr, self.bufname) end
 
   if win_config.split and (win_config.split:match("_all$") or win_config.split:match("_most$")) then
@@ -226,14 +230,17 @@ function Win:show()
 
     self.winid = api.nvim_get_current_win()
 
-    if not self.enter then api.nvim_set_current_win(self.old_win) end
+    if not self.enter then api.nvim_set_current_win(self.old_winid) end
+
+    api.nvim_win_set_buf(self.winid, self.bufnr)
+  elseif self.kind:match("^replace") then
+    self.winid = vim.api.nvim_get_current_win()
 
     api.nvim_win_set_buf(self.winid, self.bufnr)
   else
     self.winid = api.nvim_open_win(self.bufnr, self.enter, win_config)
   end
 
-  api.nvim_exec_autocmds("BufEnter", {})
   api.nvim_exec_autocmds("User", {
     pattern = "FylerWinOpen",
     data = { win = self.winid, buf = self.bufnr, bufname = self.bufname },
@@ -263,9 +270,15 @@ function Win:show()
 end
 
 function Win:hide()
-  if self:has_valid_winid() then api.nvim_win_close(self.winid, true) end
+  util.try(api.nvim_win_close, self.winid, true)
+  util.try(api.nvim_buf_delete, self.bufnr, { force = true })
 
-  if self:has_valid_bufnr() then api.nvim_buf_delete(self.bufnr, { force = true }) end
+  if self.kind:match("^replace") and util.is_valid_bufnr(self.old_bufnr) and api.nvim_buf_is_loaded(self.old_bufnr) then
+    api.nvim_win_set_buf(self.winid, self.old_bufnr)
+  end
+
+  self.winid = nil
+  self.bufnr = nil
 end
 
 return Win

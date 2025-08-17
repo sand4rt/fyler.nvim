@@ -161,6 +161,7 @@ local defaults = {
             top = "0.3rel",
             left = "0.25rel",
           },
+          replace = {},
           split_above = {
             height = "0.5rel",
           },
@@ -229,6 +230,7 @@ local defaults = {
             top = "0.15rel",
             left = "0.15rel",
           },
+          replace = {},
           split_above = {
             height = "0.7rel",
           },
@@ -328,9 +330,9 @@ fyler.open({ kind = "split_left_most" })
 ## Codebase inspiration
 
 - [neogit](https://github.com/NeogitOrg/neogit)
-- [telescope](https://github.com/nvim-telescope/telescope.nvim)
+- [snacks.rename](https://github.com/folke/snacks.nvim/blob/main/docs/rename.md)
+- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
 
 ## Special thanks to all contributors
 
 ![Contributors](https://contrib.rocks/image?repo=A7Lavinraj/fyler.nvim)
-

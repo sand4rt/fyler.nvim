@@ -110,4 +110,14 @@ function M.set_buf_option(bufnr, option, value)
   api.nvim_set_option_value(option, value, { buf = bufnr, scope = "local" })
 end
 
+---@param fn function
+---@param ... any
+---@return boolean|any
+function M.try(fn, ...)
+  local ok, result = pcall(fn, ...)
+  if not ok then return false end
+
+  return result or true
+end
+
 return M

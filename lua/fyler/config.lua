@@ -114,6 +114,7 @@ local defaults = {
             top = "0.3rel",
             left = "0.25rel",
           },
+          replace = {},
           split_above = {
             height = "0.5rel",
           },
@@ -171,6 +172,7 @@ local defaults = {
             top = "0.15rel",
             left = "0.15rel",
           },
+          replace = {},
           split_above = {
             height = "0.7rel",
           },
@@ -266,6 +268,7 @@ function M.setup(config)
 
     for _, kind_preset_name in ipairs {
       "float",
+      "replace",
       "split_above",
       "split_above_all",
       "split_below",
