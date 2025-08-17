@@ -156,10 +156,10 @@ local defaults = {
         -- Changes window kind preset
         kind_presets = {
           float = {
-            height = "0.4rel",
-            width = "0.5rel",
+            height = "0.3rel",
+            width = "0.4rel",
             top = "0.3rel",
-            left = "0.25rel",
+            left = "0.3rel",
           },
           replace = {},
           split_above = {
@@ -221,7 +221,7 @@ local defaults = {
           shiftwidth = 2,
         },
       -- Changes window kind
-        kind = "float",
+        kind = "replace",
       -- Changes window kind preset
         kind_presets = {
           float = {

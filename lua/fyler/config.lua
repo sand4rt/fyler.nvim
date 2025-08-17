@@ -109,10 +109,10 @@ local defaults = {
         kind = "float",
         kind_presets = {
           float = {
-            height = "0.4rel",
-            width = "0.5rel",
+            height = "0.3rel",
+            width = "0.4rel",
             top = "0.3rel",
-            left = "0.25rel",
+            left = "0.3rel",
           },
           replace = {},
           split_above = {
@@ -164,7 +164,7 @@ local defaults = {
           expandtab = true,
           shiftwidth = 2,
         },
-        kind = "float",
+        kind = "replace",
         kind_presets = {
           float = {
             height = "0.7rel",
