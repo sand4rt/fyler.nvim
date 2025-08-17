@@ -61,6 +61,18 @@ function M.unique(tbl)
   return res
 end
 
+---@param str string
+---@return string
+function M.camel_to_snake(str)
+  if not str or str == "" then return str end
+
+  local result = str:gsub("(%u)", function(c) return "_" .. c:lower() end)
+
+  if result:sub(1, 1) == "_" then result = result:sub(2) end
+
+  return result
+end
+
 ---@param lines string[]
 function M.filter_bl(lines)
   return vim.iter(lines):filter(function(line) return line ~= "" end):totable()
@@ -74,16 +86,28 @@ function M.is_valid_winid(winid) return type(winid) == "number" and api.nvim_win
 ---@return boolean
 function M.is_valid_bufnr(bufnr) return type(bufnr) == "number" and api.nvim_buf_is_valid(bufnr) end
 
----@param str string
----@return string
-function M.camel_to_snake(str)
-  if not str or str == "" then return str end
+---@param winid integer
+---@param option string
+---@return any
+function M.get_win_option(winid, option) return api.nvim_get_option_value(option, { win = winid, scope = "local" }) end
 
-  local result = str:gsub("(%u)", function(c) return "_" .. c:lower() end)
+---@param bufnr integer
+---@param option string
+---@return any
+function M.get_buf_option(bufnr, option) return api.nvim_get_option_value(option, { buf = bufnr, scope = "local" }) end
 
-  if result:sub(1, 1) == "_" then result = result:sub(2) end
+---@param winid integer
+---@param option string
+---@param value any
+function M.set_win_option(winid, option, value)
+  api.nvim_set_option_value(option, value, { win = winid, scope = "local" })
+end
 
-  return result
+---@param bufnr integer
+---@param option string
+---@param value any
+function M.set_buf_option(bufnr, option, value)
+  api.nvim_set_option_value(option, value, { buf = bufnr, scope = "local" })
 end
 
 return M

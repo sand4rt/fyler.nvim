@@ -1,3 +1,5 @@
+local util = require("fyler.lib.util")
+
 local api = vim.api
 
 ---@class FylerUi
@@ -30,11 +32,11 @@ end
 function Ui:_render(ui_lines)
   if not self.win:has_valid_bufnr() then return end
 
-  local was_modifiable = vim.bo[self.win.bufnr].modifiable
+  local was_modifiable = util.get_buf_option(self.win.bufnr, "modifiable")
   local win_width = api.nvim_win_get_width(self.win.winid)
   local buf_lines = {}
 
-  vim.bo[self.win.bufnr].modifiable = true
+  util.set_buf_option(self.win.bufnr, "modifiable", true)
 
   for _, line in ipairs(ui_lines) do
     local line_text = table.concat(vim.tbl_map(function(word) return word.str end, line.words))
@@ -72,9 +74,9 @@ function Ui:_render(ui_lines)
     end
   end
 
-  if not was_modifiable then vim.bo[self.win.bufnr].modifiable = false end
+  if not was_modifiable then util.set_buf_option(self.win.bufnr, "modifiable", false) end
 
-  vim.bo[self.win.bufnr].modified = false
+  util.set_buf_option(self.win.bufnr, "modified", false)
 end
 
 function Ui:render(opts)

@@ -1,3 +1,5 @@
+local util = require("fyler.lib.util")
+
 local M = {}
 
 local api = vim.api
@@ -21,7 +23,7 @@ function M.setup(config)
         local path = vim.api.nvim_buf_get_name(0)
         if vim.fn.isdirectory(path) ~= 1 then return end
 
-        vim.bo.bufhidden = "wipe"
+        util.set_buf_option(0, "bufhidden", "wipe")
 
         require("fyler").open { path = path }
       end,
@@ -35,8 +37,8 @@ function M.setup(config)
       if not (arg.data.bufname and arg.data.bufname:match("fyler://*")) then return end
 
       api.nvim_win_call(arg.data.win, function()
-        vim.wo.concealcursor = "nvic"
-        vim.wo.conceallevel = 3
+        util.set_win_option(0, "concealcursor", "nvic")
+        util.set_win_option(0, "conceallevel", 3)
 
         fn.matchadd("Conceal", [[/\d\d\d\d\d ]])
       end)
@@ -54,24 +56,6 @@ function M.setup(config)
       local cur_instance = require("fyler.views.explorer").get_current_instance()
       if cur_instance then cur_instance:_action("try_focus_buffer")(arg) end
     end,
-  })
-
-  api.nvim_create_autocmd("BufEnter", {
-    group = augroup,
-    callback = vim.schedule_wrap(function(arg)
-      local explorer = require("fyler.views.explorer").instance
-      if not explorer then return end
-
-      if vim.fn.bufname(arg.buf) == explorer.win.bufname then return end
-
-      if api.nvim_get_current_win() == explorer.win.winid then
-        for option, _ in pairs(require("fyler.config").get_view_config("explorer").win.win_opts) do
-          if not explorer.win:has_valid_winid() then return end
-
-          vim.wo[explorer.win.winid][option] = vim.w[explorer.win.winid][option]
-        end
-      end
-    end),
   })
 end
 

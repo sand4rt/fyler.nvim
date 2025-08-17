@@ -302,14 +302,14 @@ function M.refreshview(view, on_render)
     await(view.root.update, view.root)
 
     if not (view.win:has_valid_winid() and view.win:has_valid_bufnr()) then return end
-    vim.bo[view.win.bufnr].undolevels = -1
+    util.set_buf_option(view.win.bufnr, "undolevels", -1)
 
     view.win.ui:render {
       ui_lines = await(ui.Explorer, algos.tree_table_from_node(view).children),
       on_render = vim.schedule_wrap(function()
         if on_render then on_render() end
         if view.win:has_valid_bufnr() then
-          vim.bo[view.win.bufnr].undolevels = vim.go.undolevels
+          util.set_buf_option(view.win.bufnr, "undolevels", -1)
           M.draw_indentscope(view)()
         end
       end),

@@ -240,12 +240,11 @@ function Win:show()
   end
 
   for option, value in pairs(self.win_opts) do
-    vim.w[self.winid][option] = vim.wo[self.winid][option]
-    vim.wo[self.winid][option] = value
+    util.set_win_option(self.winid, option, value)
   end
 
   for option, value in pairs(self.buf_opts) do
-    vim.bo[self.bufnr][option] = value
+    util.set_buf_option(self.bufnr, option, value)
   end
 
   for event, callback in pairs(self.autocmds) do

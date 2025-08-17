@@ -1,3 +1,5 @@
+local util = require("fyler.lib.util")
+
 local M = {}
 local hooks = {}
 
@@ -71,7 +73,7 @@ function hooks.on_rename(src, dst)
   local src_bufnr = fn.bufnr(src)
   if src_bufnr >= 0 then
     local dst_bufnr = fn.bufadd(dst)
-    vim.bo[dst_bufnr].buflisted = true
+    util.set_buf_option(dst_bufnr, "buflisted", true)
 
     for _, winid in ipairs(fn.win_findbuf(src_bufnr)) do
       api.nvim_win_call(winid, function() vim.cmd("buffer " .. dst_bufnr) end)
