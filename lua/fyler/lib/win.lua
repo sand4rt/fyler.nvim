@@ -273,7 +273,12 @@ function Win:hide()
   util.try(api.nvim_win_close, self.winid, true)
   util.try(api.nvim_buf_delete, self.bufnr, { force = true })
 
-  if self.kind:match("^replace") and util.is_valid_bufnr(self.old_bufnr) and api.nvim_buf_is_loaded(self.old_bufnr) then
+  if
+    self.kind:match("^replace")
+    and util.is_valid_winid(self.winid)
+    and util.is_valid_bufnr(self.old_bufnr)
+    and api.nvim_buf_is_loaded(self.old_bufnr)
+  then
     api.nvim_win_set_buf(self.winid, self.old_bufnr)
   end
 
