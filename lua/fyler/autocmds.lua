@@ -25,7 +25,7 @@ function M.setup(config)
 
         util.set_buf_option(0, "bufhidden", "wipe")
 
-        require("fyler").open { path = path }
+        require("fyler").open { cwd = path }
       end,
     })
   end
