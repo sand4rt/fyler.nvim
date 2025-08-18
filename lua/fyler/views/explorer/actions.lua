@@ -325,9 +325,9 @@ function M.try_focus_buffer(view)
     if not view.win:has_valid_winid() then return end
 
     if string.match(arg.file, "^fyler://*") then
-      if not util.is_valid_winid(view.win.old_winid) then return end
+      if not util.is_valid_bufnr(view.win.old_bufnr) then return end
 
-      local old_bufname = fn.bufname(api.nvim_win_get_buf(view.win.old_winid))
+      local old_bufname = fn.bufname(view.win.old_bufnr)
       if old_bufname == "" or string.match(old_bufname, "^fyler://*") then return end
 
       arg.file = fs.abspath(old_bufname)
