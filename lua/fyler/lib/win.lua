@@ -241,6 +241,7 @@ function Win:show()
     self.winid = api.nvim_open_win(self.bufnr, self.enter, win_config)
   end
 
+  --TODO: Must find a better way to trigger 'try_focus_buffer' action for 'float' window kind
   api.nvim_exec_autocmds("BufEnter", {})
   api.nvim_exec_autocmds("User", {
     pattern = "FylerWinOpen",
