@@ -57,6 +57,23 @@ function M.setup(config)
       if cur_instance then cur_instance:_action("try_focus_buffer")(arg) end
     end,
   })
+
+  api.nvim_create_autocmd("BufWinEnter", {
+    group = augroup,
+    callback = function(arg)
+      local instance = require("fyler.views.explorer").get_current_instance()
+      if not instance then return end
+      if not instance.win:has_valid_winid() then return end
+
+      local bufnr = arg.buf
+      local bufname = api.nvim_buf_get_name(bufnr)
+      if bufname:match("^fyler://*") then return end
+
+      if api.nvim_win_get_buf(instance.win.winid) ~= bufnr then return end
+
+      instance:_action("n_close_view")()
+    end,
+  })
 end
 
 return M
