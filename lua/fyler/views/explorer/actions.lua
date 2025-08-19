@@ -288,6 +288,7 @@ function M.refreshview(view, on_render)
     await(view.root.update, view.root)
 
     if not (view.win:has_valid_winid() and view.win:has_valid_bufnr()) then return end
+    local cache_undolevels = util.get_buf_option(view.win.bufnr, "undolevels")
     util.set_buf_option(view.win.bufnr, "undolevels", -1)
 
     view.win.ui:render {
@@ -295,7 +296,7 @@ function M.refreshview(view, on_render)
       on_render = vim.schedule_wrap(function()
         if on_render then on_render() end
         if view.win:has_valid_bufnr() then
-          util.set_buf_option(view.win.bufnr, "undolevels", -1)
+          util.set_buf_option(view.win.bufnr, "undolevels", cache_undolevels)
           M.draw_indentscope(view)()
         end
       end),
