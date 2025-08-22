@@ -15,10 +15,20 @@ FylerConfirmView.__index = FylerConfirmView
 function FylerConfirmView:open(message, choices, on_choice)
   local view_config = config.get_view_config("confirm")
   local mappings = {}
-  util.tbl_each(
-    config.get_mappings("confirm"),
-    function(x, y) mappings[x] = self:_action(util.camel_to_snake(string.format("n%s", y)), on_choice) end
-  )
+
+  local user_actions = config.get_commands("confirm")
+  local user_action_names = vim.tbl_keys(user_actions)
+
+  util.tbl_each(config.get_mappings("confirm"), function(key, action_name)
+    if vim.tbl_contains(user_action_names, action_name) then
+      mappings[key] = user_actions[action_name](self, on_choice)
+      return
+    end
+    local native_action = self:_action(util.camel_to_snake(string.format("n%s", action_name)), on_choice)
+    vim.notify(vim.inspect(native_action))
+    if native_action == nil then error(string.format("Mapping action %s is not available", action_name)) end
+    mappings[key] = native_action
+  end)
 
   -- stylua: ignore start
   self.win = Win.new {
