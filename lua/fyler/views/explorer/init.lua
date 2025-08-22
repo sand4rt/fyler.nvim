@@ -8,11 +8,7 @@ local M = {}
 
 local fn = vim.fn
 
-local instance_map = {}
-local current_dir = nil
-
 ---@class FylerExplorerView
----@field cwd string
 ---@field root FylerTreeNode
 ---@field win FylerWin
 local ExplorerView = {}
@@ -22,12 +18,11 @@ ExplorerView.__index = ExplorerView
 function ExplorerView:open(opts)
   local view_config = config.get_view_config("explorer", opts.kind)
   local mappings = {}
+
   util.tbl_each(
     config.get_mappings("explorer"),
     function(x, y) mappings[x] = self:_action(util.camel_to_snake(string.format("n%s", y))) end
   )
-
-  current_dir = opts.cwd
 
   -- stylua: ignore start
   self.win = Win.new {
@@ -53,8 +48,9 @@ function ExplorerView:open(opts)
     render        = self:_action("refreshview"),
     right         = view_config.win.right,
     user_autocmds = {
-      ["RefreshView"] = self:_action("refreshview"),
-      ["Synchronize"] = self:_action("synchronize"),
+      ["DrawIndentscope"] = self:_action("draw_indentscope"),
+      ["RefreshView"]     = self:_action("refreshview"),
+      ["Synchronize"]     = self:_action("synchronize"),
     },
     top           = view_config.win.top,
     width         = view_config.win.width,
@@ -62,6 +58,8 @@ function ExplorerView:open(opts)
   }
   -- stylua: ignore end
 
+  self:ch_root(opts.cwd)
+  self:ch_kind(opts.kind)
   self.win:show()
 end
 
@@ -79,57 +77,48 @@ function ExplorerView:focus()
   if self.win then self.win:focus() end
 end
 
----@param cwd string
----@return FylerExplorerView
-function M.find_or_create(cwd)
-  if instance_map[cwd] then
-    current_dir = cwd
-    return instance_map[cwd]
-  end
+local node_map = {}
 
-  local instance = {
-    cwd = cwd,
-    root = TreeNode.new(store.set_entry {
+---@return string|nil
+function ExplorerView:getcwd() return self.root and store.get_entry(self.root.itemid):get_path() end
+
+---@param cwd string
+function ExplorerView:ch_root(cwd)
+  assert(vim.fn.isdirectory(cwd) == 1, "Path must be a directory")
+
+  if cwd == self:getcwd() then return end
+
+  local new_root = (function()
+    if node_map[cwd] then return node_map[cwd] end
+
+    return TreeNode.new(store.set_entry {
       name = fn.fnamemodify(cwd, ":t"),
       path = cwd,
       type = "directory",
-    }),
-  }
+    })
+  end)()
 
-  instance.root:toggle()
-  instance_map[cwd] = setmetatable(instance, ExplorerView)
-
-  return instance
+  self.root = new_root
+  self.root.open = true
 end
 
----@param cwd string
----@return FylerExplorerView
-function M.get_instance(cwd)
-  if current_dir == cwd then return instance_map[current_dir] end
-
-  local current_instance = M.get_current_instance()
-  if current_instance then current_instance.win:hide() end
-
-  current_dir = cwd
-  instance_map[current_dir] = M.find_or_create(current_dir)
-
-  return instance_map[current_dir]
-end
-
----@return FylerExplorerView|nil
-function M.get_current_instance()
-  if not current_dir then return nil end
-
-  return instance_map[current_dir]
+---@param kind FylerWinKind|string
+function ExplorerView:ch_kind(kind)
+  if self.win then self.win.kind = kind end
 end
 
 ---@param opts { cwd: string, enter: boolean, kind: FylerWinKind|string }
 function M.open(opts)
-  local instance = M.get_instance(opts.cwd)
-  if instance:is_visible() then
-    instance:focus()
+  M.instance = (function()
+    if M.instance then return M.instance end
+
+    return setmetatable({}, ExplorerView)
+  end)()
+
+  if M.instance:is_visible() then
+    M.instance:focus()
   else
-    instance:open(opts)
+    M.instance:open(opts)
   end
 end
 

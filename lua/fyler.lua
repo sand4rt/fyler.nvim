@@ -1,24 +1,31 @@
 local M = {}
 
+-- A local variable which prevents "Fyler.nvim" to re-setup
 local did_setup = false
 
----@param custom_config FylerConfig
-function M.setup(custom_config)
+-- Setup function setup various plugin components, Like config, autocommands, hooks and highlights.
+-- It also exposes some "Fyler.nvim" APIS
+---@param options FylerConfig
+function M.setup(options)
   if vim.fn.has("nvim-0.11") ~= 1 then return vim.notify("Fyler requires at least NVIM 0.11") end
-  if did_setup then return end
 
+  -- Early return if already been setuped
+  if did_setup then return end
+  -- Overwrite default configuration before setuping other components
   local config = require("fyler.config")
-  config.setup(custom_config)
+  config.setup(options)
 
   require("fyler.autocmds").setup(config)
   require("fyler.hooks").setup(config)
-  require("fyler.lib.hls").setup(config)
+  require("fyler.lib.hls").setup()
 
+  -- Mark setup as completed
   did_setup = true
 
   local util = require("fyler.lib.util")
   local fs = require("fyler.lib.fs")
 
+  -- "Fyler.nvim" API to launch explorer with defined options
   M.open = vim.schedule_wrap(
     function(opts)
       require("fyler.views.explorer").open(util.tbl_merge_keep(opts or {}, {

@@ -69,6 +69,19 @@
 
 </details>
 
+<details>
+  <summary><a href="https://github.com/echasnovski/mini.deps"><strong>Mini.deps</strong></a></summary>
+
+```lua
+add({
+  source = "A7Lavinraj/fyler.nvim",
+  depends = { "echasnovski/mini.icons" },
+  checkout = "stable",
+})
+```
+
+</details>
+
 ### Latest version
 
 <details open>
@@ -103,8 +116,15 @@ Or change to `nvim-web-devicons`
 
 ```lua
 add({
-  source = 'A7Lavinraj/fyler.nvim',
-  depends = { 'echasnovski/mini.icons' },
+  source = "A7Lavinraj/fyler.nvim",
+  depends = { "echasnovski/mini.icons" },
+})
+```
+
+```lua
+add({
+  source = "A7Lavinraj/fyler.nvim",
+  depends = { "nvim-tree/nvim-web-devicons" },
 })
 ```
 
@@ -116,8 +136,9 @@ add({
 ```lua
 local defaults = {
   hooks = {
-    on_delete = function(path) end,
-    on_rename = function(src_path, dst_path) end,
+    on_delete = nil, -- function(path) end
+    on_rename = nil, -- function(src_path, dst_path) end
+    on_highlights = nil -- function(hl_groups, palette) end
   },
   -- Changes icon provider
   icon_provider = "mini-icons",
@@ -138,8 +159,6 @@ local defaults = {
       ["n"] = "Discard",
     },
   },
-  -- Changes builtin highlight groups
-  on_highlights = function() end,
   -- Changes configuration for associated view
   views = {
     confirm = {
@@ -148,49 +167,31 @@ local defaults = {
         border = "single",
         -- Changes buffer options
         buf_opts = {
-          buflisted = false,
-          modifiable = false,
+          -- buffer options
         },
         -- Changes window kind
         kind = "float",
         -- Changes window kind preset
         kind_presets = {
-          float = {
-            height = "0.3rel",
-            width = "0.4rel",
-            top = "0.3rel",
-            left = "0.3rel",
-          },
-          replace = {},
-          split_above = {
-            height = "0.5rel",
-          },
-          split_above_all = {
-            height = "0.5rel",
-          },
-          split_below = {
-            height = "0.5rel",
-          },
-          split_below_all = {
-            height = "0.5rel",
-          },
-          split_left = {
-            width = "0.5rel",
-          },
-          split_left_most = {
-            width = "0.5rel",
-          },
-          split_right = {
-            width = "0.5rel",
-          },
-          split_right_most = {
-            width = "0.5rel",
-          },
+          -- values can be "(0,1]rel" or "{1...}abs"
+
+          -- <preset_name> = {
+          --   height = "",
+          --   width = "",
+          --   top = "",
+          --   left = ""
+          -- }
+
+          -- float = {
+          --   height = "0.3rel",
+          --   width = "0.4rel",
+          --   top = "0.3rel",
+          --   left = "0.3rel"
+          -- },
         },
         -- Changes window options
         win_opts = {
-          winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
-          wrap = false,
+          -- window options
         },
       },
     },
@@ -214,57 +215,26 @@ local defaults = {
         border = "single",
       -- Changes buffer options
         buf_opts = {
-          buflisted = false,
-          buftype = "acwrite",
-          expandtab = true,
-          filetype = "fyler",
-          shiftwidth = 2,
+          -- buffer options
         },
       -- Changes window kind
         kind = "replace",
       -- Changes window kind preset
         kind_presets = {
-          float = {
-            height = "0.7rel",
-            width = "0.7rel",
-            top = "0.15rel",
-            left = "0.15rel",
-          },
-          replace = {},
-          split_above = {
-            height = "0.7rel",
-          },
-          split_above_all = {
-            height = "0.7rel",
-          },
-          split_below = {
-            height = "0.7rel",
-          },
-          split_below_all = {
-            height = "0.7rel",
-          },
-          split_left = {
-            width = "0.3rel",
-          },
-          split_left_most = {
-            width = "0.3rel",
-          },
-          split_right = {
-            width = "0.3rel",
-          },
-          split_right_most = {
-            width = "0.3rel",
-          },
+          -- values can be "(0,1]rel" or "{1...}abs"
+
+          -- <preset_name> = {
+          --   height = "",
+          --   width = "",
+          --   top = "",
+          --   left = ""
+          -- }
+
+          -- replace = {},
         },
       -- Changes window options
         win_opts = {
-          concealcursor = "nvic",
-          conceallevel = 3,
-          cursorline = true,
-          number = true,
-          relativenumber = true,
-          winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
-          wrap = false,
+          -- window options
         },
       },
     },
@@ -324,15 +294,20 @@ fyler.open({ kind = "split_left_most" })
 
 ## Similar plugins
 
-- [oil.nvim](https://github.com/stevearc/oil.nvim)
 - [mini.files](https://github.com/echasnovski/mini.files)
+- [oil.nvim](https://github.com/stevearc/oil.nvim)
 
 ## Codebase inspiration
 
+- [mini.nvim](https://github.com/nvim-telescope/telescope.nvim)
 - [neogit](https://github.com/NeogitOrg/neogit)
+- [plenary.nvim](https://github.com/nvim-telescope/telescope.nvim)
 - [snacks.rename](https://github.com/folke/snacks.nvim/blob/main/docs/rename.md)
 - [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
 
-## Special thanks to all contributors
-
-![Contributors](https://contrib.rocks/image?repo=A7Lavinraj/fyler.nvim)
+<div align="center">
+  <h2>Special thanks to all contributors</h2>
+  <a href="https://github.com/A7Lavinraj/fyler.nvim/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=A7Lavinraj/fyler.nvim" alt="Contributors" />
+  </a>
+</div>

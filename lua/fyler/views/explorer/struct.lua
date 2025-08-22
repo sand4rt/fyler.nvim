@@ -3,21 +3,18 @@ local fs = require("fyler.lib.fs")
 local store = require("fyler.views.explorer.store")
 local util = require("fyler.lib.util")
 
-local async = a.async
-local await = a.await
-
 ---@class FylerTreeNode
----@field id string
+---@field itemid string
 ---@field open boolean
 ---@field children FylerTreeNode[]
 local TreeNode = {}
 TreeNode.__index = TreeNode
 
----@param id string
+---@param itemid string
 ---@return FylerTreeNode
-function TreeNode.new(id)
+function TreeNode.new(itemid)
   local instance = {
-    id = id,
+    itemid = itemid,
     open = false,
     children = {},
   }
@@ -37,7 +34,7 @@ end
 ---@param addr string
 ---@return FylerTreeNode|nil
 function TreeNode:find(addr)
-  if self.id == addr then return self end
+  if self.itemid == addr then return self end
 
   for _, child in ipairs(self.children) do
     local found = child:find(addr)
@@ -47,11 +44,11 @@ function TreeNode:find(addr)
   return nil
 end
 
-TreeNode.update = async(function(self, cb)
+TreeNode.update = a.wrap(function(self, cb)
   if not self.open then return cb() end
 
-  local entry = store.get_entry(self.id)
-  local err, items = await(fs.ls, entry.path)
+  local entry = store.get_entry(self.itemid)
+  local err, items = fs.ls(entry.path)
   if err then return cb() end
 
   -- stylua: ignore start
@@ -59,24 +56,24 @@ TreeNode.update = async(function(self, cb)
     return util.if_any(
       items,
       function(item)
-        return item.path == store.get_entry(child.id).path and item.type == store.get_entry(child.id).type
+        return item.path == store.get_entry(child.itemid).path and item.type == store.get_entry(child.itemid).type
       end
     )
-  -- stylua: ignore end
   end)
+  -- stylua: ignore end
 
   for _, item in ipairs(items) do
     if
       not util.if_any(self.children, function(child) ---@param child FylerTreeNode
-        return store.get_entry(child.id).path == item.path and store.get_entry(child.id).type == item.type
+        return store.get_entry(child.itemid).path == item.path and store.get_entry(child.itemid).type == item.type
       end)
     then
-      self:add_child(self.id, TreeNode.new(store.set_entry(item)))
+      self:add_child(self.itemid, TreeNode.new(store.set_entry(item)))
     end
   end
 
   for _, child in ipairs(self.children) do
-    await(child.update, child)
+    child:update()
   end
 
   return cb()
