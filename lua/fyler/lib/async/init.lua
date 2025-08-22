@@ -7,7 +7,6 @@ local function trace_error(message, co)
   local trace = debug.traceback(co or nil)
   local full_error = string.format("%s\n%s", message, trace)
   log.error(full_error)
-
   return full_error
 end
 

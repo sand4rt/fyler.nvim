@@ -3,8 +3,8 @@ local util = require("fyler.lib.util")
 vim.api.nvim_create_user_command("Fyler", function(args)
   local opts = {}
   for _, farg in ipairs(args.fargs) do
-    local key, value = util.unpack(vim.split(farg, "="))
-    opts[key] = value
+    local k, v = util.unpack(vim.split(farg, "="))
+    opts[k] = v
   end
 
   require("fyler").open(opts)

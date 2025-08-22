@@ -1,3 +1,5 @@
+local hooks = require("fyler.hooks")
+
 local M = {}
 
 local api = vim.api
@@ -66,10 +68,7 @@ local function build_palette()
   -- stylua: ignore end
 end
 
----@param opts FylerConfig|nil
-function M.setup(opts)
-  opts = opts or {}
-
+function M.setup()
   local palette = build_palette()
 
   -- stylua: ignore start
@@ -94,10 +93,10 @@ function M.setup(opts)
   }
   -- stylua: ignore end
 
-  if opts.on_highlights then opts.on_highlights(hl_groups, palette) end
+  hooks.on_highlights(hl_groups, palette)
 
-  for key, val in pairs(hl_groups) do
-    api.nvim_set_hl(0, key, val)
+  for k, v in pairs(hl_groups) do
+    api.nvim_set_hl(0, k, v)
   end
 end
 

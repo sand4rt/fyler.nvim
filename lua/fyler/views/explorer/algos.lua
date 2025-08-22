@@ -9,7 +9,7 @@ local api = vim.api
 
 ---@param str string
 ---@return string
-function M.match_id(str) return str:match("/(%d%d%d%d%d) ") end
+function M.match_itemid(str) return str:match("/(%d%d%d%d%d) ") end
 
 ---@param str string
 ---@return string
@@ -18,7 +18,7 @@ function M.match_indent(str) return str:match("^(%s*)") end
 ---@param str string
 ---@return string
 function M.match_name(str)
-  if M.match_id(str) then
+  if M.match_itemid(str) then
     return str:match("/%d%d%d%d%d (.*)$")
   else
     return str:gsub("^%s*", ""):match(".*")
@@ -27,15 +27,15 @@ end
 
 ---@param str string
 ---@return string, string, string
-function M.match_contents(str) return M.match_id(str), M.match_name(str), M.match_indent(str) end
+function M.match_contents(str) return M.match_itemid(str), M.match_name(str), M.match_indent(str) end
 
 ---@param view FylerExplorerView
 ---@return table
 function M.tree_table_from_node(view)
   ---@param node FylerTreeNode
   local function get_tbl(node)
-    local sub_tbl = store.get_entry(node.id)
-    sub_tbl.id = node.id
+    local sub_tbl = store.get_entry(node.itemid)
+    sub_tbl.itemid = node.itemid
 
     if sub_tbl:is_dir() then sub_tbl.children = {} end
 
@@ -58,24 +58,25 @@ function M.tree_table_from_buffer(view)
   if not view.win:has_valid_bufnr() then return {} end
 
   local lines = util.filter_bl(api.nvim_buf_get_lines(view.win.bufnr, 0, -1, false))
-
-  local root, stack =
-    util.tbl_merge_force(store.get_entry(view.root.id), { id = view.root.id, children = {} }), Stack.new()
+  local stack = Stack.new()
+  local root = util.tbl_merge_force(store.get_entry(view.root.itemid), {
+    itemid = view.root.itemid,
+    children = {},
+  })
   stack:push { node = root, indent = -1 }
 
   for _, line in ipairs(lines) do
-    local id, name, indent = M.match_contents(line)
-    local entry = id and store.get_entry(id)
-
+    local itemid, name, indent = M.match_contents(line)
+    local entry = itemid and store.get_entry(itemid)
     while stack:top().indent >= #indent and stack.items:len() > 1 do
       stack:pop()
     end
 
     local parent = stack:top().node
     local new_node = {
-      id = id,
-      name = name,
       children = {},
+      itemid = itemid,
+      name = name,
       path = fs.joinpath(parent.path, name),
       type = entry and entry.type or "",
     }
@@ -94,8 +95,8 @@ function M.compute_fs_actions(view)
   local hash, diffs, not_seen = {}, {}, {}
 
   local function save_hash(root)
-    hash[root.id] = root.path
-    not_seen[root.id] = true
+    hash[root.itemid] = root.path
+    not_seen[root.itemid] = true
     for _, child in ipairs(root.children or {}) do
       save_hash(child)
     end
@@ -104,9 +105,9 @@ function M.compute_fs_actions(view)
   save_hash(M.tree_table_from_node(view))
 
   local function compute_diffs(root)
-    if root.id then
-      table.insert(diffs, { src = hash[root.id], dst = root.path })
-      not_seen[root.id] = false
+    if root.itemid then
+      table.insert(diffs, { src = hash[root.itemid], dst = root.path })
+      not_seen[root.itemid] = false
     else
       table.insert(diffs, { dst = root.path })
     end
@@ -123,7 +124,6 @@ function M.compute_fs_actions(view)
   end
 
   local actions, groups = { create = {}, delete = {}, move = {}, copy = {} }, {}
-
   for _, diff in ipairs(diffs) do
     if diff.src and diff.dst then
       groups[diff.src] = groups[diff.src] or {}
@@ -147,7 +147,6 @@ function M.compute_fs_actions(view)
       else
         table.insert(actions.move, { src = path, dst = tbl[1] })
         table.remove(tbl, 1)
-
         util.tbl_each(tbl, function(x) table.insert(actions.copy, { src = path, dst = x }) end)
       end
     end

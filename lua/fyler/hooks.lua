@@ -5,15 +5,19 @@ local hooks = {}
 
 local fn = vim.fn
 local api = vim.api
+local lsp = vim.lsp
 
+-- Get attached active LSP clients
 local function get_lsp_clients()
-  if vim.lsp.get_clients then
-    return vim.lsp.get_clients()
+  if lsp.get_clients then
+    return lsp.get_clients()
   else
     ---@diagnostic disable-next-line: deprecated
-    return vim.lsp.get_active_clients()
+    return lsp.get_active_clients()
   end
 end
+
+hooks.on_highlights = function() end
 
 ---@param path string
 function hooks.on_delete(path)
@@ -28,22 +32,24 @@ function hooks.on_delete(path)
       api.nvim_win_call(winid, function()
         if not api.nvim_win_is_valid(winid) or api.nvim_win_get_buf(winid) ~= path_bufnr then return end
 
-        local alt_bufnr = fn.bufnr("#")
-        if alt_bufnr ~= path_bufnr and fn.buflisted(alt_bufnr) == 1 then
-          return api.nvim_win_set_buf(winid, alt_bufnr)
+        local alternate_bufnr = fn.bufnr("#")
+        if alternate_bufnr ~= path_bufnr and fn.buflisted(alternate_bufnr) == 1 then
+          return api.nvim_win_set_buf(winid, alternate_bufnr)
         end
 
         ---@diagnostic disable-next-line: param-type-mismatch
         local has_previous = pcall(vim.cmd, "bprevious")
         if has_previous and path_bufnr ~= api.nvim_win_get_buf(winid) then return end
 
-        local new_buf = api.nvim_create_buf(true, false)
-        api.nvim_win_set_buf(winid, new_buf)
+        local new_bufnr = api.nvim_create_buf(true, false)
+        api.nvim_win_set_buf(winid, new_bufnr)
       end)
     end
 
-    ---@diagnostic disable-next-line: param-type-mismatch
-    if api.nvim_buf_is_valid(path_bufnr) then pcall(vim.cmd, "bdelete! " .. path_bufnr) end
+    if api.nvim_buf_is_valid(path_bufnr) then
+      ---@diagnostic disable-next-line: param-type-mismatch
+      pcall(vim.cmd, "bdelete! " .. path_bufnr)
+    end
   end)
 end
 
@@ -65,8 +71,10 @@ function hooks.on_rename(src, dst)
   local clients = get_lsp_clients()
   for _, client in ipairs(clients) do
     if client:supports_method("workspace/willRenameFiles") then
-      local resp = client:request_sync("workspace/willRenameFiles", changes, 1000, 0)
-      if resp and resp.result ~= nil then vim.lsp.util.apply_workspace_edit(resp.result, client.offset_encoding) end
+      local response = client:request_sync("workspace/willRenameFiles", changes, 1000, 0)
+      if response and response.result ~= nil then
+        lsp.util.apply_workspace_edit(response.result, client.offset_encoding)
+      end
     end
   end
 

@@ -11,7 +11,7 @@ Entry.__index = Entry
 function Entry:is_dir()
   if self.type == "directory" then
     return true
-  elseif self.type == "link" and self.link_type == "directory" then
+  elseif self.type == "link" and self.ltype == "directory" then
     return true
   else
     return false
@@ -21,22 +21,22 @@ end
 ---@return string
 function Entry:get_path()
   if self.type == "link" then
-    return self.link_path
+    return self.lpath
   else
     return self.path
   end
 end
 
----@param key string
-function M.get_entry(key) return setmetatable(vim.deepcopy(store[key]), Entry) end
+---@param itemid string
+function M.get_entry(itemid) return setmetatable(vim.deepcopy(store[itemid]), Entry) end
 
 ---@param tbl table
 ---@return string
 function M.set_entry(tbl)
   count = count + 1
-  local id = string.format("%05d", count)
-  store[id] = tbl
-  return id
+  local itemid = string.format("%05d", count)
+  store[itemid] = tbl
+  return itemid
 end
 
 ---@param fn function

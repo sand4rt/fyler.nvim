@@ -91,22 +91,19 @@ function Win:has_valid_bufnr() return type(self.bufnr) == "number" and api.nvim_
 function Win:is_visible()
   local buffer_in_window = #fn.win_findbuf(self.bufnr) > 0
   local window_in_tabpage = vim.tbl_contains(api.nvim_tabpage_list_wins(0), self.winid)
-
   return buffer_in_window and window_in_tabpage
 end
 
 function Win:focus()
   local windows = fn.win_findbuf(self.bufnr)
-
   if not windows or not windows[1] then return end
 
-  fn.win_gotoid(windows[1])
+  api.nvim_set_current_win(windows[1])
 end
 
 function Win:config()
   local winconfig = {
     style = "minimal",
-    noautocmd = true,
   }
 
   ---@param str string
@@ -207,14 +204,13 @@ end
 function Win:show()
   if self:has_valid_winid() then return end
 
+  -- Saving alternative "bufnr" and "winid" for later use
   self.old_bufnr = api.nvim_get_current_buf()
   self.old_winid = api.nvim_get_current_win()
-
-  local win_config = self:config()
-
   self.bufnr = api.nvim_create_buf(false, true)
   if self.bufname then api.nvim_buf_set_name(self.bufnr, self.bufname) end
 
+  local win_config = self:config()
   if win_config.split and (win_config.split:match("_all$") or win_config.split:match("_most$")) then
     if win_config.split == "left_most" then
       api.nvim_command(string.format("topleft %dvsplit", win_config.width))
@@ -229,27 +225,27 @@ function Win:show()
     end
 
     self.winid = api.nvim_get_current_win()
-
     if not self.enter then api.nvim_set_current_win(self.old_winid) end
 
     api.nvim_win_set_buf(self.winid, self.bufnr)
   elseif self.kind:match("^replace") then
     self.winid = vim.api.nvim_get_current_win()
-
     api.nvim_win_set_buf(self.winid, self.bufnr)
   else
     self.winid = api.nvim_open_win(self.bufnr, self.enter, win_config)
+
+    -- Trigger "BufEnter" event to focus buffer for floating window when "enter" enabled
+    -- [IMPORTANT]: This is necessary because "self.winid" will not get set on time to automatically triggered.
+    if self.enter then vim.api.nvim_exec_autocmds("BufEnter", {}) end
   end
 
-  --TODO: Must find a better way to trigger 'try_focus_buffer' action for 'float' window kind
-  api.nvim_exec_autocmds("BufEnter", {})
   api.nvim_exec_autocmds("User", {
     pattern = "FylerWinOpen",
     data = { win = self.winid, buf = self.bufnr, bufname = self.bufname },
   })
 
-  for key, val in pairs(self.mappings) do
-    vim.keymap.set("n", key, val, { buffer = self.bufnr, silent = true, noremap = true })
+  for k, v in pairs(self.mappings) do
+    vim.keymap.set("n", k, v, { buffer = self.bufnr, silent = true, noremap = true })
   end
 
   for option, value in pairs(self.win_opts) do
@@ -272,20 +268,40 @@ function Win:show()
 end
 
 function Win:hide()
-  util.try(api.nvim_win_close, self.winid, true)
-  util.try(api.nvim_buf_delete, self.bufnr, { force = true })
+  -- Recover alternate buffer if using "replace"|"split" window kind
+  if self.kind:match("^replace") then
+    if
+      util.is_valid_winid(self.winid)
+      and util.is_valid_bufnr(self.old_bufnr)
+      and api.nvim_buf_is_loaded(self.old_bufnr)
+    then
+      api.nvim_win_set_buf(self.winid, self.old_bufnr)
+    end
 
-  if
-    self.kind:match("^replace")
-    and util.is_valid_winid(self.winid)
-    and util.is_valid_bufnr(self.old_bufnr)
-    and api.nvim_buf_is_loaded(self.old_bufnr)
-  then
-    api.nvim_win_set_buf(self.winid, self.old_bufnr)
+    util.try(api.nvim_buf_delete, self.bufnr, { force = true })
+  else
+    util.try(api.nvim_win_close, self.winid, true)
+    util.try(api.nvim_buf_delete, self.bufnr, { force = true })
   end
 
   self.winid = nil
   self.bufnr = nil
+end
+
+-- Handle case when user open a NON FYLER BUFFER in "Fyler" window
+function Win:recover()
+  if self.kind:match("^replace") or self.kind:match("^split") then
+    util.try(api.nvim_buf_delete, self.bufnr, { force = true })
+  else
+    local cached_bufnr = api.nvim_get_current_buf()
+    util.try(api.nvim_win_close, self.winid, true)
+    util.try(api.nvim_buf_delete, self.bufnr, { force = true })
+
+    if util.is_valid_winid(self.old_winid) then
+      api.nvim_win_set_buf(self.old_winid, cached_bufnr)
+      api.nvim_set_current_win(self.old_winid)
+    end
+  end
 end
 
 return Win

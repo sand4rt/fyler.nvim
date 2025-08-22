@@ -3,6 +3,7 @@ local util = require("fyler.lib.util")
 ---@class FylerConfigHooks
 ---@field on_delete fun(path: string)|nil
 ---@field on_rename fun(src_path: string, dst_path: string)|nil
+---@field on_highlights fun(hl_groups: table, palette: table)|nil
 
 ---Defines icon provider to various views. It is a function with following definition:
 ---```
@@ -62,25 +63,40 @@ local util = require("fyler.lib.util")
 ---@field hooks FylerConfigHooks
 ---@field icon_provider FylerConfigIconProvider
 ---@field mappings FylerConfigMappings
----@field on_highlights fun(groups: table, palette: table): nil  How to change highlight groups
 ---@field views FylerConfigViews
 
 ---@class FylerConfig : FylerConfigDefaults
 ---@field hooks FylerConfigHooks|nil
 ---@field icon_provider FylerConfigIconProvider|nil
 ---@field mappings FylerConfigMappings|nil
----@field on_highlights fun(groups: table, palette: table)|nil
 ---@field views FylerConfigViews|nil
 
 local M = {}
 
+-- Default configuration used by "Fyler.nvim" which will get overwrite by user
 ---@type FylerConfigDefaults
 local defaults = {
+  -- Hooks are predefined functions which gets invoke on particular events
   hooks = {
+    -- "on_delete" hook will get triggered when a file gets deleted by "Fyler.nvim"
     on_delete = nil,
+
+    -- "on_rename" hook will get triggered when a file gets renamed by "Fyler.nvim"
     on_rename = nil,
+
+    -- "on_highlights" hook will get triggered when a setting highlight groups by "Fyler.nvim"
+    on_highlights = nil,
   },
+
+  -- "icon_provider" defines the icon generator along with it's highlight group. It can be one the following:
+  -- 1. "none"
+  -- 2. "minimal"
+  -- 3. "mini-icons"
+  -- 4. "nvim-web-devicons"
+  -- or it could be a function with definition `fun(type: string, name: string): string, string`
   icon_provider = "mini-icons",
+
+  -- Mappings are local to their "view" and only **normal mode** mappings are allowed for now
   mappings = {
     explorer = {
       ["q"] = "CloseView",
@@ -97,16 +113,34 @@ local defaults = {
       ["n"] = "Discard",
     },
   },
-  on_highlights = function() end,
+
+  -- "views" is a map to corresponding configuration
   views = {
     confirm = {
       win = {
+        -- Border style
         border = "single",
+
+        -- Buffer options
         buf_opts = {
           buflisted = false,
           modifiable = false,
         },
+
+        -- Window kind, can be one the following:
+        -- "float"
+        -- "replace"
+        -- "split_above"
+        -- "split_above_all"
+        -- "split_below"
+        -- "split_below_all"
+        -- "split_left"
+        -- "split_left_most"
+        -- "split_right"
+        -- "split_right_most"
         kind = "float",
+
+        -- Each preset defines the dimensions and positioning of corresponding window kind
         kind_presets = {
           float = {
             height = "0.3rel",
@@ -147,10 +181,19 @@ local defaults = {
       },
     },
     explorer = {
+      -- Close explorer on selecting a file
       close_on_select = true,
+
+      -- Skips confirmation for simple edits(CREATE <= 5 && DELETE == 0 && MOVE <= 1 && COPY <= 1)
       confirm_simple = false,
+
+      -- Replace most of the NETRW commands
       default_explorer = false,
+
+      -- Git symbols
       git_status = true,
+
+      -- Indentation markers
       indentscope = {
         enabled = true,
         group = "FylerIndentMarker",
@@ -210,6 +253,7 @@ local defaults = {
   },
 }
 
+-- Returns configuration for a particular "view" and "kind"
 ---@param name string
 ---@param kind FylerWinKind|nil
 function M.get_view_config(name, kind)
@@ -217,16 +261,17 @@ function M.get_view_config(name, kind)
   local view = vim.deepcopy(M.values.views[name])
   local preset = view.win.kind_presets[kind or view.win.kind]
   view.win = util.tbl_merge_keep(view.win, preset)
-
   return view
 end
 
+-- Returns key mappings for a particular "view"
 ---@param name string
 function M.get_mappings(name)
   assert(name, "name is required")
   return M.values.mappings[name]
 end
 
+-- Type check for configuration option
 ---@param name string
 ---@param value any
 ---@param ref string|string[]
@@ -247,19 +292,18 @@ local function check_type(name, value, ref, allow_nil)
   error(string.format("(fyler.nvim) `%s` should be %s, not %s", name, ref, type(value)))
 end
 
+-- Overwrites the defaults configuration options with user options
 ---@param config FylerConfig|nil
 function M.setup(config)
-  if config == nil then return end
-
+  config = config or {}
   check_type("config", config, "table")
 
-  M.values = vim.tbl_deep_extend("force", defaults, config)
-
+  local values = vim.tbl_deep_extend("force", defaults, config)
   for _, view_name in ipairs {
     "confirm",
     "explorer",
   } do
-    local win = M.values.views[view_name].win
+    local win = values.views[view_name].win
     check_type(
       string.format("config.views.%s.win.kind_presets.%s", view_name, win.kind),
       win.kind_presets[win.kind],
@@ -278,7 +322,7 @@ function M.setup(config)
       "split_right",
       "split_right_most",
     } do
-      local kind_preset = M.values.views[view_name].win.kind_presets[kind_preset_name]
+      local kind_preset = values.views[view_name].win.kind_presets[kind_preset_name]
       check_type(string.format("config.views.%s.%s", view_name, kind_preset_name), kind_preset, "table")
       check_type(
         string.format("config.views.%s.%s.height", view_name, kind_preset_name),
@@ -295,30 +339,38 @@ function M.setup(config)
     end
   end
 
-  check_type("config.icon_provider", M.values.icon_provider, { "string", "function" })
-  check_type("config.mappings", M.values.mappings, "table")
-  check_type("config.mappings.confirm", M.values.mappings.confirm, "table")
-  check_type("config.mappings.explorer", M.values.mappings.explorer, "table")
-  check_type("config.on_highlights", M.values.on_highlights, "function")
-  check_type("config.views", M.values.views, "table")
-  check_type("config.views.confirm", M.values.views.confirm, "table")
-  check_type("config.views.confirm.kind", M.values.views.confirm.win.kind, "string")
-  check_type("config.views.confirm.win.border", M.values.views.confirm.win.border, "string")
-  check_type("config.views.confirm.win.buf_opts", M.values.views.confirm.win.buf_opts, "table")
-  check_type("config.views.confirm.win.win_opts", M.values.views.confirm.win.win_opts, "table")
-  check_type("config.views.explorer", M.values.views.explorer, "table")
-  check_type("config.views.explorer.close_on_select", M.values.views.explorer.close_on_select, "boolean")
-  check_type("config.views.explorer.confirm_simple", M.values.views.explorer.confirm_simple, "boolean")
-  check_type("config.views.explorer.default_explorer", M.values.views.explorer.default_explorer, "boolean")
-  check_type("config.views.explorer.git_status", M.values.views.explorer.git_status, "boolean")
-  check_type("config.views.explorer.indentscope", M.values.views.explorer.indentscope, "table")
-  check_type("config.views.explorer.indentscope.enabled", M.values.views.explorer.indentscope.enabled, "boolean")
-  check_type("config.views.explorer.indentscope.group", M.values.views.explorer.indentscope.group, "string")
-  check_type("config.views.explorer.indentscope.marker", M.values.views.explorer.indentscope.marker, "string")
-  check_type("config.views.explorer.kind", M.values.views.explorer.win.kind, "string")
-  check_type("config.views.explorer.win.border", M.values.views.explorer.win.border, "string")
-  check_type("config.views.explorer.win.buf_opts", M.values.views.explorer.win.buf_opts, "table")
-  check_type("config.views.explorer.win.win_opts", M.values.views.explorer.win.win_opts, "table")
+  local checks = {
+    { "config.hooks", values.hooks, "table" },
+    { "config.icon_provider", values.icon_provider, { "string", "function" } },
+    { "config.mappings", values.mappings, "table" },
+    { "config.mappings.confirm", values.mappings.confirm, "table" },
+    { "config.mappings.explorer", values.mappings.explorer, "table" },
+    { "config.views", values.views, "table" },
+    { "config.views.confirm", values.views.confirm, "table" },
+    { "config.views.confirm.kind", values.views.confirm.win.kind, "string" },
+    { "config.views.confirm.win.border", values.views.confirm.win.border, "string" },
+    { "config.views.confirm.win.buf_opts", values.views.confirm.win.buf_opts, "table" },
+    { "config.views.confirm.win.win_opts", values.views.confirm.win.win_opts, "table" },
+    { "config.views.explorer", values.views.explorer, "table" },
+    { "config.views.explorer.close_on_select", values.views.explorer.close_on_select, "boolean" },
+    { "config.views.explorer.confirm_simple", values.views.explorer.confirm_simple, "boolean" },
+    { "config.views.explorer.default_explorer", values.views.explorer.default_explorer, "boolean" },
+    { "config.views.explorer.git_status", values.views.explorer.git_status, "boolean" },
+    { "config.views.explorer.indentscope", values.views.explorer.indentscope, "table" },
+    { "config.views.explorer.indentscope.enabled", values.views.explorer.indentscope.enabled, "boolean" },
+    { "config.views.explorer.indentscope.group", values.views.explorer.indentscope.group, "string" },
+    { "config.views.explorer.indentscope.marker", values.views.explorer.indentscope.marker, "string" },
+    { "config.views.explorer.kind", values.views.explorer.win.kind, "string" },
+    { "config.views.explorer.win.border", values.views.explorer.win.border, "string" },
+    { "config.views.explorer.win.buf_opts", values.views.explorer.win.buf_opts, "table" },
+    { "config.views.explorer.win.win_opts", values.views.explorer.win.win_opts, "table" },
+  }
+
+  for _, check in ipairs(checks) do
+    check_type(util.unpack(check))
+  end
+
+  M.values = values
 end
 
 return M

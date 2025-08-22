@@ -1,4 +1,5 @@
 local Win = require("fyler.lib.win")
+local a = require("fyler.lib.async")
 local config = require("fyler.config")
 local ui = require("fyler.views.confirm.ui")
 local util = require("fyler.lib.util")
@@ -59,11 +60,11 @@ end
 
 local M = {}
 
-M.open = vim.schedule_wrap(
+M.open = a.wrap(vim.schedule_wrap(
   ---@param message { str: string, hl: string }[]
   ---@param choices string
   ---@param on_choice fun(c: boolean)
   function(message, choices, on_choice) setmetatable({}, FylerConfirmView):open(message, choices, on_choice) end
-)
+))
 
 return M

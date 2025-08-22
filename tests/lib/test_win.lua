@@ -25,8 +25,8 @@ T["can create instance"] = function()
   }
 
   local win = require("fyler.lib.win").new(opts)
-  for key, val in pairs(opts) do
-    test.expect.equality(win[key], val)
+  for k, v in pairs(opts) do
+    test.expect.equality(win[k], v)
   end
 end
 

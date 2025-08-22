@@ -1,10 +1,5 @@
-local a = require("fyler.lib.async")
 local components = require("fyler.lib.ui.components")
 local config = require("fyler.config")
-local git = require("fyler.lib.git")
-
-local async = a.async
-local await = a.await
 
 local icon_provider = (function()
   if type(config.values.icon_provider) == "function" then
@@ -50,21 +45,18 @@ local function get_sorted(tbl)
   return tbl
 end
 
-local TREE_STRUCTURE
 ---@param tbl table
 ---@param status_map table|nil
----@param cb fun(lines: FylerUiLine[])
-TREE_STRUCTURE = async(function(tbl, status_map, depth, cb)
+M.Explorer = function(tbl, status_map, depth)
   depth = depth or 0
-  if not tbl then return cb {} end
+
+  if not tbl then return {} end
 
   local lines = {}
   for _, item in ipairs(get_sorted(tbl)) do
     local icon, hl = (function()
-      if item.type == "directory" then
-        return icon_provider(item.type, item.name)
-      elseif item.type == "link" then
-        return icon_provider(item.link_type, item.name)
+      if item.type == "link" then
+        return icon_provider(item.ltype, item.name)
       else
         return icon_provider(item.type, item.name)
       end
@@ -84,11 +76,11 @@ TREE_STRUCTURE = async(function(tbl, status_map, depth, cb)
         words = {
           { str = string.rep("  ", depth) },
           {
-            str = icon == "" and "" or icon .. " ",
+            str = (icon == nil or icon == "") and "" or icon .. " ",
             hl = (function()
               if item.type == "directory" then
                 return "FylerFSDirectory"
-              elseif item.link_type == "directory" then
+              elseif item.ltype == "directory" then
                 return "FylerFSDirectory"
               else
                 return hl
@@ -99,7 +91,7 @@ TREE_STRUCTURE = async(function(tbl, status_map, depth, cb)
             str = git_symbol and string.format("%s ", git_symbol) or "",
             hl = git_status_hl[git_symbol],
           },
-          { str = string.format("/%s", item.id) },
+          { str = string.format("/%s", item.itemid) },
           {
             str = string.format(" %s", item.name),
             hl = (function()
@@ -107,7 +99,7 @@ TREE_STRUCTURE = async(function(tbl, status_map, depth, cb)
                 return git_status_hl[git_symbol]
               elseif item.type == "directory" then
                 return "FylerFSDirectory"
-              elseif item.link_type == "directory" then
+              elseif item.ltype == "directory" then
                 return "FylerFSDirectory"
               else
                 return ""
@@ -120,7 +112,7 @@ TREE_STRUCTURE = async(function(tbl, status_map, depth, cb)
           if item.type == "link" then
             table.insert(line, {
               hl = "FylerFSLink",
-              str = string.format("@%s", item.link_path),
+              str = string.format("@%s", item.lpath),
             })
           end
 
@@ -130,19 +122,13 @@ TREE_STRUCTURE = async(function(tbl, status_map, depth, cb)
     )
 
     if item.children then
-      for _, line in ipairs(await(TREE_STRUCTURE, item.children, status_map, depth + 1)) do
+      for _, line in ipairs(M.Explorer(item.children, status_map, depth + 1)) do
         table.insert(lines, line)
       end
     end
   end
 
-  return cb(lines)
-end)
-
-M.Explorer = async(
-  function(tbl, cb)
-    return cb(await(TREE_STRUCTURE, tbl, config.values.views.explorer.git_status and await(git.status_map) or {}, 0))
-  end
-)
+  return lines
+end
 
 return M

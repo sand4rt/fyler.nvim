@@ -11,7 +11,6 @@ Ui.__index = Ui
 ---@return FylerUi
 function Ui.new(win)
   assert(win, "win is required")
-
   return setmetatable({ win = win }, Ui)
 end
 
@@ -32,21 +31,15 @@ end
 function Ui:_render(ui_lines)
   if not self.win:has_valid_bufnr() then return end
 
+  local buf_lines = {}
   local was_modifiable = util.get_buf_option(self.win.bufnr, "modifiable")
   local win_width = api.nvim_win_get_width(self.win.winid)
-  local buf_lines = {}
-
   util.set_buf_option(self.win.bufnr, "modifiable", true)
 
   for _, line in ipairs(ui_lines) do
     local line_text = table.concat(vim.tbl_map(function(word) return word.str end, line.words))
-
     local margin = get_margin(win_width, line.align, line_text)
-
-    table.insert(line.words, 1, {
-      str = margin,
-    })
-
+    table.insert(line.words, 1, { str = margin })
     table.insert(buf_lines, margin .. line_text)
   end
 
@@ -55,7 +48,6 @@ function Ui:_render(ui_lines)
 
   for i, line in ipairs(ui_lines) do
     local offset = 0
-
     for _, word in ipairs(line.words) do
       api.nvim_buf_set_extmark(self.win.bufnr, self.win.namespace, i - 1, offset, {
         end_col = offset + #word.str,
@@ -83,8 +75,11 @@ function Ui:render(opts)
   opts = opts or {}
 
   vim.schedule(function()
+    if opts.before then opts.before() end
+
     self:_render(opts.ui_lines)
-    if opts.on_render then opts.on_render() end
+
+    if opts.after then opts.after() end
   end)
 end
 
