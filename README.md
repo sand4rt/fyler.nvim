@@ -210,6 +210,8 @@ local defaults = {
         group = "FylerIndentMarker",
         marker = "│",
       },
+      -- Auto current buffer tracking
+      track_current_buffer = true,
       win = {
       -- Changes window border
         border = "single",

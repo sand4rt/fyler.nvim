@@ -57,14 +57,16 @@ function M.setup(config)
   })
 
   -- Track current focused buffer in explorer
-  api.nvim_create_autocmd("BufEnter", {
-    group = augroup,
-    desc = "Track current focused buffer in explorer",
-    callback = function(arg)
-      local instance = require("fyler.views.explorer").instance
-      if instance then instance:_action("try_focus_buffer")(arg) end
-    end,
-  })
+  if config.values.views.explorer.track_current_buffer then
+    api.nvim_create_autocmd("BufEnter", {
+      group = augroup,
+      desc = "Track current focused buffer in explorer",
+      callback = function(arg)
+        local instance = require("fyler.views.explorer").instance
+        if instance then instance:_action("try_focus_buffer")(arg) end
+      end,
+    })
+  end
 
   -- Drop explorer window when buffer inside it changes to "NON FYLER BUFFER"
   api.nvim_create_autocmd("BufWinEnter", {
