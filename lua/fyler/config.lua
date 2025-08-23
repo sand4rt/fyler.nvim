@@ -113,6 +113,7 @@ local defaults = {
       ["n"] = "Discard",
     },
   },
+
   -- "views" is a map to corresponding configuration
   views = {
     confirm = {

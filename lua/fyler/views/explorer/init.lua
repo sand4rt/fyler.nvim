@@ -19,18 +19,14 @@ function ExplorerView:open(opts)
   local view_config = config.get_view_config("explorer", opts.kind)
   local mappings = {}
 
+  -- if action is a function, wrap it to pass self as the first argument otherwise search for builtin action
   util.tbl_each(config.get_mappings("explorer"), function(key, action)
     if type(action) == "function" then
-      -- if action is a function, wrap it to pass self as the first argument
       mappings[key] = function() action(self) end
-      return
     elseif type(action) == "string" then
-      local success, native_action = pcall(self._action, self, util.camel_to_snake(string.format("n%s", action)))
-      if not success or native_action == nil then
-        vim.notify("" .. string.format("Mapping action %s is not available", action), vim.log.levels.WARN)
-        return
-      end
-      mappings[key] = native_action
+      mappings[key] = self:_action(util.camel_to_snake(string.format("n%s", action)))
+    else
+      error(string.format("(fyler.nvim): Invalid mapping for key '%s'", key))
     end
   end)
 
