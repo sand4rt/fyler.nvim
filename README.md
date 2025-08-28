@@ -61,7 +61,7 @@
 ```lua
 {
   "A7Lavinraj/fyler.nvim",
-  dependencies = { "echasnovski/mini.icons" },
+  dependencies = { "nvim-mini/mini.icons" },
   branch = "stable",
   opts = {}
 }
@@ -70,12 +70,12 @@
 </details>
 
 <details>
-  <summary><a href="https://github.com/echasnovski/mini.deps"><strong>Mini.deps</strong></a></summary>
+  <summary><a href="https://github.com/nvim-mini/mini.deps"><strong>Mini.deps</strong></a></summary>
 
 ```lua
 add({
   source = "A7Lavinraj/fyler.nvim",
-  depends = { "echasnovski/mini.icons" },
+  depends = { "nvim-mini/mini.icons" },
   checkout = "stable",
 })
 ```
@@ -92,7 +92,7 @@ You can use default setup with `mini.icons`
 ```lua
 {
   "A7Lavinraj/fyler.nvim",
-  dependencies = { "echasnovski/mini.icons" },
+  dependencies = { "nvim-mini/mini.icons" },
   opts = {}
 }
 ```
@@ -112,12 +112,12 @@ Or change to `nvim-web-devicons`
 </details>
 
 <details>
-  <summary><a href="https://github.com/echasnovski/mini.deps"><strong>Mini.deps</strong></a></summary>
+  <summary><a href="https://github.com/nvim-mini/mini.deps"><strong>Mini.deps</strong></a></summary>
 
 ```lua
 add({
   source = "A7Lavinraj/fyler.nvim",
-  depends = { "echasnovski/mini.icons" },
+  depends = { "nvim-mini/mini.icons" },
 })
 ```
 
@@ -296,7 +296,7 @@ fyler.open({ kind = "split_left_most" })
 
 ## Similar plugins
 
-- [mini.files](https://github.com/echasnovski/mini.files)
+- [mini.files](https://github.com/nvim-mini/mini.files)
 - [oil.nvim](https://github.com/stevearc/oil.nvim)
 
 ## Codebase inspiration
