@@ -24,7 +24,7 @@ local function ensure_install(repo)
 end
 
 local function run_tests()
-  ensure_install("echasnovski/mini.test")
+  ensure_install("nvim-mini/mini.test")
 
   vim.opt.runtimepath:prepend(".")
 
