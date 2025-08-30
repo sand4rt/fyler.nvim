@@ -365,7 +365,7 @@ function M.try_focus_buffer(view)
   end)
 end
 
-local extmark_namespace = api.nvim_create_namespace("FylerIndentScope")
+local extmark_namespace = api.nvim_create_namespace("Fyler-indent-scope")
 
 ---@param view FylerExplorerView
 function M.draw_indentscope(view)

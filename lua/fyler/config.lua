@@ -206,6 +206,8 @@ local defaults = {
       win = {
         border = "single",
         buf_opts = {
+          filetype = "FylerExplorer",
+          syntax = "FylerExplorer",
           buflisted = false,
           buftype = "acwrite",
           expandtab = true,
@@ -246,6 +248,8 @@ local defaults = {
           },
         },
         win_opts = {
+          concealcursor = "nvic",
+          conceallevel = 3,
           cursorline = true,
           number = true,
           relativenumber = true,

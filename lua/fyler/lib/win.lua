@@ -14,7 +14,7 @@ local util = require("fyler.lib.util")
 ---| "split_right_most"
 
 ---@class FylerWin
----@field augroup string
+---@field augroup integer
 ---@field autocmds table
 ---@field border string|string[]
 ---@field bottom string|nil
@@ -28,7 +28,6 @@ local util = require("fyler.lib.util")
 ---@field kind FylerWinKind
 ---@field left string|nil
 ---@field mappings table
----@field name string
 ---@field namespace integer
 ---@field old_bufnr integer|nil
 ---@field old_winid integer|nil
@@ -48,34 +47,11 @@ Win.__index = Win
 local api = vim.api
 local fn = vim.fn
 
----@param name string
----@return integer
-local function get_namespace(name) return api.nvim_create_namespace("Fyler" .. name) end
-
----@param name string
----@return integer
-local function get_augroup(name) return api.nvim_create_augroup("Fyler" .. name, { clear = true }) end
-
 ---@return FylerWin
 function Win.new(opts)
   opts = opts or {}
 
-  assert(opts.name, "name is required field")
-
-  -- stylua: ignore start
-  local instance = util.tbl_merge_keep(opts, {
-    augroup       = get_augroup(opts.name),
-    autocmds      = {},
-    buf_opts      = {},
-    kind          = "float",
-    mappings      = {},
-    name          = "",
-    namespace     = get_namespace(opts.name),
-    user_autocmds = {},
-    win_opts      = {},
-  })
-  -- stylua: ignore end
-
+  local instance = util.tbl_merge_keep(opts, { kind = "float" })
   instance.ui = Ui.new(instance)
   setmetatable(instance, Win)
 
@@ -207,6 +183,7 @@ function Win:show()
   -- Saving alternative "bufnr" and "winid" for later use
   self.old_bufnr = api.nvim_get_current_buf()
   self.old_winid = api.nvim_get_current_win()
+
   self.bufnr = api.nvim_create_buf(false, true)
   if self.bufname then api.nvim_buf_set_name(self.bufnr, self.bufname) end
 
@@ -239,35 +216,37 @@ function Win:show()
     if self.enter then vim.api.nvim_exec_autocmds("BufEnter", {}) end
   end
 
-  api.nvim_exec_autocmds("User", {
-    pattern = "FylerWinOpen",
-    data = { win = self.winid, buf = self.bufnr, bufname = self.bufname },
-  })
+  self.augroup = api.nvim_create_augroup("Fyler-augroup-" .. self.bufnr, { clear = true })
+  self.namespace = api.nvim_create_namespace("Fyler-namespace-" .. self.bufnr)
 
-  for k, v in pairs(self.mappings) do
+  for k, v in pairs(self.mappings or {}) do
     vim.keymap.set("n", k, v, { buffer = self.bufnr, silent = true, noremap = true })
   end
 
-  for option, value in pairs(self.win_opts) do
+  for option, value in pairs(self.win_opts or {}) do
     util.set_win_option(self.winid, option, value)
   end
 
-  for option, value in pairs(self.buf_opts) do
+  for option, value in pairs(self.buf_opts or {}) do
     util.set_buf_option(self.bufnr, option, value)
   end
 
-  for event, callback in pairs(self.autocmds) do
+  for event, callback in pairs(self.autocmds or {}) do
     api.nvim_create_autocmd(event, { group = self.augroup, buffer = self.bufnr, callback = callback })
   end
 
-  for event, callback in pairs(self.user_autocmds) do
+  for event, callback in pairs(self.user_autocmds or {}) do
     api.nvim_create_autocmd("User", { pattern = event, group = self.augroup, callback = callback })
   end
 
   if self.render then self.render() end
 end
 
+function Win:clear() api.nvim_clear_autocmds { group = self.augroup } end
+
 function Win:hide()
+  self:clear()
+
   -- Recover alternate buffer if using "replace"|"split" window kind
   if self.kind:match("^replace") then
     if
@@ -290,6 +269,8 @@ end
 
 -- Handle case when user open a NON FYLER BUFFER in "Fyler" window
 function Win:recover()
+  self:clear()
+
   if self.kind:match("^replace") or self.kind:match("^split") then
     util.try(api.nvim_buf_delete, self.bufnr, { force = true })
   else

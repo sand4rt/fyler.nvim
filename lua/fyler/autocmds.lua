@@ -6,7 +6,7 @@ local api = vim.api
 local fn = vim.fn
 
 -- Autogroup for global autocommands controlled by "Fyler.nvim"
-local augroup = api.nvim_create_augroup("Fyler", { clear = true })
+local augroup = api.nvim_create_augroup("Fyler-augroup-global", { clear = true })
 
 -- Setup autocommands with respect to configuration
 function M.setup(config)
@@ -32,22 +32,6 @@ function M.setup(config)
       end,
     })
   end
-
-  -- Set window syntax when "FylerWinOpen" event gets triggered
-  api.nvim_create_autocmd("User", {
-    group = augroup,
-    pattern = "FylerWinOpen",
-    desc = "Add Fyler.Explorer syntax",
-    callback = function(arg)
-      if not (arg.data.bufname and arg.data.bufname:match("fyler://*")) then return end
-
-      api.nvim_win_call(arg.data.win, function()
-        util.set_win_option(0, "concealcursor", "nvic")
-        util.set_win_option(0, "conceallevel", 3)
-        fn.matchadd("Conceal", [[/\d\d\d\d\d ]])
-      end)
-    end,
-  })
 
   -- Adjust highlight groups with respect to "colorscheme"
   api.nvim_create_autocmd("ColorScheme", {
