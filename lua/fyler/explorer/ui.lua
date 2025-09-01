@@ -1,13 +1,12 @@
 local components = require "fyler.lib.ui.components"
 local config = require "fyler.config"
 
-local icon_provider = (function()
-  if type(config.values.icon_provider) == "function" then
-    return config.values.icon_provider
-  else
-    return require("fyler.integrations.icon")[config.values.icon_provider]
-  end
-end)()
+local icon_provider
+if type(config.values.icon_provider) == "function" then
+  icon_provider = config.values.icon_provider
+else
+  icon_provider = require("fyler.integrations.icon")[config.values.icon_provider]
+end
 
 local Line = components.Line
 
@@ -54,13 +53,7 @@ M.Explorer = function(tbl, status_map, depth)
 
   local lines = {}
   for _, item in ipairs(get_sorted(tbl)) do
-    local icon, hl = (function()
-      if item.type == "link" then
-        return icon_provider(item.ltype, item.name)
-      else
-        return icon_provider(item.type, item.name)
-      end
-    end)()
+    local icon, hl = icon_provider(item.type, item.name)
 
     local git_symbol = (function()
       if not status_map then return nil end
@@ -80,8 +73,6 @@ M.Explorer = function(tbl, status_map, depth)
             hl = (function()
               if item.type == "directory" then
                 return "FylerFSDirectory"
-              elseif item.ltype == "directory" then
-                return "FylerFSDirectory"
               else
                 return hl
               end
@@ -99,8 +90,6 @@ M.Explorer = function(tbl, status_map, depth)
                 return git_status_hl[git_symbol]
               elseif item.type == "directory" then
                 return "FylerFSDirectory"
-              elseif item.ltype == "directory" then
-                return "FylerFSDirectory"
               else
                 return ""
               end
@@ -112,7 +101,7 @@ M.Explorer = function(tbl, status_map, depth)
           if item.type == "link" then
             table.insert(line, {
               hl = "FylerFSLink",
-              str = string.format("@%s", item.lpath),
+              str = string.format("@%s", item.path),
             })
           end
 

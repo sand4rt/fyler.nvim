@@ -11,7 +11,7 @@ end
 
 ---@param repo string
 local function ensure_install(repo)
-  local name = repo:match("/(.*)$")
+  local name = repo:match "/(.*)$"
   local install_path = FYLER_TESTING_DIR .. name
 
   if not path_exists(install_path) then
@@ -24,9 +24,9 @@ local function ensure_install(repo)
 end
 
 local function run_tests()
-  ensure_install("nvim-mini/mini.test")
+  ensure_install "nvim-mini/mini.test"
 
-  vim.opt.runtimepath:prepend(".")
+  vim.opt.runtimepath:prepend "."
 
   require("mini.test").run {
     collect = {

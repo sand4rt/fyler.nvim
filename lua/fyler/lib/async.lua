@@ -1,5 +1,5 @@
-local log = require("fyler.log")
-local util = require("fyler.lib.util")
+local log = require "fyler.log"
+local util = require "fyler.lib.util"
 
 local M = {}
 

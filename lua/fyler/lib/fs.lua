@@ -56,7 +56,7 @@ function M.list_dir(path)
         local item = {
           name = entry.name,
           path = resolved_path or full_path,
-          type = entry.type or resolved_type,
+          type = resolved_type or entry.type,
         }
 
         if entry.type == "link" then item.link = full_path end

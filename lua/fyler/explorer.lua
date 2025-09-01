@@ -1,4 +1,4 @@
-local Tree = require "fyler.explorer.file-tree"
+local Tree = require "fyler.explorer.file_tree"
 local Win = require "fyler.lib.win"
 
 ---@class Explorer

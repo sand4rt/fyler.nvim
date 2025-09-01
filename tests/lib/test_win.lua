@@ -1,4 +1,4 @@
-local test = require("mini.test")
+local test = require "mini.test"
 local T = test.new_set()
 
 T["can create instance"] = function()

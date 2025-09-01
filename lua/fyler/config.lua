@@ -10,7 +10,7 @@ local util = require "fyler.lib.util"
 ---fun(type: string, name: string): string, string
 ---```
 ---Builtin options: `mini-icons`, `nvim-web-devicons`
----@alias FylerConfigIconProvider "mini-icons"| "nvim-web-devicons"|fun(type: string, name: string): string, string
+---@alias FylerConfigIconProvider "mini_icons"| "nvim_web_devicons"|fun(type: string, name: string): string, string
 
 ---@class FylerConfigIndentScope
 ---@field enabled boolean Enable or disable indentation markers
@@ -90,11 +90,10 @@ local defaults = {
 
   -- "icon_provider" defines the icon generator along with it's highlight group. It can be one the following:
   -- 1. "none"
-  -- 2. "minimal"
-  -- 3. "mini-icons"
-  -- 4. "nvim-web-devicons"
+  -- 2. "mini_icons"
+  -- 3. "nvim_web_devicons"
   -- or it could be a function with definition `fun(type: string, name: string): string, string`
-  icon_provider = "mini-icons",
+  icon_provider = "mini_icons",
 
   -- Mappings are local to their "view" and only **normal mode** mappings are allowed for now
   mappings = {

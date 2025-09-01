@@ -1,4 +1,4 @@
-local util = require("fyler.lib.util")
+local util = require "fyler.lib.util"
 
 vim.api.nvim_create_user_command("Fyler", function(args)
   local opts = {}
@@ -11,15 +11,15 @@ vim.api.nvim_create_user_command("Fyler", function(args)
 end, {
   nargs = "*",
   complete = function(arglead, cmdline)
-    if arglead:find("^kind=") then
+    if arglead:find "^kind=" then
       return util.tbl_map(
         vim.tbl_keys(require("fyler.config").values.views.explorer.win.kind_presets),
         function(kind_preset) return string.format("kind=%s", kind_preset) end
       )
     end
 
-    if arglead:find("^cwd=") then return { "cwd=" .. (vim.uv or vim.loop).cwd() } end
+    if arglead:find "^dir=" then return { "dir=" .. (vim.uv or vim.loop).cwd() } end
 
-    return util.tbl_filter({ "kind=", "cwd=" }, function(arg) return cmdline:match(arg) == nil end)
+    return util.tbl_filter({ "kind=", "dir=" }, function(arg) return cmdline:match(arg) == nil end)
   end,
 })

@@ -31,6 +31,10 @@ function M.setup(options)
     local dir = opts.dir or fs.cwd()
     local kind = opts.kind or config.get_view_config("explorer").win.kind
     local instance = explorer.instance(dir)
+    local current = explorer.current()
+
+    if current and current.dir ~= dir then current:_action "n_close"() end
+
     if instance then
       instance:open(dir, kind)
     else
@@ -41,14 +45,13 @@ function M.setup(options)
   -- "Fyler.nvim" API to track (given or current) buffer
   ---@param file string|nil
   M.track_buffer = function(file)
-    if not explorer.current() then
+    local current = explorer.current()
+    if not current then
       log.error "No existing explorer"
       return
     end
 
-    explorer.current():_action "try_focus_buffer" {
-      file = file or vim.fn.expand "%:p",
-    }
+    current:_action "try_focus_buffer" { file = file or vim.fn.expand "%:p" }
   end
 end
 
