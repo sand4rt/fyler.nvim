@@ -1,5 +1,5 @@
-local components = require("fyler.lib.ui.components")
-local config = require("fyler.config")
+local components = require "fyler.lib.ui.components"
+local config = require "fyler.config"
 
 local icon_provider = (function()
   if type(config.values.icon_provider) == "function" then
@@ -33,9 +33,9 @@ local git_status_hl = setmetatable({
 
 local function get_sorted(tbl)
   table.sort(tbl, function(x, y)
-    if x:is_dir() and not y:is_dir() then
+    if x.type == "directory" and y.type ~= "directory" then
       return true
-    elseif not x:is_dir() and y:is_dir() then
+    elseif x.type ~= "directory" and y.type == "directory" then
       return false
     else
       return x.name < y.name
@@ -91,7 +91,7 @@ M.Explorer = function(tbl, status_map, depth)
             str = git_symbol and string.format("%s ", git_symbol) or "",
             hl = git_status_hl[git_symbol],
           },
-          { str = string.format("/%s", item.itemid) },
+          { str = string.format("/%05d", item.identity) },
           {
             str = string.format(" %s", item.name),
             hl = (function()

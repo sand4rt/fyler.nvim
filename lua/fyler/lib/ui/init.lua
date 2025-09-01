@@ -1,20 +1,20 @@
-local util = require("fyler.lib.util")
+local util = require "fyler.lib.util"
 
 local api = vim.api
 
----@class FylerUi
----@field win FylerWin
+---@class Ui
+---@field win Win
 local Ui = {}
 Ui.__index = Ui
 
----@param win FylerWin
----@return FylerUi
+---@param win Win
+---@return Ui
 function Ui.new(win)
   assert(win, "win is required")
   return setmetatable({ win = win }, Ui)
 end
 
----@param align FylerUiLineAlign
+---@param align UiLineAlign
 ---@param line string
 ---@return string
 local function get_margin(width, align, line)
@@ -27,7 +27,7 @@ local function get_margin(width, align, line)
   end
 end
 
----@param ui_lines FylerUiLine[]
+---@param ui_lines UiLine[]
 function Ui:_render(ui_lines)
   if not self.win:has_valid_bufnr() then return end
 

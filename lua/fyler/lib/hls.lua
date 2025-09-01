@@ -1,4 +1,4 @@
-local hooks = require("fyler.hooks")
+local hooks = require "fyler.hooks"
 
 local M = {}
 
@@ -33,7 +33,7 @@ local function get_bg(name)
   end
 end
 
----@class FylerColorPalette
+---@class Palette
 ---@field bg string
 ---@field black string
 ---@field blue string
@@ -47,7 +47,7 @@ end
 ---@field white string
 ---@field yellow string
 
----@return FylerColorPalette
+---@return Palette
 local function build_palette()
   -- stylua: ignore start
   return {

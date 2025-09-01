@@ -1,9 +1,7 @@
-local util = require("fyler.lib.util")
+local util = require "fyler.lib.util"
 
 local M = {}
-
 local api = vim.api
-local fn = vim.fn
 
 -- Autogroup for global autocommands controlled by "Fyler.nvim"
 local augroup = api.nvim_create_augroup("Fyler-augroup-global", { clear = true })
@@ -14,8 +12,8 @@ function M.setup(config)
 
   -- Only replace NETRW commands when mentioned
   if config.values.views.explorer.default_explorer then
-    vim.cmd("silent! autocmd! FileExplorer *")
-    vim.cmd("autocmd VimEnter * ++once silent! autocmd! FileExplorer *")
+    vim.cmd "silent! autocmd! FileExplorer *"
+    vim.cmd "autocmd VimEnter * ++once silent! autocmd! FileExplorer *"
 
     api.nvim_create_autocmd("BufEnter", {
       group = augroup,
@@ -40,14 +38,14 @@ function M.setup(config)
     callback = function() require("fyler.lib.hls").setup() end,
   })
 
-  -- Track current focused buffer in explorer
+  -- -- Track current focused buffer in explorer
   if config.values.views.explorer.track_current_buffer then
     api.nvim_create_autocmd("BufEnter", {
       group = augroup,
       desc = "Track current focused buffer in explorer",
       callback = function(arg)
-        local instance = require("fyler.views.explorer").instance
-        if instance then instance:_action("try_focus_buffer")(arg) end
+        local instance = require("fyler.explorer").current()
+        if instance then util.debounce("focus_buffer", function() instance:_action "try_focus_buffer"(arg) end, 10) end
       end,
     })
   end
@@ -57,13 +55,14 @@ function M.setup(config)
     group = augroup,
     desc = "Drop explorer window when buffer inside it changes to NON FYLER BUFFER",
     callback = function(arg)
-      local instance = require("fyler.views.explorer").instance
+      local instance = require("fyler.explorer").current()
+
       if not instance then return end
       if not instance.win:has_valid_winid() then return end
 
       local bufnr = arg.buf
       local bufname = api.nvim_buf_get_name(bufnr)
-      if bufname:match("^fyler://*") then return end
+      if bufname:match "^fyler://*" then return end
       if api.nvim_win_get_buf(instance.win.winid) == bufnr then instance.win:recover() end
     end,
   })

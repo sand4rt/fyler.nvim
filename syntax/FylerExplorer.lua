@@ -3,7 +3,7 @@ vim.cmd [[
     finish
   endif
 
-  syn match FylerExplorerItemID /\/\d* / conceal
+  syn match FylerExplorerMeta /\/\d* / conceal
 
   let b:current_syntax = "FylerExplorer"
 ]]

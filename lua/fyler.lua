@@ -7,12 +7,12 @@ local did_setup = false
 -- It also exposes some "Fyler.nvim" APIS
 ---@param options FylerConfig
 function M.setup(options)
-  if vim.fn.has("nvim-0.11") ~= 1 then return vim.notify("Fyler requires at least NVIM 0.11") end
+  if vim.fn.has "nvim-0.11" ~= 1 then return vim.notify "Fyler requires at least NVIM 0.11" end
 
   -- Early return if already been setuped
   if did_setup then return end
   -- Overwrite default configuration before setuping other components
-  local config = require("fyler.config")
+  local config = require "fyler.config"
   config.setup(options)
 
   require("fyler.autocmds").setup(config)
@@ -22,32 +22,32 @@ function M.setup(options)
   -- Mark setup as completed
   did_setup = true
 
-  local util = require("fyler.lib.util")
-  local fs = require("fyler.lib.fs")
-  local explorer = require("fyler.views.explorer")
-  local log = require("fyler.log")
+  local explorer = require "fyler.explorer"
+  local fs = require "fyler.lib.fs"
+  local log = require "fyler.log"
 
   -- "Fyler.nvim" API to launch explorer with defined options
-  M.open = vim.schedule_wrap(
-    function(opts)
-      explorer.open(util.tbl_merge_keep(opts or {}, {
-        cwd = fs.getcwd(),
-        enter = true,
-        kind = config.get_view_config("explorer").win.kind,
-      }))
+  M.open = vim.schedule_wrap(function(opts)
+    local dir = opts.dir or fs.cwd()
+    local kind = opts.kind or config.get_view_config("explorer").win.kind
+    local instance = explorer.instance(dir)
+    if instance then
+      instance:open(dir, kind)
+    else
+      explorer.new(dir, config):open(dir, kind)
     end
-  )
+  end)
 
   -- "Fyler.nvim" API to track (given or current) buffer
   ---@param file string|nil
   M.track_buffer = function(file)
-    if not explorer.instance then
-      log.error("No existing explorer")
+    if not explorer.current() then
+      log.error "No existing explorer"
       return
     end
 
-    explorer.instance:_action("try_focus_buffer") {
-      file = file or vim.fn.expand("%:p"),
+    explorer.current():_action "try_focus_buffer" {
+      file = file or vim.fn.expand "%:p",
     }
   end
 end

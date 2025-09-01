@@ -1,20 +1,20 @@
----@alias FylerUiLineAlign
+---@alias UiLineAlign
 ---| "end"
 ---| "start"
 ---| "center"
 
----@alias FylerUiWord { str: string, hl: string|nil }
----@alias FylerUiMark { str: string, hl: string|nil, id: string }
+---@alias UiWord { str: string, hl: string|nil }
+---@alias UiMark { str: string, hl: string|nil, id: string }
 
----@class FylerUiLine
----@field align FylerUiLineAlign
----@field words FylerUiWord[]
----@field marks FylerUiMark[]
+---@class UiLine
+---@field align UiLineAlign
+---@field words UiWord[]
+---@field marks UiMark[]
 local Line = {}
 Line.__index = Line
 
----@param opts { words: FylerUiWord[], marks: FylerUiMark[], align: FylerUiLineAlign|nil }
----@return FylerUiLine
+---@param opts { words: UiWord[], marks: UiMark[], align: UiLineAlign|nil }
+---@return UiLine
 function Line.new(opts)
   local instance = {
     words = opts.words or {},

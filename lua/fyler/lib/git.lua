@@ -1,44 +1,39 @@
-local a = require("fyler.lib.async")
-local fs = require("fyler.lib.fs")
-local util = require("fyler.lib.util")
+local fs = require "fyler.lib.fs"
+local util = require "fyler.lib.util"
 
 local M = {}
 
-local system = a.wrap(function(cmd, cb) cb(vim.system(cmd, { text = true }):wait()) end)
+local system = function(cmd) return vim.system(cmd, { text = true }):wait() end
 
----@param cb fun(result: boolean)
-local is_git_repo = a.wrap(function(cb)
+local function is_git_repo()
   local out = system { "git", "rev-parse", "--is-inside-work-tree" }
-  return cb(string.match(out.stdout, "^(.*)\n$") == "true")
-end)
+  return string.match(out.stdout, "^(.*)\n$") == "true"
+end
 
----@param cb fun(status: string|nil)
-local git_status = a.wrap(function(cb)
-  if not is_git_repo() then return cb(nil) end
+local function git_status()
+  if not is_git_repo() then return nil end
 
   local out = system { "git", "status", "--porcelain", "-z" }
-  if not out.stdout then return cb(nil) end
+  if not out.stdout then return nil end
 
-  return cb(out.stdout)
-end)
+  return out.stdout
+end
 
----@param cb fun(path: string|nil)
-local git_toplevel = a.wrap(function(cb)
+local function git_toplevel()
   local out = system { "git", "rev-parse", "--show-toplevel" }
-  if not out.stdout then return cb(nil) end
+  if not out.stdout then return nil end
 
-  return cb(string.match(out.stdout, "^(.*)\n$"))
-end)
+  return string.match(out.stdout, "^(.*)\n$")
+end
 
----@param cb fun(status_map: table|nil)
-M.status_map = a.wrap(function(cb)
+function M.status_map()
   local status_str = git_status()
-  if not status_str then return cb(nil) end
+  if not status_str then return nil end
 
   local statuses = util.filter_bl(vim.split(status_str, "\0"))
 
   local toplevel = git_toplevel()
-  if not toplevel then return cb(nil) end
+  if not toplevel then return nil end
 
   local status_map = {}
   for _, status in ipairs(statuses) do
@@ -53,7 +48,7 @@ M.status_map = a.wrap(function(cb)
     status_map[fs.joinpath(toplevel, fs.normalize(path))] = symbol
   end
 
-  return cb(status_map)
-end)
+  return status_map
+end
 
 return M

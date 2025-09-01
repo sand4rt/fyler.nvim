@@ -1,11 +1,11 @@
-local List = require("fyler.lib.structs.list")
+local List = require "fyler.lib.structs.list"
 
----@class FylerStack
----@field items FylerLinkedList
+---@class Stack
+---@field items LinkedList
 local Stack = {}
 Stack.__index = Stack
 
----@return FylerStack
+---@return Stack
 function Stack.new() return setmetatable({ items = List.new() }, Stack) end
 
 ---@param data any
@@ -24,6 +24,9 @@ function Stack:top()
   assert(self.items.node, "stack is empty")
   return self.items.node.data
 end
+
+---@return integer
+function Stack:size() return self.items:len() end
 
 ---@return boolean
 function Stack:is_empty() return self.items:len() == 0 end

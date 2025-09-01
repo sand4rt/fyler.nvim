@@ -1,7 +1,7 @@
-local Ui = require("fyler.lib.ui")
-local util = require("fyler.lib.util")
+local Ui = require "fyler.lib.ui"
+local util = require "fyler.lib.util"
 
----@alias FylerWinKind
+---@alias WinKind
 ---| "float"
 ---| "replace"
 ---| "split_above"
@@ -13,7 +13,7 @@ local util = require("fyler.lib.util")
 ---| "split_right"
 ---| "split_right_most"
 
----@class FylerWin
+---@class Win
 ---@field augroup integer
 ---@field autocmds table
 ---@field border string|string[]
@@ -25,7 +25,7 @@ local util = require("fyler.lib.util")
 ---@field footer string|string[]|nil
 ---@field footer_pos string|nil
 ---@field height string
----@field kind FylerWinKind
+---@field kind WinKind
 ---@field left string|nil
 ---@field mappings table
 ---@field namespace integer
@@ -36,7 +36,7 @@ local util = require("fyler.lib.util")
 ---@field title string|string[]|nil
 ---@field title_pos string|nil
 ---@field top string|nil
----@field ui FylerUi
+---@field ui Ui
 ---@field user_autocmds table
 ---@field width string
 ---@field win_opts table
@@ -47,7 +47,7 @@ Win.__index = Win
 local api = vim.api
 local fn = vim.fn
 
----@return FylerWin
+---@return Win
 function Win.new(opts)
   opts = opts or {}
 
@@ -84,16 +84,16 @@ function Win:config()
 
   ---@param str string
   local function destructure(str)
-    if not str:match("[%d%.]+[%a]+") then return 0, 0 end
+    if not str:match "[%d%.]+[%a]+" then return 0, 0 end
     local v, u = string.match(str, "([%d%.]+)([%a]+)")
     return tonumber(v), u
   end
 
-  if self.kind:match("^split_") then
-    winconfig.split = self.kind:match("^split_(.*)")
-  elseif self.kind:match("^replace") then
+  if self.kind:match "^split_" then
+    winconfig.split = self.kind:match "^split_(.*)"
+  elseif self.kind:match "^replace" then
     return winconfig
-  elseif self.kind:match("^float") then
+  elseif self.kind:match "^float" then
     winconfig.relative = "editor"
     winconfig.border = self.border
     winconfig.title = self.title
@@ -188,7 +188,7 @@ function Win:show()
   if self.bufname then api.nvim_buf_set_name(self.bufnr, self.bufname) end
 
   local win_config = self:config()
-  if win_config.split and (win_config.split:match("_all$") or win_config.split:match("_most$")) then
+  if win_config.split and (win_config.split:match "_all$" or win_config.split:match "_most$") then
     if win_config.split == "left_most" then
       api.nvim_command(string.format("topleft %dvsplit", win_config.width))
     elseif win_config.split == "above_all" then
@@ -205,7 +205,7 @@ function Win:show()
     if not self.enter then api.nvim_set_current_win(self.old_winid) end
 
     api.nvim_win_set_buf(self.winid, self.bufnr)
-  elseif self.kind:match("^replace") then
+  elseif self.kind:match "^replace" then
     self.winid = vim.api.nvim_get_current_win()
     api.nvim_win_set_buf(self.winid, self.bufnr)
   else
@@ -248,7 +248,7 @@ function Win:hide()
   self:clear()
 
   -- Recover alternate buffer if using "replace"|"split" window kind
-  if self.kind:match("^replace") then
+  if self.kind:match "^replace" then
     if
       util.is_valid_winid(self.winid)
       and util.is_valid_bufnr(self.old_bufnr)
@@ -271,7 +271,7 @@ end
 function Win:recover()
   self:clear()
 
-  if self.kind:match("^replace") or self.kind:match("^split") then
+  if self.kind:match "^replace" or self.kind:match "^split" then
     util.try(api.nvim_buf_delete, self.bufnr, { force = true })
   else
     local cached_bufnr = api.nvim_get_current_buf()

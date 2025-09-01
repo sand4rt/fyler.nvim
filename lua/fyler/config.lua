@@ -1,4 +1,4 @@
-local util = require("fyler.lib.util")
+local util = require "fyler.lib.util"
 
 ---@class FylerConfigHooks
 ---@field on_delete fun(path: string)|nil
@@ -40,7 +40,7 @@ local util = require("fyler.lib.util")
 ---@class FylerConfigViewWin
 ---@field border string Window border style (for more info ':help winborder')
 ---@field buf_opts table<string, any> Buffer options
----@field kind FylerWinKind Window kind
+---@field kind WinKind Window kind
 ---@field kind_presets table<string, FylerConfigViewWinKindPreset> Window kind
 ---@field win_opts table<string, any> Window options
 
@@ -145,7 +145,7 @@ local defaults = {
           float = {
             height = "0.3rel",
             width = "0.4rel",
-            top = "0.3rel",
+            top = "0.35rel",
             left = "0.3rel",
           },
           replace = {},
@@ -218,7 +218,7 @@ local defaults = {
           float = {
             height = "0.7rel",
             width = "0.7rel",
-            top = "0.15rel",
+            top = "0.1rel",
             left = "0.15rel",
           },
           replace = {},
@@ -263,7 +263,7 @@ local defaults = {
 
 -- Returns configuration for a particular "view" and "kind"
 ---@param name string
----@param kind FylerWinKind|nil
+---@param kind WinKind|nil
 function M.get_view_config(name, kind)
   assert(name, "name is required")
   local view = vim.deepcopy(M.values.views[name])
@@ -274,9 +274,19 @@ end
 
 -- Returns key mappings for a particular "view"
 ---@param name string
-function M.get_mappings(name)
+function M.get_maps(name)
   assert(name, "name is required")
   return M.values.mappings[name]
+end
+
+function M.get_reversed_maps(name)
+  local maps = M.get_maps(name)
+  local reversed_maps = {}
+  for k, v in pairs(maps) do
+    reversed_maps[v] = k
+  end
+
+  return reversed_maps
 end
 
 -- Type check for configuration option

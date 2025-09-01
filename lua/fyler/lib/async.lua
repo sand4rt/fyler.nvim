@@ -77,16 +77,10 @@ function M.wrap(fn)
   end
 end
 
-function M.async(async_fn)
+function M.void_wrap(async_fn)
   return function(...) execute_async(async_fn, nil, ...) end
 end
 
-function M.run(async_fn, cb) execute_async(async_fn, cb) end
+function M.void(async_fn, cb) execute_async(async_fn, cb) end
 
-return setmetatable(M, {
-  __index = function(_, key)
-    local has_module, module = pcall(require, "fyler.lib.async." .. key)
-    assert(has_module, string.format("Module fyler.lib.async.'%s' not found", key))
-    return module
-  end,
-})
+return M

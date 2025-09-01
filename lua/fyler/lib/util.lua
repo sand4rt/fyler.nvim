@@ -120,4 +120,20 @@ function M.try(fn, ...)
   return result or true
 end
 
+---@type table<string, uv.uv_timer_t>
+local running = {}
+
+---@param name string
+---@param fn function
+---@param timeout integer
+function M.debounce(name, fn, timeout)
+  if running[name] then running[name]:stop() end
+
+  running[name] = vim.defer_fn(function()
+    running[name] = nil
+
+    fn()
+  end, timeout)
+end
+
 return M

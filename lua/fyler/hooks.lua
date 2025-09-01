@@ -1,8 +1,7 @@
-local util = require("fyler.lib.util")
+local util = require "fyler.lib.util"
 
 local M = {}
 local hooks = {}
-
 local fn = vim.fn
 local api = vim.api
 local lsp = vim.lsp
@@ -32,7 +31,7 @@ function hooks.on_delete(path)
       api.nvim_win_call(winid, function()
         if not api.nvim_win_is_valid(winid) or api.nvim_win_get_buf(winid) ~= path_bufnr then return end
 
-        local alternate_bufnr = fn.bufnr("#")
+        local alternate_bufnr = fn.bufnr "#"
         if alternate_bufnr ~= path_bufnr and fn.buflisted(alternate_bufnr) == 1 then
           return api.nvim_win_set_buf(winid, alternate_bufnr)
         end
@@ -70,7 +69,7 @@ function hooks.on_rename(src, dst)
 
   local clients = get_lsp_clients()
   for _, client in ipairs(clients) do
-    if client:supports_method("workspace/willRenameFiles") then
+    if client:supports_method "workspace/willRenameFiles" then
       local response = client:request_sync("workspace/willRenameFiles", changes, 1000, 0)
       if response and response.result ~= nil then
         lsp.util.apply_workspace_edit(response.result, client.offset_encoding)
@@ -91,7 +90,7 @@ function hooks.on_rename(src, dst)
   end
 
   for _, client in ipairs(clients) do
-    if client:supports_method("workspace/didRenameFiles") then client:notify("workspace/didRenameFiles", changes) end
+    if client:supports_method "workspace/didRenameFiles" then client:notify("workspace/didRenameFiles", changes) end
   end
 end
 
