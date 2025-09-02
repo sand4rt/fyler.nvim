@@ -1,6 +1,6 @@
 local uv = vim.loop or vim.uv
 
-local FYLER_TESTING_DIR = ".tests/repos/"
+FYLER_TESTING_DIR = vim.fs.joinpath(vim.uv.cwd(), ".tests")
 
 ---@param path string
 ---@return boolean
@@ -12,7 +12,7 @@ end
 ---@param repo string
 local function ensure_install(repo)
   local name = repo:match "/(.*)$"
-  local install_path = FYLER_TESTING_DIR .. name
+  local install_path = vim.fs.joinpath(FYLER_TESTING_DIR, "repos", name)
 
   if not path_exists(install_path) then
     vim.system({ "git", "clone", "--depth=1", "git@github.com:" .. repo .. ".git", install_path }):wait()
