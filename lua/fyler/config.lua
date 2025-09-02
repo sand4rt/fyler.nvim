@@ -20,6 +20,7 @@ local util = require "fyler.lib.util"
 ---| "SelectSplit"
 ---| "SelectTab"
 ---| "SelectVSplit"
+---| "CollapseAll"
 
 ---@class FylerConfigIndentScope
 ---@field enabled boolean
@@ -74,6 +75,7 @@ local function defaults()
       ["^"] = "GotoParent",
       ["="] = "GotoCwd",
       ["."] = "GotoNode",
+      ["#"] = "CollapseAll",
     },
     close_on_select = true,
     confirm_simple = false,
