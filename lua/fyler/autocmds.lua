@@ -20,13 +20,13 @@ function M.setup(config)
       pattern = "*",
       desc = "Hijack NETRW commands",
       callback = function(arg)
-        if vim.api.nvim_get_current_buf() ~= arg.buf then return end
+        if api.nvim_get_current_buf() ~= arg.buf then return end
 
-        local path = vim.api.nvim_buf_get_name(0)
+        local path = api.nvim_buf_get_name(0)
         if vim.fn.isdirectory(path) ~= 1 then return end
 
-        util.set_buf_option(0, "bufhidden", "wipe")
-        require("fyler").open { cwd = path }
+        api.nvim_buf_delete(0, { force = true })
+        require("fyler").open { dir = path }
       end,
     })
   end
