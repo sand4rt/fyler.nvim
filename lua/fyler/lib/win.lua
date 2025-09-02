@@ -110,7 +110,7 @@ function Win:config()
       elseif unit == "abs" then
         winconfig.row = value
       else
-        error(string.format("(fyler.nvim) Unknown unit '%s'", unit))
+        error(string.format("[fyler.nvim] Unknown unit '%s'", unit))
       end
     end
 
@@ -122,7 +122,7 @@ function Win:config()
       elseif ru == "abs" then
         winconfig.col = (vim.o.columns - rv - wv)
       else
-        error(string.format("(fyler.nvim) Unknown unit '%s'", ru))
+        error(string.format("[fyler.nvim] Unknown unit '%s'", ru))
       end
     end
 
@@ -134,7 +134,7 @@ function Win:config()
       elseif unit == "abs" then
         winconfig.row = (vim.o.lines - value - hv)
       else
-        error(string.format("(fyler.nvim) Unknown unit '%s'", unit))
+        error(string.format("[fyler.nvim] Unknown unit '%s'", unit))
       end
     end
 
@@ -145,11 +145,11 @@ function Win:config()
       elseif unit == "abs" then
         winconfig.col = value
       else
-        error(string.format("(fyler.nvim) Unknown unit '%s'", unit))
+        error(string.format("[fyler.nvim] Unknown unit '%s'", unit))
       end
     end
   else
-    error(string.format("(fyler.nvim) Invalid window kind `%s`", self.kind))
+    error(string.format("[fyler.nvim] Invalid window kind `%s`", self.kind))
   end
 
   if self.width then
@@ -159,7 +159,7 @@ function Win:config()
     elseif unit == "abs" then
       winconfig.width = value
     else
-      error(string.format("(fyler.nvim) Unknown unit '%s'", unit))
+      error(string.format("[fyler.nvim] Unknown unit '%s'", unit))
     end
   end
 
@@ -170,7 +170,7 @@ function Win:config()
     elseif unit == "abs" then
       winconfig.height = value
     else
-      error(string.format("(fyler.nvim) Unknown unit '%s'", unit))
+      error(string.format("[fyler.nvim] Unknown unit '%s'", unit))
     end
   end
 
