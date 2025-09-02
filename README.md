@@ -103,9 +103,7 @@ Or change to `nvim-web-devicons`
 {
   "A7Lavinraj/fyler.nvim",
   dependencies = { "nvim-tree/nvim-web-devicons" },
-  opts = {
-    icon_provider = "nvim-web-devicons",
-  }
+  opts = { icon_provider = "nvim_web_devicons" }
 }
 ```
 
@@ -138,107 +136,62 @@ local defaults = {
   hooks = {
     on_delete = nil, -- function(path) end
     on_rename = nil, -- function(src_path, dst_path) end
-    on_highlights = nil -- function(hl_groups, palette) end
+    on_highlight = nil -- function(hl_groups, palette) end
   },
   -- Changes icon provider
-  icon_provider = "mini-icons",
+  icon_provider = "mini_icons",
   -- Changes mappings for associated view
   mappings = {
-    explorer = {
-      ["q"] = "CloseView",
-      ["<CR>"] = "Select",
-      ["<C-t>"] = "SelectTab",
-      ["|"] = "SelectVSplit",
-      ["-"] = "SelectSplit",
-      ["^"] = "GotoParent",
-      ["="] = "GotoCwd",
-      ["."] = "GotoNode",
-    },
-    confirm = {
-      ["y"] = "Confirm",
-      ["n"] = "Discard",
-    },
+    ["q"] = "CloseView",
+    ["<CR>"] = "Select",
+    ["<C-t>"] = "SelectTab",
+    ["|"] = "SelectVSplit",
+    ["-"] = "SelectSplit",
+    ["^"] = "GotoParent",
+    ["="] = "GotoCwd",
+    ["."] = "GotoNode",
   },
-  -- Changes configuration for associated view
-  views = {
-    confirm = {
-      win = {
-        -- Changes window border
-        border = "single",
-        -- Changes buffer options
-        buf_opts = {
-          -- buffer options
-        },
-        -- Changes window kind
-        kind = "float",
-        -- Changes window kind preset
-        kind_presets = {
-          -- values can be "(0,1]rel" or "{1...}abs"
-
-          -- <preset_name> = {
-          --   height = "",
-          --   width = "",
-          --   top = "",
-          --   left = ""
-          -- }
-
-          -- float = {
-          --   height = "0.3rel",
-          --   width = "0.4rel",
-          --   top = "0.3rel",
-          --   left = "0.3rel"
-          -- },
-        },
-        -- Changes window options
-        win_opts = {
-          -- window options
-        },
-      },
+  -- Changes explorer closing behaviour when a file get selected
+  close_on_select = true,
+  -- Changes explorer behaviour to auto confirm simple edits
+  confirm_simple = false,
+  -- Changes explorer behaviour to hijack NETRW
+  default_explorer = false,
+  -- Changes git statuses visibility
+  git_status = true,
+  -- Changes Indentation marker properties
+  indentscope = {
+    enabled = true,
+    group = "FylerIndentMarker",
+    marker = "│",
+  },
+  -- Auto current buffer tracking
+  track_current_buffer = true,
+  win = {
+    -- Changes window border
+    border = "single",
+    -- Changes buffer options
+    buf_opts = {
+      -- buffer options
     },
-    explorer = {
-      -- Changes explorer closing behaviour when a file get selected
-      close_on_select = true,
-      -- Changes explorer behaviour to auto confirm simple edits
-      confirm_simple = false,
-      -- Changes explorer behaviour to hijack NETRW
-      default_explorer = false,
-      -- Changes git statuses visibility
-      git_status = true,
-      -- Changes Indentation marker properties
-      indentscope = {
-        enabled = true,
-        group = "FylerIndentMarker",
-        marker = "│",
-      },
-      -- Auto current buffer tracking
-      track_current_buffer = true,
-      win = {
-      -- Changes window border
-        border = "single",
-      -- Changes buffer options
-        buf_opts = {
-          -- buffer options
-        },
-      -- Changes window kind
-        kind = "replace",
-      -- Changes window kind preset
-        kind_presets = {
-          -- values can be "(0,1]rel" or "{1...}abs"
+    -- Changes window kind
+    kind = "replace",
+    -- Changes window kind preset
+    kind_presets = {
+      -- values can be "(0,1]rel" or "{1...}abs"
 
-          -- <preset_name> = {
-          --   height = "",
-          --   width = "",
-          --   top = "",
-          --   left = ""
-          -- }
+      -- <preset_name> = {
+      --   height = "",
+      --   width = "",
+      --   top = "",
+      --   left = ""
+      -- }
 
-          -- replace = {},
-        },
-      -- Changes window options
-        win_opts = {
-          -- window options
-        },
-      },
+      -- replace = {},
+    },
+    -- Changes window options
+    win_opts = {
+      -- window options
     },
   },
 }
@@ -253,7 +206,7 @@ You can either open Fyler by `Fyler` command
 ```vim
 :Fyler             " Open with default options
 :Fyler kind=<kind> " Open with specific window kind
-:Fyler cwd=<path>  " Open with specific directory
+:Fyler dir=<path>  " Open with specific directory
 ```
 
 Or using lua api
@@ -265,7 +218,7 @@ local fyler = require("fyler")
 fyler.open()
 
 -- Open with specific directory
-fyler.open({ cwd = "~/" })
+fyler.open({ dir = "~/" })
 
 -- Open with specific kind
 fyler.open({ kind = "split_left_most" })

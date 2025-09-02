@@ -13,111 +13,85 @@ CONFIGURATION                                                     *fyler.config*
 Fyler supports plenty of options to customize. Following are default values
 
 >lua
-  local defaults = {
+  {
     hooks = {
-      on_delete = nil, -- function(path) end
-      on_rename = nil, -- function(src_path, dst_path) end
-      on_highlights = nil -- function(hl_groups, palette) end
+      on_delete = nil,
+      on_rename = nil,
+      on_highlight = nil,
     },
-    -- Changes icon provider
-    icon_provider = "mini-icons",
-    -- Changes mappings for associated view
+    icon_provider = "mini_icons",
     mappings = {
-      explorer = {
-        ["q"] = "CloseView",
-        ["<CR>"] = "Select",
-        ["<C-t>"] = "SelectTab",
-        ["|"] = "SelectVSplit",
-        ["-"] = "SelectSplit",
-        ["^"] = "GotoParent",
-        ["="] = "GotoCwd",
-        ["."] = "GotoNode",
-      },
-      confirm = {
-        ["y"] = "Confirm",
-        ["n"] = "Discard",
-      },
+      ["q"] = "CloseView",
+      ["<CR>"] = "Select",
+      ["<C-t>"] = "SelectTab",
+      ["|"] = "SelectVSplit",
+      ["-"] = "SelectSplit",
+      ["^"] = "GotoParent",
+      ["="] = "GotoCwd",
+      ["."] = "GotoNode",
     },
-    -- Changes configuration for associated view
-    views = {
-      confirm = {
-        win = {
-          -- Changes window border
-          border = "single",
-          -- Changes buffer options
-          buf_opts = {
-            -- buffer options
-          },
-          -- Changes window kind
-          kind = "float",
-          -- Changes window kind preset
-          kind_presets = {
-            -- values can be "(0,1]rel" or "{1...}abs"
-
-            -- <preset_name> = {
-            --   height = "",
-            --   width = "",
-            --   top = "",
-            --   left = ""
-            -- }
-
-            -- float = {
-            --   height = "0.3rel",
-            --   width = "0.4rel",
-            --   top = "0.3rel",
-            --   left = "0.3rel"
-            -- },
-          },
-          -- Changes window options
-          win_opts = {
-            -- window options
-          },
+    close_on_select = true,
+    confirm_simple = false,
+    default_explorer = false,
+    git_status = true,
+    indentscope = {
+      enabled = true,
+      group = "FylerIndentMarker",
+      marker = "│",
+    },
+    track_current_buffer = true,
+    win = {
+      border = "single",
+      buf_opts = {
+        filetype = "fyler",
+        syntax = "fyler",
+        buflisted = false,
+        buftype = "acwrite",
+        expandtab = true,
+        shiftwidth = 2,
+      },
+      kind = "replace",
+      kind_presets = {
+        float = {
+          height = "0.7rel",
+          width = "0.7rel",
+          top = "0.1rel",
+          left = "0.15rel",
+        },
+        replace = {},
+        split_above = {
+          height = "0.7rel",
+        },
+        split_above_all = {
+          height = "0.7rel",
+        },
+        split_below = {
+          height = "0.7rel",
+        },
+        split_below_all = {
+          height = "0.7rel",
+        },
+        split_left = {
+          width = "0.3rel",
+        },
+        split_left_most = {
+          width = "0.3rel",
+        },
+        split_right = {
+          width = "0.3rel",
+        },
+        split_right_most = {
+          width = "0.3rel",
         },
       },
-      explorer = {
-        -- Changes explorer closing behaviour when a file get selected
-        close_on_select = true,
-        -- Changes explorer behaviour to auto confirm simple edits
-        confirm_simple = false,
-        -- Changes explorer behaviour to hijack NETRW
-        default_explorer = false,
-        -- Changes git statuses visibility
-        git_status = true,
-        -- Changes Indentation marker properties
-        indentscope = {
-          enabled = true,
-          group = "FylerIndentMarker",
-          marker = "│",
-        },
-        -- Auto current buffer tracking
-        track_current_buffer = true,
-        win = {
-        -- Changes window border
-          border = "single",
-        -- Changes buffer options
-          buf_opts = {
-            -- buffer options
-          },
-        -- Changes window kind
-          kind = "replace",
-        -- Changes window kind preset
-          kind_presets = {
-            -- values can be "(0,1]rel" or "{1...}abs"
-
-            -- <preset_name> = {
-            --   height = "",
-            --   width = "",
-            --   top = "",
-            --   left = ""
-            -- }
-
-            -- replace = {},
-          },
-        -- Changes window options
-          win_opts = {
-            -- window options
-          },
-        },
+      win_opts = {
+        concealcursor = "nvic",
+        conceallevel = 3,
+        cursorline = true,
+        number = true,
+        relativenumber = true,
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
+        wrap = false,
       },
     },
   }
