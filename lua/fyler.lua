@@ -33,7 +33,7 @@ function M.setup(options)
     local instance = explorer.instance(dir)
     local current = explorer.current()
 
-    if current and current.dir ~= dir then current:_action "n_close"() end
+    if current and (current.dir ~= dir or current.win.kind ~= kind) then current:_action "n_close"() end
 
     if instance then
       instance:open(dir, kind)
