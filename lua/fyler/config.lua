@@ -2,102 +2,69 @@ local util = require "fyler.lib.util"
 
 ---@class FylerConfigHooks
 ---@field on_delete fun(path: string)|nil
----@field on_rename fun(src_path: string, dst_path: string)|nil
----@field on_highlights fun(hl_groups: table, palette: table)|nil
+---@field on_rename fun(src: string, dst: string)|nil
+---@field on_highlight fun(groups: table, palette: Palette)|nil
 
----Defines icon provider to various views. It is a function with following definition:
----```
----fun(type: string, name: string): string, string
----```
----Builtin options: `mini-icons`, `nvim-web-devicons`
----@alias FylerConfigIconProvider "mini_icons"| "nvim_web_devicons"|fun(type: string, name: string): string, string
+---@alias FylerConfigIconProvider
+---| "mini_icons"
+---| "none"
+---| "nvim_web_devicons"
+
+---@alias FylerConfigExplorerMapping
+---| "CloseView"
+---| "GotoCwd"
+---| "GotoNode"
+---| "GotoParent"
+---| "Select"
+---| "SelectSplit"
+---| "SelectTab"
+---| "SelectVSplit"
 
 ---@class FylerConfigIndentScope
----@field enabled boolean Enable or disable indentation markers
----@field group string Change highlight group
----@field marker string Change marker char
+---@field enabled boolean
+---@field group string
+---@field marker string
 
----@alias FylerConfigMappingsExplorer
----| "CloseView" Close explorer view
----| "Select" Select item under the cursor
----| "SelectTab" Open file under the cursor in new tab
----| "SelectVSplit" Open file under the cursor in vertical split
----| "SelectSplit" Open file under the cursor horizontal split
----| "GotoParent" Jump to parent directory
----| "GotoCwd" Jump to current working directory
----| "GotoNode" Jump to node under cursor
+---@alias FylerConfigWinBorder
+---| "bold"
+---| "double"
+---| "none"
+---| "rounded"
+---| "shadow"
+---| "single"
+---| "solid"
 
----@alias FylerConfigMappingsConfirm
----| "Confirm" Confirm actions
----| "Discard" Discard actions
+---@class FylerConfigWin
+---@field border FylerConfigWinBorder|string[]
+---@field buf_opts table
+---@field kind WinKind
+---@field kind_presets table<WinKind|string, table>
+---@field win_opts table
 
----@class FylerConfigMappings
----@field confirm table<string, FylerConfigMappingsConfirm>
----@field explorer table<string, FylerConfigMappingsExplorer>
-
----@alias FylerConfigViewWinKindPreset { height: string, width: string }
-
----@class FylerConfigViewWin
----@field border string Window border style (for more info ':help winborder')
----@field buf_opts table<string, any> Buffer options
----@field kind WinKind Window kind
----@field kind_presets table<string, FylerConfigViewWinKindPreset> Window kind
----@field win_opts table<string, any> Window options
-
----@class FylerConfigViewConfirm
----@field win FylerConfigViewWin
-
----@class FylerConfigViewExplorer
+---@class FylerConfig
+---@field hooks FylerConfigHooks
+---@field icon_provider FylerConfigIconProvider
+---@field mappings table<string, FylerConfigExplorerMapping>
 ---@field close_on_select boolean
 ---@field confirm_simple boolean
 ---@field default_explorer boolean
 ---@field git_status boolean
 ---@field indentscope FylerConfigIndentScope
----@field win FylerConfigViewWin
-
----@class FylerConfigViews
----@field confirm FylerConfigViewConfirm
----@field explorer FylerConfigViewExplorer
-
----@class FylerConfigDefaults
----@field hooks FylerConfigHooks
----@field icon_provider FylerConfigIconProvider
----@field mappings FylerConfigMappings
----@field views FylerConfigViews
-
----@class FylerConfig : FylerConfigDefaults
----@field hooks FylerConfigHooks|nil
----@field icon_provider FylerConfigIconProvider|nil
----@field mappings FylerConfigMappings|nil
----@field views FylerConfigViews|nil
+---@field track_current_buffer boolean
+---@field win FylerConfigWin
 
 local M = {}
 
--- Default configuration used by "Fyler.nvim" which will get overwrite by user
----@type FylerConfigDefaults
-local defaults = {
-  -- Hooks are predefined functions which gets invoke on particular events
-  hooks = {
-    -- "on_delete" hook will get triggered when a file gets deleted by "Fyler.nvim"
-    on_delete = nil,
-
-    -- "on_rename" hook will get triggered when a file gets renamed by "Fyler.nvim"
-    on_rename = nil,
-
-    -- "on_highlights" hook will get triggered when a setting highlight groups by "Fyler.nvim"
-    on_highlights = nil,
-  },
-
-  -- "icon_provider" defines the icon generator along with it's highlight group. It can be one the following:
-  -- 1. "none"
-  -- 2. "mini_icons"
-  -- 3. "nvim_web_devicons"
-  -- or it could be a function with definition `fun(type: string, name: string): string, string`
-  icon_provider = "mini_icons",
-
-  -- Mappings are local to their "view" and only **normal mode** mappings are allowed for now
-  mappings = {
-    explorer = {
+---@return FylerConfig
+local function defaults()
+  return {
+    hooks = {
+      on_delete = nil,
+      on_rename = nil,
+      on_highlight = nil,
+    },
+    icon_provider = "mini_icons",
+    mappings = {
       ["q"] = "CloseView",
       ["<CR>"] = "Select",
       ["<C-t>"] = "SelectTab",
@@ -107,183 +74,80 @@ local defaults = {
       ["="] = "GotoCwd",
       ["."] = "GotoNode",
     },
-    confirm = {
-      ["y"] = "Confirm",
-      ["n"] = "Discard",
+    close_on_select = true,
+    confirm_simple = false,
+    default_explorer = false,
+    git_status = true,
+    indentscope = {
+      enabled = true,
+      group = "FylerIndentMarker",
+      marker = "│",
     },
-  },
-
-  -- "views" is a map to corresponding configuration
-  views = {
-    confirm = {
-      win = {
-        -- Border style
-        border = "single",
-
-        -- Buffer options
-        buf_opts = {
-          buflisted = false,
-          modifiable = false,
+    track_current_buffer = true,
+    win = {
+      border = "single",
+      buf_opts = {
+        filetype = "fyler",
+        syntax = "fyler",
+        buflisted = false,
+        buftype = "acwrite",
+        expandtab = true,
+        shiftwidth = 2,
+      },
+      kind = "replace",
+      kind_presets = {
+        float = {
+          height = "0.7rel",
+          width = "0.7rel",
+          top = "0.1rel",
+          left = "0.15rel",
         },
-
-        -- Window kind, can be one the following:
-        -- "float"
-        -- "replace"
-        -- "split_above"
-        -- "split_above_all"
-        -- "split_below"
-        -- "split_below_all"
-        -- "split_left"
-        -- "split_left_most"
-        -- "split_right"
-        -- "split_right_most"
-        kind = "float",
-
-        -- Each preset defines the dimensions and positioning of corresponding window kind
-        kind_presets = {
-          float = {
-            height = "0.3rel",
-            width = "0.4rel",
-            top = "0.35rel",
-            left = "0.3rel",
-          },
-          replace = {},
-          split_above = {
-            height = "0.5rel",
-          },
-          split_above_all = {
-            height = "0.5rel",
-          },
-          split_below = {
-            height = "0.5rel",
-          },
-          split_below_all = {
-            height = "0.5rel",
-          },
-          split_left = {
-            width = "0.5rel",
-          },
-          split_left_most = {
-            width = "0.5rel",
-          },
-          split_right = {
-            width = "0.5rel",
-          },
-          split_right_most = {
-            width = "0.5rel",
-          },
+        replace = {},
+        split_above = {
+          height = "0.7rel",
         },
-        win_opts = {
-          winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
-          wrap = false,
+        split_above_all = {
+          height = "0.7rel",
+        },
+        split_below = {
+          height = "0.7rel",
+        },
+        split_below_all = {
+          height = "0.7rel",
+        },
+        split_left = {
+          width = "0.3rel",
+        },
+        split_left_most = {
+          width = "0.3rel",
+        },
+        split_right = {
+          width = "0.3rel",
+        },
+        split_right_most = {
+          width = "0.3rel",
         },
       },
-    },
-    explorer = {
-      -- Close explorer on selecting a file
-      close_on_select = true,
-
-      -- Skips confirmation for simple edits(CREATE <= 5 && DELETE == 0 && MOVE <= 1 && COPY <= 1)
-      confirm_simple = false,
-
-      -- Replace most of the NETRW commands
-      default_explorer = false,
-
-      -- Git symbols
-      git_status = true,
-
-      -- Indentation markers
-      indentscope = {
-        enabled = true,
-        group = "FylerIndentMarker",
-        marker = "│",
-      },
-
-      -- Auto current buffer tracking
-      track_current_buffer = true,
-
-      win = {
-        border = "single",
-        buf_opts = {
-          filetype = "FylerExplorer",
-          syntax = "FylerExplorer",
-          buflisted = false,
-          buftype = "acwrite",
-          expandtab = true,
-          shiftwidth = 2,
-        },
-        kind = "replace",
-        kind_presets = {
-          float = {
-            height = "0.7rel",
-            width = "0.7rel",
-            top = "0.1rel",
-            left = "0.15rel",
-          },
-          replace = {},
-          split_above = {
-            height = "0.7rel",
-          },
-          split_above_all = {
-            height = "0.7rel",
-          },
-          split_below = {
-            height = "0.7rel",
-          },
-          split_below_all = {
-            height = "0.7rel",
-          },
-          split_left = {
-            width = "0.3rel",
-          },
-          split_left_most = {
-            width = "0.3rel",
-          },
-          split_right = {
-            width = "0.3rel",
-          },
-          split_right_most = {
-            width = "0.3rel",
-          },
-        },
-        win_opts = {
-          concealcursor = "nvic",
-          conceallevel = 3,
-          cursorline = true,
-          number = true,
-          relativenumber = true,
-          winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
-          wrap = false,
-        },
+      win_opts = {
+        concealcursor = "nvic",
+        conceallevel = 3,
+        cursorline = true,
+        number = true,
+        relativenumber = true,
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
+        wrap = false,
       },
     },
-  },
-}
-
--- Returns configuration for a particular "view" and "kind"
----@param name string
----@param kind WinKind|nil
-function M.get_view_config(name, kind)
-  assert(name, "name is required")
-  local view = vim.deepcopy(M.values.views[name])
-  local preset = view.win.kind_presets[kind or view.win.kind]
-  view.win = util.tbl_merge_keep(view.win, preset)
-  return view
+  }
 end
 
--- Returns key mappings for a particular "view"
----@param name string
-function M.get_maps(name)
-  assert(name, "name is required")
-  return M.values.mappings[name]
-end
-
-function M.get_reversed_maps(name)
-  local maps = M.get_maps(name)
+function M.get_reversed_maps()
   local reversed_maps = {}
-  for k, v in pairs(maps) do
-    reversed_maps[v] = k
+  for k, v in pairs(M.values.mappings) do
+    if v then reversed_maps[v] = k end
   end
+
+  setmetatable(reversed_maps, { __index = function() return "<nop>" end })
 
   return reversed_maps
 end
@@ -310,84 +174,31 @@ local function check_type(name, value, ref, allow_nil)
 end
 
 -- Overwrites the defaults configuration options with user options
----@param config FylerConfig|nil
-function M.setup(config)
-  config = config or {}
-  check_type("config", config, "table")
+function M.setup(opts)
+  opts = opts or {}
+  check_type("config", opts, "table")
 
-  local values = vim.tbl_deep_extend("force", defaults, config)
-  for _, view_name in ipairs {
-    "confirm",
-    "explorer",
-  } do
-    local win = values.views[view_name].win
-    check_type(
-      string.format("config.views.%s.win.kind_presets.%s", view_name, win.kind),
-      win.kind_presets[win.kind],
-      "table"
-    )
-
-    for _, kind_preset_name in ipairs {
-      "float",
-      "replace",
-      "split_above",
-      "split_above_all",
-      "split_below",
-      "split_below_all",
-      "split_left",
-      "split_left_most",
-      "split_right",
-      "split_right_most",
-    } do
-      local kind_preset = values.views[view_name].win.kind_presets[kind_preset_name]
-      check_type(string.format("config.views.%s.%s", view_name, kind_preset_name), kind_preset, "table")
-      check_type(
-        string.format("config.views.%s.%s.height", view_name, kind_preset_name),
-        kind_preset.height,
-        "string",
-        kind_preset_name ~= "float"
-      )
-      check_type(
-        string.format("config.views.%s.%s.width", view_name, kind_preset_name),
-        kind_preset.width,
-        "string",
-        kind_preset_name ~= "float"
-      )
-    end
-  end
+  M.values = util.tbl_merge_force(defaults(), opts)
 
   local checks = {
-    { "config.hooks", values.hooks, "table" },
-    { "config.icon_provider", values.icon_provider, { "string", "function" } },
-    { "config.mappings", values.mappings, "table" },
-    { "config.mappings.confirm", values.mappings.confirm, "table" },
-    { "config.mappings.explorer", values.mappings.explorer, "table" },
-    { "config.views", values.views, "table" },
-    { "config.views.confirm", values.views.confirm, "table" },
-    { "config.views.confirm.kind", values.views.confirm.win.kind, "string" },
-    { "config.views.confirm.win.border", values.views.confirm.win.border, "string" },
-    { "config.views.confirm.win.buf_opts", values.views.confirm.win.buf_opts, "table" },
-    { "config.views.confirm.win.win_opts", values.views.confirm.win.win_opts, "table" },
-    { "config.views.explorer", values.views.explorer, "table" },
-    { "config.views.explorer.close_on_select", values.views.explorer.close_on_select, "boolean" },
-    { "config.views.explorer.confirm_simple", values.views.explorer.confirm_simple, "boolean" },
-    { "config.views.explorer.default_explorer", values.views.explorer.default_explorer, "boolean" },
-    { "config.views.explorer.git_status", values.views.explorer.git_status, "boolean" },
-    { "config.views.explorer.indentscope", values.views.explorer.indentscope, "table" },
-    { "config.views.explorer.indentscope.enabled", values.views.explorer.indentscope.enabled, "boolean" },
-    { "config.views.explorer.indentscope.group", values.views.explorer.indentscope.group, "string" },
-    { "config.views.explorer.indentscope.marker", values.views.explorer.indentscope.marker, "string" },
-    { "config.views.explorer.kind", values.views.explorer.win.kind, "string" },
-    { "config.views.explorer.win.border", values.views.explorer.win.border, "string" },
-    { "config.views.explorer.win.buf_opts", values.views.explorer.win.buf_opts, "table" },
-    { "config.views.explorer.win.win_opts", values.views.explorer.win.win_opts, "table" },
+    { "config.hooks", M.values.hooks, "table" },
+    { "config.hooks.on_delete", M.values.hooks.on_delete, "function", true },
+    { "config.hooks.on_rename", M.values.hooks.on_rename, "function", true },
+    { "config.hooks.on_highlights", M.values.hooks.on_highlight, "function", true },
+    { "config.icon_provider", M.values.icon_provider, { "string", "function" } },
+    { "config.mappings", M.values.mappings, "table" },
+    { "config.close_on_select", M.values.close_on_select, "boolean" },
+    { "config.confirm_simple", M.values.confirm_simple, "boolean" },
+    { "config.default_explorer", M.values.default_explorer, "boolean" },
+    { "config.git_status", M.values.git_status, "boolean" },
+    { "config.indentscope", M.values.indentscope, "table" },
+    { "config.track_current_buffer", M.values.track_current_buffer, "boolean" },
+    { "config.win", M.values.win, "table" },
   }
 
   for _, check in ipairs(checks) do
     check_type(util.unpack(check))
   end
-
-  M.values = values
 end
 
 return M

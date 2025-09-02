@@ -11,7 +11,7 @@ function M.setup(config)
   config = config or {}
 
   -- Only replace NETRW commands when mentioned
-  if config.values.views.explorer.default_explorer then
+  if config.values.default_explorer then
     vim.cmd "silent! autocmd! FileExplorer *"
     vim.cmd "autocmd VimEnter * ++once silent! autocmd! FileExplorer *"
 
@@ -39,7 +39,7 @@ function M.setup(config)
   })
 
   -- -- Track current focused buffer in explorer
-  if config.values.views.explorer.track_current_buffer then
+  if config.values.track_current_buffer then
     api.nvim_create_autocmd("BufEnter", {
       group = augroup,
       desc = "Track current focused buffer in explorer",

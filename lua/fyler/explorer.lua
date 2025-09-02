@@ -70,8 +70,7 @@ end
 ---@param dir string
 ---@param kind WinKind
 function M:open(dir, kind)
-  local view_config = self.config.get_view_config("explorer", kind)
-  local reversed_maps = self.config.get_reversed_maps "explorer"
+  local reversed_maps = self.config.get_reversed_maps()
 
   if self:getcwd() == dir then
     if self:is_visible() then
@@ -84,6 +83,8 @@ function M:open(dir, kind)
 
   recentdir = dir
 
+  -- print(vim.inspect(self.config.values.win.win_opts), vim.inspect(self.config.values.win.buf_opts))
+
   -- stylua: ignore start
   self.win = Win.new {
     autocmds      = {
@@ -95,16 +96,16 @@ function M:open(dir, kind)
       ["TextChangedI"] = self:_action "draw_indentscope",
       ["WinClosed"]    = self:_action "n_close",
     },
-    border        = view_config.win.border,
+    border        = self.config.values.win.border,
     bufname       = string.format("fyler://%s", dir),
-    bottom        = view_config.win.bottom,
-    buf_opts      = view_config.win.buf_opts,
+    bottom        = self.config.values.win.bottom,
+    buf_opts      = self.config.values.win.buf_opts,
     enter         = true,
-    footer        = view_config.win.footer,
-    footer_pos    = view_config.win.footer,
-    height        = view_config.win.height,
+    footer        = self.config.values.win.footer,
+    footer_pos    = self.config.values.win.footer,
+    height        = self.config.values.win.height,
     kind          = kind,
-    left          = view_config.win.left,
+    left          = self.config.values.win.left,
     mappings      = {
       [reversed_maps["CloseView"]]    = self:_action "n_close",
       [reversed_maps["Select"]]       = self:_action "n_select",
@@ -116,15 +117,15 @@ function M:open(dir, kind)
       [reversed_maps["GotoNode"]]     = self:_action "n_goto_node",
     },
     render        = self:_action "dispatch_refresh",
-    right         = view_config.win.right,
-    title         = view_config.win.title,
-    title_pos     = view_config.win.title,
-    top           = view_config.win.top,
+    right         = self.config.values.win.right,
+    title         = self.config.values.win.title,
+    title_pos     = self.config.values.win.title,
+    top           = self.config.values.win.top,
     user_autocmds = {
       ["DispatchRefresh"] = self:_action "dispatch_refresh"
     },
-    width         = view_config.win.width,
-    win_opts      = view_config.win.win_opts,
+    width         = self.config.values.win.width,
+    win_opts      = self.config.values.win.win_opts,
   }
   -- stylua: ignore end
 

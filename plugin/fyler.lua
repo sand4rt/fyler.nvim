@@ -13,7 +13,7 @@ end, {
   complete = function(arglead, cmdline)
     if arglead:find "^kind=" then
       return util.tbl_map(
-        vim.tbl_keys(require("fyler.config").values.views.explorer.win.kind_presets),
+        vim.tbl_keys(require("fyler.config").values.win.kind_presets),
         function(kind_preset) return string.format("kind=%s", kind_preset) end
       )
     end

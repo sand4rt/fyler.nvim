@@ -16,7 +16,7 @@ local function get_lsp_clients()
   end
 end
 
-hooks.on_highlights = function() end
+hooks.on_highlight = function() end
 
 ---@param path string
 function hooks.on_delete(path)

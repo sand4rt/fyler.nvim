@@ -33,7 +33,7 @@ function M.n_select(self)
       api.nvim_exec_autocmds("User", { pattern = "DispatchRefresh" })
     else
       if util.is_valid_winid(self.win.old_winid) then
-        if self.config.values.views.explorer.close_on_select then self.win:hide() end
+        if self.config.values.close_on_select then self.win:hide() end
 
         api.nvim_set_current_win(self.win.old_winid)
         api.nvim_win_call(self.win.old_winid, function() vim.cmd.edit(entry.path) end)
@@ -51,7 +51,7 @@ function M.n_select_tab(self)
     local entry = self.file_tree:node_entry(identity)
     if not entry:isdir() then
       if util.is_valid_winid(self.win.old_winid) then
-        if self.config.values.views.explorer.close_on_select then self.win:hide() end
+        if self.config.values.close_on_select then self.win:hide() end
 
         vim.cmd.tabedit(entry.path)
       end
@@ -68,7 +68,7 @@ function M.n_select_v_split(self)
     local entry = self.file_tree:node_entry(identity)
     if not entry:isdir() then
       if util.is_valid_winid(self.win.old_winid) then
-        if self.config.values.views.explorer.close_on_select then self.win:hide() end
+        if self.config.values.close_on_select then self.win:hide() end
 
         api.nvim_set_current_win(self.win.old_winid)
         vim.cmd.vsplit(entry.path)
@@ -87,7 +87,7 @@ function M.n_select_split(self)
     if not entry:isdir() then
       if util.is_valid_winid(self.win.old_winid) then
         api.nvim_set_current_win(self.win.old_winid)
-        if self.config.values.views.explorer.close_on_select then self.win:hide() end
+        if self.config.values.close_on_select then self.win:hide() end
 
         api.nvim_set_current_win(self.win.old_winid)
         vim.cmd.split(entry.path)
@@ -244,7 +244,7 @@ function M.synchronize(self)
     local changes = self.file_tree:diff_with_lines(buf_lines)
 
     local can_mutate
-    if self.config.values.views.explorer.confirm_simple and can_bypass(changes) then
+    if self.config.values.confirm_simple and can_bypass(changes) then
       can_mutate = true
     else
       can_mutate = popups.permission:open(get_tbl(self, changes))
@@ -264,7 +264,7 @@ function M.dispatch_refresh(self)
 
     self.file_tree:update()
 
-    local status_map = self.config.values.views.explorer.git_status and git.status_map() or nil
+    local status_map = self.config.values.git_status and git.status_map() or nil
     local cache_undolevels
     self.win.ui:render {
       ui_lines = ui.Explorer(self.file_tree:totable().children, status_map),
@@ -357,8 +357,8 @@ function M.draw_indentscope(self)
         hl_mode = "combine",
         virt_text = {
           {
-            self.config.values.views.explorer.indentscope.marker,
-            self.config.values.views.explorer.indentscope.group,
+            self.config.values.indentscope.marker,
+            self.config.values.indentscope.group,
           },
         },
         virt_text_pos = "overlay",
@@ -369,7 +369,7 @@ function M.draw_indentscope(self)
 
   return function()
     if not self.win:has_valid_bufnr() then return end
-    if not self.config.values.views.explorer.indentscope.enabled then return end
+    if not self.config.values.indentscope.enabled then return end
 
     api.nvim_buf_clear_namespace(self.win.bufnr, extmark_namespace, 0, -1)
     for i = 1, api.nvim_buf_line_count(self.win.bufnr) do

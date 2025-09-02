@@ -93,7 +93,7 @@ function M.setup()
   }
   -- stylua: ignore end
 
-  hooks.on_highlights(hl_groups, palette)
+  hooks.on_highlight(hl_groups, palette)
 
   for k, v in pairs(hl_groups) do
     api.nvim_set_hl(0, k, v)

@@ -29,7 +29,7 @@ function M.setup(options)
   -- "Fyler.nvim" API to launch explorer with defined options
   M.open = vim.schedule_wrap(function(opts)
     local dir = opts.dir or fs.cwd()
-    local kind = opts.kind or config.get_view_config("explorer").win.kind
+    local kind = opts.kind or config.values.win.kind
     local instance = explorer.instance(dir)
     local current = explorer.current()
 
