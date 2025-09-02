@@ -1,3 +1,4 @@
+local log = require "fyler.log"
 local util = require "fyler.lib.util"
 
 ---@class FylerConfigHooks
@@ -160,47 +161,45 @@ function M.get_reversed_maps()
 end
 
 -- Type check for configuration option
----@param name string
 ---@param value any
 ---@param ref string|string[]
 ---@param allow_nil boolean|nil
-local function check_type(name, value, ref, allow_nil)
-  local are_matched = (function()
-    if type(ref) == "table" then
-      return util.if_any(ref, function(x) return type(value) == x end)
-    elseif type(value) == ref then
-      return true
-    else
-      return false
-    end
-  end)()
+local function check_type(value, ref, allow_nil)
+  local are_matched
+  if type(ref) == "table" then
+    are_matched = util.if_any(ref, function(x) return type(value) == x end)
+  elseif type(value) == ref then
+    are_matched = true
+  else
+    are_matched = false
+  end
 
   if are_matched or (ref == "callable" and vim.is_callable(value)) or (allow_nil and value == nil) then return end
 
-  error(string.format("(fyler.nvim) `%s` should be %s, not %s", name, ref, type(value)))
+  log.warn "[fyler.nvim] Your configuration might have some problems, Please run ':checkhealth fyler' for more details"
 end
 
 -- Overwrites the defaults configuration options with user options
 function M.setup(opts)
   opts = opts or {}
-  check_type("config", opts, "table")
+  check_type(opts, "table")
 
   M.values = util.tbl_merge_force(defaults(), opts)
 
   local checks = {
-    { "config.hooks", M.values.hooks, "table" },
-    { "config.hooks.on_delete", M.values.hooks.on_delete, "function", true },
-    { "config.hooks.on_rename", M.values.hooks.on_rename, "function", true },
-    { "config.hooks.on_highlights", M.values.hooks.on_highlight, "function", true },
-    { "config.icon_provider", M.values.icon_provider, { "string", "function" } },
-    { "config.mappings", M.values.mappings, "table" },
-    { "config.close_on_select", M.values.close_on_select, "boolean" },
-    { "config.confirm_simple", M.values.confirm_simple, "boolean" },
-    { "config.default_explorer", M.values.default_explorer, "boolean" },
-    { "config.git_status", M.values.git_status, "boolean" },
-    { "config.indentscope", M.values.indentscope, "table" },
-    { "config.track_current_buffer", M.values.track_current_buffer, "boolean" },
-    { "config.win", M.values.win, "table" },
+    { M.values.hooks, "table" },
+    { M.values.hooks.on_delete, "function", true },
+    { M.values.hooks.on_rename, "function", true },
+    { M.values.hooks.on_highlight, "function", true },
+    { M.values.icon_provider, { "string", "function" } },
+    { M.values.mappings, "table" },
+    { M.values.close_on_select, "boolean" },
+    { M.values.confirm_simple, "boolean" },
+    { M.values.default_explorer, "boolean" },
+    { M.values.git_status, "boolean" },
+    { M.values.indentscope, "table" },
+    { M.values.track_current_buffer, "boolean" },
+    { M.values.win, "table" },
   }
 
   for _, check in ipairs(checks) do
