@@ -141,6 +141,13 @@ local function defaults()
   }
 end
 
+---@param kind WinKind
+function M.build_win(kind)
+  local win = M.values.win
+  local kind_preset = M.values.win.kind_presets[kind]
+  return util.tbl_merge_force(win, kind_preset)
+end
+
 function M.get_reversed_maps()
   local reversed_maps = {}
   for k, v in pairs(M.values.mappings) do

@@ -81,9 +81,8 @@ function M:open(dir, kind)
     self:chdir(dir)
   end
 
+  local win = self.config.build_win(kind)
   recentdir = dir
-
-  -- print(vim.inspect(self.config.values.win.win_opts), vim.inspect(self.config.values.win.buf_opts))
 
   -- stylua: ignore start
   self.win = Win.new {
@@ -96,16 +95,16 @@ function M:open(dir, kind)
       ["TextChangedI"] = self:_action "draw_indentscope",
       ["WinClosed"]    = self:_action "n_close",
     },
-    border        = self.config.values.win.border,
+    border        = win.border,
     bufname       = string.format("fyler://%s", dir),
-    bottom        = self.config.values.win.bottom,
-    buf_opts      = self.config.values.win.buf_opts,
+    bottom        = win.bottom,
+    buf_opts      = win.buf_opts,
     enter         = true,
-    footer        = self.config.values.win.footer,
-    footer_pos    = self.config.values.win.footer,
-    height        = self.config.values.win.height,
+    footer        = win.footer,
+    footer_pos    = win.footer,
+    height        = win.height,
     kind          = kind,
-    left          = self.config.values.win.left,
+    left          = win.left,
     mappings      = {
       [reversed_maps["CloseView"]]    = self:_action "n_close",
       [reversed_maps["Select"]]       = self:_action "n_select",
@@ -117,15 +116,15 @@ function M:open(dir, kind)
       [reversed_maps["GotoNode"]]     = self:_action "n_goto_node",
     },
     render        = self:_action "dispatch_refresh",
-    right         = self.config.values.win.right,
-    title         = self.config.values.win.title,
-    title_pos     = self.config.values.win.title,
-    top           = self.config.values.win.top,
+    right         = win.right,
+    title         = win.title,
+    title_pos     = win.title,
+    top           = win.top,
     user_autocmds = {
       ["DispatchRefresh"] = self:_action "dispatch_refresh"
     },
-    width         = self.config.values.win.width,
-    win_opts      = self.config.values.win.win_opts,
+    width         = win.width,
+    win_opts      = win.win_opts,
   }
   -- stylua: ignore end
 
