@@ -150,6 +150,7 @@ local defaults = {
     ["^"] = "GotoParent",
     ["="] = "GotoCwd",
     ["."] = "GotoNode",
+    ["#"] = "CollapseAll",
   },
   -- Changes explorer closing behaviour when a file get selected
   close_on_select = true,

@@ -29,6 +29,7 @@ Fyler supports plenty of options to customize. Following are default values
       ["^"] = "GotoParent",
       ["="] = "GotoCwd",
       ["."] = "GotoNode",
+      ["#"] = "CollapseAll",
     },
     close_on_select = true,
     confirm_simple = false,
