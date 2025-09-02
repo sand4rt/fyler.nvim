@@ -25,7 +25,7 @@ function M.n_select(self)
 
     if entry:isdir() then
       if entry.open then
-        self.file_tree:compress_node(indentity)
+        self.file_tree:collapse_node(indentity)
       else
         self.file_tree:expand_node(indentity)
       end
@@ -93,6 +93,15 @@ function M.n_select_split(self)
         vim.cmd.split(entry.path)
       end
     end
+  end
+end
+
+---@param self Explorer
+function M.n_collapse_all(self)
+  return function()
+    self.file_tree:collapse_all()
+
+    api.nvim_exec_autocmds("User", { pattern = "DispatchRefresh" })
   end
 end
 

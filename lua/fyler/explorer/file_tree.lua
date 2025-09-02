@@ -115,13 +115,31 @@ function M:expand_node(node_value)
 end
 
 ---@param node_value integer
-function M:compress_node(node_value)
+function M:collapse_node(node_value)
   assert(node_value, "cannot find node without node_value")
 
   local node = self.tree:find(node_value)
   assert(node, "cannot locate node with given node_value")
 
   EntryByIdentity[node.value].open = false
+end
+
+function M:collapse_all()
+  if not self.tree.root then return end
+
+  for _, child in ipairs(self.tree.root.children) do
+    self:_collapse_recursive(child)
+  end
+end
+
+---@param node TreeNode
+function M:_collapse_recursive(node)
+  local entry = EntryManager.get(node.value)
+  if entry:isdir() and entry.open then EntryByIdentity[node.value].open = false end
+
+  for _, child in ipairs(node.children or {}) do
+    self:_collapse_recursive(child)
+  end
 end
 
 ---@param parent_value integer
