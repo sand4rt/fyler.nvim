@@ -64,11 +64,8 @@ function Win:has_valid_winid() return type(self.winid) == "number" and api.nvim_
 ---@return boolean
 function Win:has_valid_bufnr() return type(self.bufnr) == "number" and api.nvim_buf_is_valid(self.bufnr) end
 
-function Win:is_visible()
-  local buffer_in_window = #fn.win_findbuf(self.bufnr) > 0
-  local window_in_tabpage = vim.tbl_contains(api.nvim_tabpage_list_wins(0), self.winid)
-  return buffer_in_window and window_in_tabpage
-end
+---@return boolean
+function Win:is_visible() return self:has_valid_winid() and self:has_valid_bufnr() end
 
 function Win:focus()
   local windows = fn.win_findbuf(self.bufnr)
