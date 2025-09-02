@@ -251,8 +251,6 @@ function M.synchronize(self)
     end
 
     if can_mutate then run_mutation(changes) end
-
-    api.nvim_exec_autocmds("User", { pattern = "DispatchRefresh" })
   end)
 end
 

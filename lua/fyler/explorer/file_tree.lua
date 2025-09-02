@@ -152,7 +152,6 @@ function M:_update(node)
   if not node_entry.open then return end
 
   local entries = fs.list_dir(node_entry.path)
-  if #entries == 0 then return end
 
   local entry_paths = {}
   for _, entry in ipairs(entries) do
