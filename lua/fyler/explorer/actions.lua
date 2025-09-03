@@ -244,6 +244,8 @@ local function run_mutation(changes)
   vim.schedule(function() api.nvim_exec_autocmds("User", { pattern = "DispatchRefresh" }) end)
 end
 
+local function has_changes(changes) return #changes.create + #changes.delete + #changes.move + #changes.copy > 0 end
+
 ---@param self Explorer
 function M.synchronize(self)
   return a.void_wrap(function()
@@ -253,7 +255,7 @@ function M.synchronize(self)
     local changes = self.file_tree:diff_with_lines(buf_lines)
 
     local can_mutate
-    if self.config.values.confirm_simple and can_bypass(changes) then
+    if not has_changes(changes) or self.config.values.confirm_simple and can_bypass(changes) then
       can_mutate = true
     else
       can_mutate = popups.permission:open(get_tbl(self, changes))

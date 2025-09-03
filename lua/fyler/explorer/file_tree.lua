@@ -62,12 +62,12 @@ end
 ---@param type string
 ---@param link string|nil
 function EntryManager.set(open, name, path, type, link)
-  if IdentityByPath[path] then return IdentityByPath[path] end
+  if IdentityByPath[link or path] then return IdentityByPath[path] end
 
   local identity = NextItemIdentity
   NextItemIdentity = NextItemIdentity + 1
   EntryByIdentity[identity] = Entry.new(identity, open, name, path, type, link)
-  IdentityByPath[path] = identity
+  IdentityByPath[link or path] = identity
 
   return identity
 end
@@ -309,7 +309,7 @@ function M:diff_with_lines(lines)
   local function traverse(node)
     local node_entry = EntryManager.get(node.value)
     not_seen[node.value] = true
-    hash_table[node.value] = node_entry.path
+    hash_table[node.value] = node_entry.link or node_entry.path
 
     if not node_entry.open then return end
 

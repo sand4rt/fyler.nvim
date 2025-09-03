@@ -98,7 +98,7 @@ M.Explorer = function(tbl, status_map, depth)
         },
         marks = (function()
           local line = {}
-          if item.type == "link" then
+          if item.link then
             table.insert(line, {
               hl = "FylerFSLink",
               str = string.format("@%s", item.path),
