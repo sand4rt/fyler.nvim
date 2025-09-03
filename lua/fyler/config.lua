@@ -55,6 +55,35 @@ local util = require "fyler.lib.util"
 ---@field track_current_buffer boolean
 ---@field win FylerConfigWin
 
+---@class FylerSetupOptionsHooks
+---@field on_delete fun(path: string)|nil
+---@field on_rename fun(src: string, dst: string)|nil
+---@field on_highlight fun(groups: table, palette: Palette)|nil
+
+---@class FylerSetupOptionsIndentScope
+---@field enabled boolean|nil
+---@field group string|nil
+---@field marker string|nil
+
+---@class FylerSetupOptionsWin
+---@field border FylerConfigWinBorder|string[]|nil
+---@field buf_opts table|nil
+---@field kind WinKind|nil
+---@field kind_presets table<WinKind|string, table>|nil
+---@field win_opts table|nil
+
+---@class FylerSetupOptions
+---@field hooks FylerSetupOptionsHooks|nil
+---@field icon_provider FylerConfigIconProvider|nil
+---@field mappings table<string, FylerConfigExplorerMapping>|nil
+---@field close_on_select boolean|nil
+---@field confirm_simple boolean|nil
+---@field default_explorer boolean|nil
+---@field git_status boolean|nil
+---@field indentscope FylerSetupOptionsIndentScope|nil
+---@field track_current_buffer boolean|nil
+---@field win FylerSetupOptionsWin|nil
+
 local M = {}
 
 ---@return FylerConfig
