@@ -63,6 +63,8 @@
   "A7Lavinraj/fyler.nvim",
   dependencies = { "nvim-mini/mini.icons" },
   branch = "stable",
+  ---@module 'fyler'
+  ---@type FylerSetupOptions
   opts = {}
 }
 ```
@@ -93,6 +95,8 @@ You can use default setup with `mini.icons`
 {
   "A7Lavinraj/fyler.nvim",
   dependencies = { "nvim-mini/mini.icons" },
+  ---@module 'fyler'
+  ---@type FylerSetupOptions
   opts = {}
 }
 ```
@@ -103,6 +107,8 @@ Or change to `nvim-web-devicons`
 {
   "A7Lavinraj/fyler.nvim",
   dependencies = { "nvim-tree/nvim-web-devicons" },
+  ---@module 'fyler'
+  ---@type FylerSetupOptions
   opts = { icon_provider = "nvim_web_devicons" }
 }
 ```
