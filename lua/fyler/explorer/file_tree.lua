@@ -25,7 +25,7 @@ function Entry.new(identity, open, name, path, type, link)
     identity = identity,
     open = open,
     name = name,
-    path = path,
+    path = vim.fn.fnameescape(path),
     type = type,
     link = link,
   }
