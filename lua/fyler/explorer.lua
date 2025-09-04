@@ -124,6 +124,7 @@ function M:open(dir, kind)
     user_autocmds = {
       ["DispatchRefresh"] = self:_action "dispatch_refresh"
     },
+    user_mappings = self.config.get_user_mappings(),
     width         = win.width,
     win_opts      = win.win_opts,
   }

@@ -38,6 +38,7 @@ local util = require "fyler.lib.util"
 ---@field top string|nil
 ---@field ui Ui
 ---@field user_autocmds table
+---@field user_mappings table
 ---@field width string
 ---@field win_opts table
 ---@field winid integer|nil
@@ -216,7 +217,13 @@ function Win:show()
   self.augroup = api.nvim_create_augroup("Fyler-augroup-" .. self.bufnr, { clear = true })
   self.namespace = api.nvim_create_namespace("Fyler-namespace-" .. self.bufnr)
 
-  for k, v in pairs(self.mappings or {}) do
+  for keys, v in pairs(self.mappings or {}) do
+    for _, k in ipairs(keys) do
+      vim.keymap.set("n", k, v, { buffer = self.bufnr, silent = true, noremap = true })
+    end
+  end
+
+  for k, v in pairs(self.user_mappings or {}) do
     vim.keymap.set("n", k, v, { buffer = self.bufnr, silent = true, noremap = true })
   end
 

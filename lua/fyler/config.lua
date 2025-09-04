@@ -44,21 +44,21 @@ local util = require "fyler.lib.util"
 ---@field win_opts table
 
 ---@class FylerConfig
----@field hooks FylerConfigHooks
----@field icon_provider FylerConfigIconProvider
----@field mappings table<string, FylerConfigExplorerMapping>
 ---@field close_on_select boolean
 ---@field confirm_simple boolean
 ---@field default_explorer boolean
 ---@field git_status boolean
+---@field hooks FylerConfigHooks
+---@field icon_provider FylerConfigIconProvider
 ---@field indentscope FylerConfigIndentScope
+---@field mappings table<string, FylerConfigExplorerMapping>
 ---@field track_current_buffer boolean
 ---@field win FylerConfigWin
 
 ---@class FylerSetupOptionsHooks
 ---@field on_delete fun(path: string)|nil
----@field on_rename fun(src: string, dst: string)|nil
 ---@field on_highlight fun(groups: table, palette: Palette)|nil
+---@field on_rename fun(src: string, dst: string)|nil
 
 ---@class FylerSetupOptionsIndentScope
 ---@field enabled boolean|nil
@@ -73,14 +73,14 @@ local util = require "fyler.lib.util"
 ---@field win_opts table|nil
 
 ---@class FylerSetupOptions
----@field hooks FylerSetupOptionsHooks|nil
----@field icon_provider FylerConfigIconProvider|nil
----@field mappings table<string, FylerConfigExplorerMapping>|nil
 ---@field close_on_select boolean|nil
 ---@field confirm_simple boolean|nil
 ---@field default_explorer boolean|nil
 ---@field git_status boolean|nil
+---@field hooks FylerSetupOptionsHooks|nil
+---@field icon_provider FylerConfigIconProvider|nil
 ---@field indentscope FylerSetupOptionsIndentScope|nil
+---@field mappings table<string, FylerConfigExplorerMapping>|nil
 ---@field track_current_buffer boolean|nil
 ---@field win FylerSetupOptionsWin|nil
 
@@ -183,12 +183,28 @@ end
 function M.get_reversed_maps()
   local reversed_maps = {}
   for k, v in pairs(M.values.mappings) do
-    if v then reversed_maps[v] = k end
+    if type(v) == "string" then
+      local current = reversed_maps[v]
+      if current then
+        table.insert(current, k)
+      else
+        reversed_maps[v] = { k }
+      end
+    end
   end
 
   setmetatable(reversed_maps, { __index = function() return "<nop>" end })
 
   return reversed_maps
+end
+
+function M.get_user_mappings()
+  local user_mappings = {}
+  for k, v in pairs(M.values.mappings or {}) do
+    if type(v) == "function" then user_mappings[k] = v end
+  end
+
+  return user_mappings
 end
 
 -- Type check for configuration option
