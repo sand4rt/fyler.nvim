@@ -36,7 +36,7 @@ function M.n_select(self)
         if self.config.values.close_on_select then self.win:hide() end
 
         api.nvim_set_current_win(self.win.old_winid)
-        api.nvim_win_call(self.win.old_winid, function() vim.cmd.edit(entry.path) end)
+        api.nvim_win_call(self.win.old_winid, function() vim.cmd.edit(vim.fn.fnameescape(entry.path)) end)
       end
     end
   end
