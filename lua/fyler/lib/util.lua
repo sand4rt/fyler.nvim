@@ -23,6 +23,10 @@ function M.if_any(tbl, fn) return vim.iter(tbl):any(fn) end
 ---@param fn function
 function M.if_all(tbl, fn) return vim.iter(tbl):all(fn) end
 
+---@param value any
+---@return table
+function M.tbl_wrap(value) return type(value) == "table" and value or { value } end
+
 ---@param tbl table
 ---@param fn function
 ---@return any

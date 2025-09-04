@@ -218,7 +218,7 @@ function Win:show()
   self.namespace = api.nvim_create_namespace("Fyler-namespace-" .. self.bufnr)
 
   for keys, v in pairs(self.mappings or {}) do
-    for _, k in ipairs(keys) do
+    for _, k in ipairs(util.tbl_wrap(keys)) do
       vim.keymap.set("n", k, v, { buffer = self.bufnr, silent = true, noremap = true })
     end
   end
