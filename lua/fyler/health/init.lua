@@ -98,7 +98,7 @@ local function get_config_schema()
     {
       path = "config.values.git_status",
       value = config.values.git_status,
-      expected = "boolean",
+      expected = "table",
     },
     {
       path = "config.values.indentscope",
