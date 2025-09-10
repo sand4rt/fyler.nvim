@@ -76,6 +76,12 @@ function EntryManager.set(open, name, path, type, link)
   return identity
 end
 
+function EntryManager.reset()
+  EntryByIdentity = {}
+  IdentityByPath = {}
+  NextItemIdentity = 1
+end
+
 ---@class FileTree
 ---@field tree Tree
 local M = {}
@@ -88,6 +94,8 @@ M.__index = M
 ---@param link string|nil
 ---@return FileTree
 function M.new(name, open, path, type, link)
+  EntryManager.reset()
+
   local instance = {
     tree = Tree.new(EntryManager.set(open, name, path, type, link)),
   }
