@@ -1,7 +1,6 @@
 local a = require "fyler.lib.async"
 local eu = require "fyler.explorer.util"
 local fs = require "fyler.lib.fs"
-local git = require "fyler.lib.git"
 local ui = require "fyler.explorer.ui"
 local util = require "fyler.lib.util"
 
@@ -157,26 +156,26 @@ local function get_tbl(self, tbl)
   local lines = {}
   if not self then return lines end
   if not vim.tbl_isempty(tbl.copy) then
-    table.insert(lines, { { str = "COPY", hl = "FylerConfirmYellow" } })
+    table.insert(lines, { { str = "COPY", hlg = "FylerConfirmYellow" } })
     for _, change in ipairs(tbl.copy) do
       table.insert(lines, {
         { str = "| " },
-        { str = fs.relpath(self:getcwd(), change.src), hl = "FylerConfirmGrey" },
+        { str = fs.relpath(self:getcwd(), change.src), hlg = "FylerConfirmGrey" },
         { str = " > " },
-        { str = fs.relpath(self:getcwd(), change.dst), hl = "FylerConfirmGrey" },
+        { str = fs.relpath(self:getcwd(), change.dst), hlg = "FylerConfirmGrey" },
       })
     end
     table.insert(lines, { { str = "" } })
   end
 
   if not vim.tbl_isempty(tbl.move) then
-    table.insert(lines, { { str = "MOVE", hl = "FylerConfirmYellow" } })
+    table.insert(lines, { { str = "MOVE", hlg = "FylerConfirmYellow" } })
     for _, change in ipairs(tbl.move) do
       table.insert(lines, {
         { str = "| " },
-        { str = fs.relpath(self:getcwd(), change.src), hl = "FylerConfirmGrey" },
+        { str = fs.relpath(self:getcwd(), change.src), hlg = "FylerConfirmGrey" },
         { str = " > " },
-        { str = fs.relpath(self:getcwd(), change.dst), hl = "FylerConfirmGrey" },
+        { str = fs.relpath(self:getcwd(), change.dst), hlg = "FylerConfirmGrey" },
       })
     end
 
@@ -184,11 +183,11 @@ local function get_tbl(self, tbl)
   end
 
   if not vim.tbl_isempty(tbl.create) then
-    table.insert(lines, { { str = "CREATE", hl = "FylerConfirmGreen" } })
+    table.insert(lines, { { str = "CREATE", hlg = "FylerConfirmGreen" } })
     for _, change in ipairs(tbl.create) do
       table.insert(lines, {
         { str = "| " },
-        { str = fs.relpath(self:getcwd(), change), hl = "FylerConfirmGrey" },
+        { str = fs.relpath(self:getcwd(), change), hlg = "FylerConfirmGrey" },
       })
     end
 
@@ -196,11 +195,11 @@ local function get_tbl(self, tbl)
   end
 
   if not vim.tbl_isempty(tbl.delete) then
-    table.insert(lines, { { str = "DELETE", hl = "FylerConfirmRed" } })
+    table.insert(lines, { { str = "DELETE", hlg = "FylerConfirmRed" } })
     for _, change in ipairs(tbl.delete) do
       table.insert(lines, {
         { str = "| " },
-        { str = fs.relpath(self:getcwd(), change), hl = "FylerConfirmGrey" },
+        { str = fs.relpath(self:getcwd(), change), hlg = "FylerConfirmGrey" },
       })
     end
 
@@ -258,7 +257,7 @@ function M.synchronize(self)
     if not has_changes(changes) or self.config.values.confirm_simple and can_bypass(changes) then
       can_mutate = true
     else
-      can_mutate = popups.permission:open(get_tbl(self, changes))
+      can_mutate = popups.permission.create(get_tbl(self, changes))
     end
 
     if can_mutate then run_mutation(changes) end
@@ -273,10 +272,9 @@ function M.dispatch_refresh(self)
 
     self.file_tree:update()
 
-    local status_map = self.config.values.git_status and git.status_map() or nil
     local cache_undolevels
     self.win.ui:render {
-      ui_lines = ui.Explorer(self.file_tree:totable().children, status_map),
+      ui_lines = ui(self.file_tree:totable()),
 
       before = function()
         cache_undolevels = vim.bo[self.win.bufnr].undolevels

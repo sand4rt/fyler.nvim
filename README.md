@@ -165,7 +165,19 @@ local defaults = {
   -- Changes explorer behaviour to hijack NETRW
   default_explorer = false,
   -- Changes git statuses visibility
-  git_status = true,
+  git_status = {
+    enabled = true,
+    symbols = {
+      Untracked = "●",
+      Added = "✚",
+      Modified = "●",
+      Deleted = "✖",
+      Renamed = "➜",
+      Copied = "C",
+      Conflict = "‼",
+      Ignored = "○",
+    },
+  },
   -- Changes Indentation marker properties
   indentscope = {
     enabled = true,

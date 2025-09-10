@@ -34,7 +34,19 @@ Fyler supports plenty of options to customize. Following are default values
     close_on_select = true,
     confirm_simple = false,
     default_explorer = false,
-    git_status = true,
+    git_status = {
+      enabled = true,
+      symbols = {
+        Untracked = "●",
+        Added = "✚",
+        Modified = "●",
+        Deleted = "✖",
+        Renamed = "➜",
+        Copied = "C",
+        Conflict = "‼",
+        Ignored = "○",
+      },
+    },
     indentscope = {
       enabled = true,
       group = "FylerIndentMarker",

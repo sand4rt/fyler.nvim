@@ -23,7 +23,7 @@ function M.is_valid_path(path)
   return stat_exists(clean_path)
 end
 
-function M.resolve_link(link)
+function M.reslink(link)
   local current_path = link
   local stat = uv.fs_stat(current_path)
 
@@ -38,7 +38,7 @@ function M.resolve_link(link)
   return nil, nil
 end
 
-function M.list_dir(path)
+function M.listdir(path)
   local stat = uv.fs_stat(path)
   if not (stat and stat.type == "directory") then return {} end
 
@@ -51,17 +51,24 @@ function M.list_dir(path)
     local entries = uv.fs_readdir(dir)
     if entries then
       for _, entry in ipairs(entries) do
-        local full_path = M.joinpath(path, entry.name)
-        local resolved_path, resolved_type = M.resolve_link(full_path)
-        local item = {
-          name = entry.name,
-          path = resolved_path or full_path,
-          type = resolved_type or entry.type,
-        }
+        local fullpath = M.joinpath(path, entry.name)
+        local item = { name = entry.name }
 
-        if entry.type == "link" then item.link = full_path end
-
-        if item.type == "directory" then item.open = false end
+        if entry.type == "link" then
+          local respath, restype = M.reslink(fullpath)
+          if respath and restype then
+            item.type = restype
+            item.path = respath
+            item.link = fullpath
+          else
+            item.type = "file"
+            item.path = fullpath
+            item.link = fullpath
+          end
+        else
+          item.type = entry.type
+          item.path = fullpath
+        end
 
         table.insert(items, item)
       end
@@ -102,7 +109,7 @@ function M.remove_recursive(path)
     to_delete:insert(1, item)
 
     if item.type == "directory" then
-      for _, entry in ipairs(M.list_dir(item.path)) do
+      for _, entry in ipairs(M.listdir(item.path)) do
         to_process:push(entry)
       end
     end
@@ -186,7 +193,7 @@ function M.copy_recursive(src_path, dst_path)
     if item.type == "directory" then
       M.create_dir_recursive(item.dst_path)
 
-      for _, entry in ipairs(M.list_dir(item.src_path)) do
+      for _, entry in ipairs(M.listdir(item.src_path)) do
         stack:push {
           src_path = entry.path,
           dst_path = M.joinpath(item.dst_path, entry.name),
