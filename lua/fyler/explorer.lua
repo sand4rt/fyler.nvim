@@ -58,6 +58,8 @@ function M:chdir(dir)
   assert(dir, "cannot change directory with empty path")
 
   self.file_tree = Tree.new(vim.fn.fnamemodify(dir, ":t"), true, dir, "directory")
+
+  if self.win then self.win:update_title(string.format(" %s ", dir)) end
 end
 
 ---@return boolean
@@ -118,7 +120,7 @@ function M:open(dir, kind)
     },
     render        = self:_action "dispatch_refresh",
     right         = win.right,
-    title         = win.title,
+    title         = string.format(" %s ", dir),
     title_pos     = win.title,
     top           = win.top,
     user_autocmds = {
