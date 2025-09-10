@@ -61,10 +61,11 @@ local function create_file_row(item, depth, width, icon, hl)
   local indentation = Text(string.rep(" ", 2 * depth))
 
   local is_dir = isdir(item)
-  local directory_highlight = "FylerFSDirectory"
+  local directory_icon_highlight = "FylerFSDirectoryIcon"
+  local directory_name_highlight = "FylerFSDirectoryName"
 
   local icon_text = ""
-  local icon_highlight = is_dir and directory_highlight or hl
+  local icon_highlight = is_dir and directory_icon_highlight or hl
 
   if icon and icon ~= "" then icon_text = icon .. " " end
 
@@ -74,7 +75,7 @@ local function create_file_row(item, depth, width, icon, hl)
 
   local identity_text = Text(string.format("/%05d", item.identity))
 
-  local name_highlight = item.git_hlg or (is_dir and directory_highlight) or nil
+  local name_highlight = item.git_hlg or (is_dir and directory_name_highlight) or nil
   local name_text = Text(" " .. item.name, {
     highlight = name_highlight,
   })
