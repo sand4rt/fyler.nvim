@@ -11,7 +11,7 @@ M.__index = M
 M.create = a.wrap(vim.schedule_wrap(function(message, on_choice)
   Popup.new()
     :enter()
-    :border("rounded")
+    :border(vim.fn.has "nvim-0.11" == 1 and vim.o.winborder or "rounded")
     :buf_opt("modifiable", false)
     :height("0.3rel")
     :kind("float")
