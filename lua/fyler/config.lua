@@ -53,6 +53,7 @@ local util = require "fyler.lib.util"
 ---@field default_explorer boolean
 ---@field git_status FylerConfigGitStatus
 ---@field hooks FylerConfigHooks
+---@field icon table<string, string>
 ---@field icon_provider FylerConfigIconProvider
 ---@field indentscope FylerConfigIndentScope
 ---@field mappings table<string, FylerConfigExplorerMapping>
@@ -93,23 +94,6 @@ local M = {}
 ---@return FylerConfig
 local function defaults()
   return {
-    hooks = {
-      on_delete = nil,
-      on_rename = nil,
-      on_highlight = nil,
-    },
-    icon_provider = "mini_icons",
-    mappings = {
-      ["q"] = "CloseView",
-      ["<CR>"] = "Select",
-      ["<C-t>"] = "SelectTab",
-      ["|"] = "SelectVSplit",
-      ["-"] = "SelectSplit",
-      ["^"] = "GotoParent",
-      ["="] = "GotoCwd",
-      ["."] = "GotoNode",
-      ["#"] = "CollapseAll",
-    },
     close_on_select = true,
     confirm_simple = false,
     default_explorer = false,
@@ -126,10 +110,32 @@ local function defaults()
         Ignored = "○",
       },
     },
+    hooks = {
+      on_delete = nil,
+      on_rename = nil,
+      on_highlight = nil,
+    },
+    icon = {
+      directory_collapsed = nil,
+      directory_empty = nil,
+      directory_expanded = nil,
+    },
+    icon_provider = "mini_icons",
     indentscope = {
       enabled = true,
       group = "FylerIndentMarker",
       marker = "│",
+    },
+    mappings = {
+      ["q"] = "CloseView",
+      ["<CR>"] = "Select",
+      ["<C-t>"] = "SelectTab",
+      ["|"] = "SelectVSplit",
+      ["-"] = "SelectSplit",
+      ["^"] = "GotoParent",
+      ["="] = "GotoCwd",
+      ["."] = "GotoNode",
+      ["#"] = "CollapseAll",
     },
     track_current_buffer = true,
     win = {

@@ -14,23 +14,6 @@ Fyler supports plenty of options to customize. Following are default values
 
 >lua
   {
-    hooks = {
-      on_delete = nil,
-      on_rename = nil,
-      on_highlight = nil,
-    },
-    icon_provider = "mini_icons",
-    mappings = {
-      ["q"] = "CloseView",
-      ["<CR>"] = "Select",
-      ["<C-t>"] = "SelectTab",
-      ["|"] = "SelectVSplit",
-      ["-"] = "SelectSplit",
-      ["^"] = "GotoParent",
-      ["="] = "GotoCwd",
-      ["."] = "GotoNode",
-      ["#"] = "CollapseAll",
-    },
     close_on_select = true,
     confirm_simple = false,
     default_explorer = false,
@@ -47,10 +30,32 @@ Fyler supports plenty of options to customize. Following are default values
         Ignored = "○",
       },
     },
+    hooks = {
+      on_delete = nil,
+      on_rename = nil,
+      on_highlight = nil,
+    },
+    icon = {
+      directory_collapsed = nil,
+      directory_empty = nil,
+      directory_expanded = nil,
+    },
+    icon_provider = "mini_icons",
     indentscope = {
       enabled = true,
       group = "FylerIndentMarker",
       marker = "│",
+    },
+    mappings = {
+      ["q"] = "CloseView",
+      ["<CR>"] = "Select",
+      ["<C-t>"] = "SelectTab",
+      ["|"] = "SelectVSplit",
+      ["-"] = "SelectSplit",
+      ["^"] = "GotoParent",
+      ["="] = "GotoCwd",
+      ["."] = "GotoNode",
+      ["#"] = "CollapseAll",
     },
     track_current_buffer = true,
     win = {

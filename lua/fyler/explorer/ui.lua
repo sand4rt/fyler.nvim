@@ -114,6 +114,16 @@ file_tree = UiComponent.new(function(node, width, depth)
   for _, item in ipairs(sorted_items) do
     local icon, hl = icon_provider(item.type, item.name)
 
+    if item.type == "directory" then
+      local icons = config.values.icon
+      local is_empty = item.open and item.children and #item.children == 0
+      local is_expanded = item.open or false
+
+      icon = is_empty and icons.directory_empty
+        or (is_expanded and icons.directory_expanded or icons.directory_collapsed)
+        or icon
+    end
+
     table.insert(children, create_file_row(item, depth, width, icon, hl))
 
     if item.children and #item.children > 0 then
