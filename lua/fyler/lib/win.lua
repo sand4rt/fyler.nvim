@@ -72,7 +72,22 @@ function Win:focus()
   local windows = fn.win_findbuf(self.bufnr)
   if not windows or not windows[1] then return end
 
+  self.old_winid = api.nvim_get_current_win()
+  self.old_bufnr = api.nvim_get_current_buf()
+
   api.nvim_set_current_win(windows[1])
+end
+
+function Win:update_config(config)
+  if not self:has_valid_winid() then return end
+
+  local old_config = api.nvim_win_get_config(self.winid)
+
+  api.nvim_win_set_config(self.winid, util.tbl_merge_force(old_config, config))
+end
+
+function Win:update_title(title)
+  if self.kind:match "^float" then self:update_config { title = title } end
 end
 
 function Win:config()
