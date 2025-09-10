@@ -1,7 +1,9 @@
 local Stack = require "fyler.lib.structs.stack"
 local Tree = require "fyler.lib.structs.tree"
+local config = require "fyler.config"
 local eu = require "fyler.explorer.util"
 local fs = require "fyler.lib.fs"
+local git = require "fyler.lib.git"
 local util = require "fyler.lib.util"
 
 ---@class Entry
@@ -11,6 +13,8 @@ local util = require "fyler.lib.util"
 ---@field path string
 ---@field type string
 ---@field link string|nil
+---@field git_sym string|nil
+---@field git_hlg string|nil
 local Entry = {}
 Entry.__index = Entry
 
@@ -154,6 +158,8 @@ end
 
 ---@param node_value integer|nil
 function M:update(node_value)
+  if config.values.git_status.enabled then git.refresh() end
+
   if node_value then
     local node = self.tree:find(node_value)
     if not node then return end
@@ -169,7 +175,7 @@ function M:_update(node)
   local node_entry = EntryManager.get(node.value)
   if not node_entry.open then return end
 
-  local entries = fs.list_dir(node_entry.path)
+  local entries = fs.listdir(node_entry.path)
 
   local entry_paths = {}
   for _, entry in ipairs(entries) do
@@ -185,12 +191,24 @@ function M:_update(node)
   for i = #node.children, 1, -1 do
     local child = node.children[i]
     local child_entry = EntryManager.get(child.value)
-    if not entry_paths[child_entry.path] then self.tree:delete(child.value) end
+    if not entry_paths[child_entry.path] then
+      self.tree:delete(child.value)
+    else
+      local sym, hlg = git.status(child_entry.path)
+      EntryByIdentity[child.value].git_sym = sym
+      EntryByIdentity[child.value].git_hlg = hlg
+    end
   end
 
   for _, entry in ipairs(entries) do
     if not child_paths[entry.path] then
-      self.tree:insert(node.value, EntryManager.set(false, entry.name, entry.path, entry.type, entry.link))
+      local identity = EntryManager.set(false, entry.name, entry.path, entry.type, entry.link)
+      local sym, hlg = git.status(entry.path)
+
+      EntryByIdentity[identity].git_sym = sym
+      EntryByIdentity[identity].git_hlg = hlg
+
+      self.tree:insert(node.value, identity)
     end
   end
 
@@ -253,6 +271,8 @@ function M:_totable(node)
     path = entry.path,
     link = entry.link,
     identity = node.value,
+    git_sym = entry.git_sym,
+    git_hlg = entry.git_hlg,
     children = {},
   }
 

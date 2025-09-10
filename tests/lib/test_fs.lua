@@ -89,7 +89,7 @@ T["remove_dir"] = function()
   cleanup_test_env()
 end
 
-T["list_dir"] = function()
+T["listdir"] = function()
   setup_test_env()
 
   local file1 = vim.fs.joinpath(TEST_DATA_DIR, "file1.txt")
@@ -100,7 +100,7 @@ T["list_dir"] = function()
   vim.fn.writefile({ "content" }, file2)
   vim.fn.mkdir(subdir, "p")
 
-  local items = fs.list_dir(TEST_DATA_DIR)
+  local items = fs.listdir(TEST_DATA_DIR)
   test.expect.equality(type(items), "table")
   test.expect.equality(#items, 3)
 
@@ -290,15 +290,15 @@ T["errors"] = function()
   cleanup_test_env()
 end
 
-T["resolve_link"] = function()
+T["reslink"] = function()
   setup_test_env()
 
   local target_file = vim.fs.joinpath(TEST_DATA_DIR, "target.txt")
   vim.fn.writefile({ "content" }, target_file)
 
-  local resolved_path, resolved_type = fs.resolve_link(target_file)
-  test.expect.equality(resolved_path, target_file)
-  test.expect.equality(resolved_type, "file")
+  local respath, restype = fs.reslink(target_file)
+  test.expect.equality(respath, target_file)
+  test.expect.equality(restype, "file")
 
   cleanup_test_env()
 end

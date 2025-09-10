@@ -1,6 +1,10 @@
 local log = require "fyler.log"
 local util = require "fyler.lib.util"
 
+---@class FylerConfigGitStatus
+---@field enabled boolean
+---@field symbols table<string, string>
+
 ---@class FylerConfigHooks
 ---@field on_delete fun(path: string)|nil
 ---@field on_rename fun(src: string, dst: string)|nil
@@ -47,7 +51,7 @@ local util = require "fyler.lib.util"
 ---@field close_on_select boolean
 ---@field confirm_simple boolean
 ---@field default_explorer boolean
----@field git_status boolean
+---@field git_status FylerConfigGitStatus
 ---@field hooks FylerConfigHooks
 ---@field icon_provider FylerConfigIconProvider
 ---@field indentscope FylerConfigIndentScope
@@ -76,7 +80,7 @@ local util = require "fyler.lib.util"
 ---@field close_on_select boolean|nil
 ---@field confirm_simple boolean|nil
 ---@field default_explorer boolean|nil
----@field git_status boolean|nil
+---@field git_status FylerConfigGitStatus|nil
 ---@field hooks FylerSetupOptionsHooks|nil
 ---@field icon_provider FylerConfigIconProvider|nil
 ---@field indentscope FylerSetupOptionsIndentScope|nil
@@ -109,7 +113,19 @@ local function defaults()
     close_on_select = true,
     confirm_simple = false,
     default_explorer = false,
-    git_status = true,
+    git_status = {
+      enabled = true,
+      symbols = {
+        Untracked = "●",
+        Added = "✚",
+        Modified = "●",
+        Deleted = "✖",
+        Renamed = "➜",
+        Copied = "C",
+        Conflict = "‼",
+        Ignored = "○",
+      },
+    },
     indentscope = {
       enabled = true,
       group = "FylerIndentMarker",
@@ -231,6 +247,7 @@ function M.setup(opts)
   opts = opts or {}
   check_type(opts, "table")
 
+  ---@type FylerConfig
   M.values = util.tbl_merge_force(defaults(), opts)
 
   local checks = {
@@ -243,7 +260,7 @@ function M.setup(opts)
     { M.values.close_on_select, "boolean" },
     { M.values.confirm_simple, "boolean" },
     { M.values.default_explorer, "boolean" },
-    { M.values.git_status, "boolean" },
+    { M.values.git_status, "table" },
     { M.values.indentscope, "table" },
     { M.values.track_current_buffer, "boolean" },
     { M.values.win, "table" },

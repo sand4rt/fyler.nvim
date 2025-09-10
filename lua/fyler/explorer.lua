@@ -122,7 +122,8 @@ function M:open(dir, kind)
     title_pos     = win.title,
     top           = win.top,
     user_autocmds = {
-      ["DispatchRefresh"] = self:_action "dispatch_refresh"
+      ["DispatchRefresh"] = self:_action "dispatch_refresh",
+      ["DrawIndentscope"] = self:_action "draw_indentscope"
     },
     user_mappings = self.config.get_user_mappings(),
     width         = win.width,

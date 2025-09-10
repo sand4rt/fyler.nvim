@@ -1,5 +1,8 @@
-local components = require "fyler.lib.ui.components"
+local UiComponent = require "fyler.lib.ui.component"
+local components = require "fyler.ui_components"
 local config = require "fyler.config"
+local Text = components.Text
+local Row = components.Row
 
 local icon_provider
 if type(config.values.icon_provider) == "function" then
@@ -8,116 +11,122 @@ else
   icon_provider = require("fyler.integrations.icon")[config.values.icon_provider]
 end
 
-local Line = components.Line
+local function isdir(node) return node.type == "directory" end
 
-local M = {}
+local function sort_nodes(nodes)
+  table.sort(nodes, function(x, y)
+    local x_is_dir = isdir(x)
+    local y_is_dir = isdir(y)
 
--- stylua: ignore start
-local git_status_hl = setmetatable({
-  ["  "] = "FylerGitAdded",
-  ["UU"] = "FylerGitConflict",
-  [" D"] = "FylerGitDeleted",
-  ["!!"] = "FylerGitIgnored",
-  [" M"] = "FylerGitModified",
-  ["R "] = "FylerGitRenamed",
-  ["M "] = "FylerGitStaged",
-  ["??"] = "FylerGitUntracked",
-  ["MM"] = "FylerGitUnstaged",
-}, {
-  __index = function()
-    return ""
-  end,
-})
--- stylua: ignore end
-
-local function get_sorted(tbl)
-  table.sort(tbl, function(x, y)
-    if x.type == "directory" and y.type ~= "directory" then
+    if x_is_dir and not y_is_dir then
       return true
-    elseif x.type ~= "directory" and y.type == "directory" then
+    elseif not x_is_dir and y_is_dir then
       return false
     else
       return x.name < y.name
     end
   end)
 
-  return tbl
+  return nodes
 end
 
----@param tbl table
----@param status_map table|nil
-M.Explorer = function(tbl, status_map, depth)
+local function calculate_line_width(depth, icon, identity, name)
+  local icon_part = (not icon or icon == "") and "" or icon .. " "
+  local identity_part = string.format("/%05d", identity)
+  local name_part = " " .. name
+
+  return (2 * depth) + #icon_part + #identity_part + #name_part
+end
+
+local function calc_file_tree_width(node, depth)
   depth = depth or 0
+  local max_width = 0
 
-  if not tbl then return {} end
+  for _, child in ipairs(node.children) do
+    local icon = icon_provider(child.type, child.name)
+    local width = calculate_line_width(depth, icon, child.identity, child.name)
 
-  local lines = {}
-  for _, item in ipairs(get_sorted(tbl)) do
+    max_width = math.max(max_width, width)
+
+    if child.children and #child.children > 0 then
+      local child_width = calc_file_tree_width(child, depth + 1)
+      max_width = math.max(max_width, child_width)
+    end
+  end
+
+  return max_width
+end
+
+local function create_file_row(item, depth, width, icon, hl)
+  local indentation = Text(string.rep(" ", 2 * depth))
+
+  local is_dir = isdir(item)
+  local directory_highlight = "FylerFSDirectory"
+
+  local icon_text = ""
+  local icon_highlight = is_dir and directory_highlight or hl
+
+  if icon and icon ~= "" then icon_text = icon .. " " end
+
+  local icon_component = Text(icon_text, {
+    highlight = icon_highlight,
+  })
+
+  local identity_text = Text(string.format("/%05d", item.identity))
+
+  local name_highlight = item.git_hlg or (is_dir and directory_highlight) or nil
+  local name_text = Text(" " .. item.name, {
+    highlight = name_highlight,
+  })
+
+  local git_text = nil
+  if item.git_sym and item.git_hlg then
+    git_text = Text(nil, {
+      virt_text = { { item.git_sym, item.git_hlg } },
+      col = width,
+    })
+  end
+
+  return Row {
+    indentation,
+    icon_component,
+    identity_text,
+    name_text,
+    git_text,
+  }
+end
+
+---@type UiComponent
+local file_tree
+---@param node table
+---@param width integer|nil
+---@param depth integer|nil
+file_tree = UiComponent.new(function(node, width, depth)
+  depth = depth or 0
+  width = width or calc_file_tree_width(node, depth)
+
+  if not node or not node.children then return { tag = "file_tree", children = {} } end
+
+  local children = {}
+  local sorted_items = sort_nodes(node.children)
+
+  for _, item in ipairs(sorted_items) do
     local icon, hl = icon_provider(item.type, item.name)
 
-    local git_symbol = (function()
-      if not status_map then return nil end
+    table.insert(children, create_file_row(item, depth, width, icon, hl))
 
-      if status_map[item.path] then return status_map[item.path] end
-
-      return nil
-    end)()
-
-    table.insert(
-      lines,
-      Line.new {
-        words = {
-          { str = string.rep("  ", depth) },
-          {
-            str = (icon == nil or icon == "") and "" or icon .. " ",
-            hl = (function()
-              if item.type == "directory" then
-                return "FylerFSDirectory"
-              else
-                return hl
-              end
-            end)(),
-          },
-          {
-            str = git_symbol and string.format("%s ", git_symbol) or "",
-            hl = git_status_hl[git_symbol],
-          },
-          { str = string.format("/%05d", item.identity) },
-          {
-            str = string.format(" %s", item.name),
-            hl = (function()
-              if git_symbol then
-                return git_status_hl[git_symbol]
-              elseif item.type == "directory" then
-                return "FylerFSDirectory"
-              else
-                return ""
-              end
-            end)(),
-          },
-        },
-        marks = (function()
-          local line = {}
-          if item.link then
-            table.insert(line, {
-              hl = "FylerFSLink",
-              str = string.format("@%s", item.path),
-            })
-          end
-
-          return line
-        end)(),
-      }
-    )
-
-    if item.children then
-      for _, line in ipairs(M.Explorer(item.children, status_map, depth + 1)) do
-        table.insert(lines, line)
+    if item.children and #item.children > 0 then
+      local child_tree = file_tree(item, width, depth + 1)
+      for _, child in ipairs(child_tree.children) do
+        table.insert(children, child)
       end
     end
   end
 
-  return lines
-end
+  return {
+    tag = "file_tree",
+    children = children,
+  }
+end)
 
-return M
+return file_tree
