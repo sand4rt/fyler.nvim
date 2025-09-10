@@ -139,25 +139,6 @@ add({
 
 ```lua
 local defaults = {
-  hooks = {
-    on_delete = nil, -- function(path) end
-    on_rename = nil, -- function(src_path, dst_path) end
-    on_highlight = nil -- function(hl_groups, palette) end
-  },
-  -- Changes icon provider
-  icon_provider = "mini_icons",
-  -- Changes mappings for associated view
-  mappings = {
-    ["q"] = "CloseView",
-    ["<CR>"] = "Select",
-    ["<C-t>"] = "SelectTab",
-    ["|"] = "SelectVSplit",
-    ["-"] = "SelectSplit",
-    ["^"] = "GotoParent",
-    ["="] = "GotoCwd",
-    ["."] = "GotoNode",
-    ["#"] = "CollapseAll",
-  },
   -- Changes explorer closing behaviour when a file get selected
   close_on_select = true,
   -- Changes explorer behaviour to auto confirm simple edits
@@ -178,11 +159,36 @@ local defaults = {
       Ignored = "○",
     },
   },
+  hooks = {
+    on_delete = nil, -- function(path) end
+    on_rename = nil, -- function(src_path, dst_path) end
+    on_highlight = nil -- function(hl_groups, palette) end
+  },
+  -- Custom icons for various directory states
+  icon = {
+    directory_collapsed = nil,
+    directory_empty = nil,
+    directory_expanded = nil,
+  },
+  -- Changes icon provider
+  icon_provider = "mini_icons",
   -- Changes Indentation marker properties
   indentscope = {
     enabled = true,
     group = "FylerIndentMarker",
     marker = "│",
+  },
+  -- Changes mappings for associated view
+  mappings = {
+    ["q"] = "CloseView",
+    ["<CR>"] = "Select",
+    ["<C-t>"] = "SelectTab",
+    ["|"] = "SelectVSplit",
+    ["-"] = "SelectSplit",
+    ["^"] = "GotoParent",
+    ["="] = "GotoCwd",
+    ["."] = "GotoNode",
+    ["#"] = "CollapseAll",
   },
   -- Auto current buffer tracking
   track_current_buffer = true,
