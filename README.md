@@ -37,7 +37,7 @@
   </h4>
   <img
     alt="Showcase"
-    src="https://github.com/user-attachments/assets/51d8d4dd-6b0a-4539-af65-84dc6714066c"
+    src="https://github.com/user-attachments/assets/f0e7e86f-88a7-488e-9309-4302f0b6fdf2"
   />
 </div>
 

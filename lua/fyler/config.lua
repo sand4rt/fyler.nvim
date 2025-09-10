@@ -182,7 +182,7 @@ local function defaults()
         cursorline = true,
         number = true,
         relativenumber = true,
-        winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatTitle",
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:FloatBorder",
         wrap = false,
       },
     },
