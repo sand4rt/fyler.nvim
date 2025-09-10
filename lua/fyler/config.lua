@@ -139,7 +139,7 @@ local function defaults()
     },
     track_current_buffer = true,
     win = {
-      border = "rounded",
+      border = vim.fn.has "nvim-0.11" == 1 and vim.o.winborder or "rounded",
       buf_opts = {
         filetype = "fyler",
         syntax = "fyler",
