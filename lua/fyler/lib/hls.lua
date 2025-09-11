@@ -84,7 +84,7 @@ function M.setup()
     FylerGitAdded        = { fg = palette.green },
     FylerGitConflict     = { fg = palette.red },
     FylerGitDeleted      = { fg = palette.red },
-    FylerGitIgnored      = { fg = palette.red },
+    FylerGitIgnored      = { fg = palette.grey },
     FylerGitModified     = { fg = palette.yellow },
     FylerGitRenamed      = { fg = palette.yellow },
     FylerGitStaged       = { fg = palette.green },
