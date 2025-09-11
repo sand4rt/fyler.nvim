@@ -51,7 +51,7 @@ function M.setup(options)
       return
     end
 
-    current:_action "try_focus_buffer" { file = file or vim.fn.expand "%:p" }
+    current:_action "track_buffer" { file = file or vim.fn.expand "%:p" }
   end
 end
 

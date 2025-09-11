@@ -16,7 +16,7 @@ end
 ---@param self Explorer
 function M.n_select(self)
   return function()
-    local indentity = eu.parse_identity(api.nvim_get_current_line())
+    local indentity = eu.parse_ref_id(api.nvim_get_current_line())
     if not indentity then return end
 
     local entry = self.file_tree:node_entry(indentity)
@@ -44,10 +44,10 @@ end
 ---@param self Explorer
 function M.n_select_tab(self)
   return function()
-    local identity = eu.parse_identity(api.nvim_get_current_line())
-    if not identity then return end
+    local ref_id = eu.parse_ref_id(api.nvim_get_current_line())
+    if not ref_id then return end
 
-    local entry = self.file_tree:node_entry(identity)
+    local entry = self.file_tree:node_entry(ref_id)
     if not entry:isdir() then
       if util.is_valid_winid(self.win.old_winid) then
         if self.config.values.close_on_select then self.win:hide() end
@@ -61,10 +61,10 @@ end
 ---@param self Explorer
 function M.n_select_v_split(self)
   return function()
-    local identity = eu.parse_identity(api.nvim_get_current_line())
-    if not identity then return end
+    local ref_id = eu.parse_ref_id(api.nvim_get_current_line())
+    if not ref_id then return end
 
-    local entry = self.file_tree:node_entry(identity)
+    local entry = self.file_tree:node_entry(ref_id)
     if not entry:isdir() then
       if util.is_valid_winid(self.win.old_winid) then
         if self.config.values.close_on_select then self.win:hide() end
@@ -79,10 +79,10 @@ end
 ---@param self Explorer
 function M.n_select_split(self)
   return function()
-    local identity = eu.parse_identity(api.nvim_get_current_line())
-    if not identity then return end
+    local ref_id = eu.parse_ref_id(api.nvim_get_current_line())
+    if not ref_id then return end
 
-    local entry = self.file_tree:node_entry(identity)
+    local entry = self.file_tree:node_entry(ref_id)
     if not entry:isdir() then
       if util.is_valid_winid(self.win.old_winid) then
         api.nvim_set_current_win(self.win.old_winid)
@@ -133,7 +133,7 @@ end
 ---@param self Explorer
 function M.n_goto_node(self)
   return function()
-    local indentity = eu.parse_identity(api.nvim_get_current_line())
+    local indentity = eu.parse_ref_id(api.nvim_get_current_line())
     if not indentity then return end
 
     local entry = self.file_tree:node_entry(indentity)
@@ -295,10 +295,10 @@ end
 function M.constrain_cursor(view)
   return function()
     local cur = api.nvim_get_current_line()
-    local identity = eu.parse_identity(cur)
-    if not identity then return end
+    local ref_id = eu.parse_ref_id(cur)
+    if not ref_id then return end
 
-    local _, ub = string.find(cur, identity)
+    local _, ub = string.find(cur, ref_id)
     if not view.win:has_valid_winid() then return end
 
     local row, col = util.unpack(api.nvim_win_get_cursor(view.win.winid))
@@ -307,7 +307,7 @@ function M.constrain_cursor(view)
 end
 
 ---@param self Explorer
-function M.try_focus_buffer(self)
+function M.track_buffer(self)
   return function(arg)
     if not fs.is_valid_path(arg.file) then return end
     if not util.is_valid_winid(self.win.winid) then return end
@@ -356,7 +356,7 @@ function M.draw_indentscope(self)
     if not self.win:has_valid_bufnr() then return end
 
     local cur_line = util.unpack(api.nvim_buf_get_lines(self.win.bufnr, ln - 1, ln, false))
-    local cur_indent = eu.parse_indentation(cur_line)
+    local cur_indent = eu.parse_indent_level(cur_line)
     if cur_indent == 0 then return end
 
     local indent_depth = math.floor(cur_indent * 0.5)

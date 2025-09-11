@@ -7,7 +7,7 @@ local git = require "fyler.lib.git"
 local util = require "fyler.lib.util"
 
 ---@class Entry
----@field identity integer
+---@field ref_id integer
 ---@field open boolean
 ---@field name string
 ---@field path string
@@ -18,15 +18,15 @@ local util = require "fyler.lib.util"
 local Entry = {}
 Entry.__index = Entry
 
----@param identity integer
+---@param ref_id integer
 ---@param open boolean
 ---@param name string
 ---@param path string
 ---@param type string
 ---@param link string|nil
-function Entry.new(identity, open, name, path, type, link)
+function Entry.new(ref_id, open, name, path, type, link)
   local instance = {
-    identity = identity,
+    ref_id = ref_id,
     open = open,
     name = name,
     path = path,
@@ -43,21 +43,21 @@ end
 function Entry:isdir() return self.type == "directory" end
 
 ---@type table<integer, Entry>
-local EntryByIdentity = {}
+local EntryByref_id = {}
 
 ---@type table<string, integer>
-local IdentityByPath = {}
+local ref_idByPath = {}
 
-local NextItemIdentity = 1
+local NextItemref_id = 1
 local EntryManager = {}
 
----@param identity integer
+---@param ref_id integer
 ---@return Entry
-function EntryManager.get(identity)
-  assert(identity, "cannot find entry without identity")
-  assert(EntryByIdentity[identity], "cannot locate entry with given identity")
+function EntryManager.get(ref_id)
+  assert(ref_id, "cannot find entry without ref_id")
+  assert(EntryByref_id[ref_id], "cannot locate entry with given ref_id")
 
-  return vim.deepcopy(EntryByIdentity[identity])
+  return vim.deepcopy(EntryByref_id[ref_id])
 end
 
 ---@param open boolean
@@ -66,20 +66,20 @@ end
 ---@param type string
 ---@param link string|nil
 function EntryManager.set(open, name, path, type, link)
-  if IdentityByPath[link or path] then return IdentityByPath[path] end
+  if ref_idByPath[link or path] then return ref_idByPath[path] end
 
-  local identity = NextItemIdentity
-  NextItemIdentity = NextItemIdentity + 1
-  EntryByIdentity[identity] = Entry.new(identity, open, name, path, type, link)
-  IdentityByPath[link or path] = identity
+  local ref_id = NextItemref_id
+  NextItemref_id = NextItemref_id + 1
+  EntryByref_id[ref_id] = Entry.new(ref_id, open, name, path, type, link)
+  ref_idByPath[link or path] = ref_id
 
-  return identity
+  return ref_id
 end
 
 function EntryManager.reset()
-  EntryByIdentity = {}
-  IdentityByPath = {}
-  NextItemIdentity = 1
+  EntryByref_id = {}
+  ref_idByPath = {}
+  NextItemref_id = 1
 end
 
 ---@class FileTree
@@ -123,7 +123,7 @@ function M:expand_node(node_value)
   local node = self.tree:find(node_value)
   assert(node, "cannot locate node with given node_value")
 
-  EntryByIdentity[node.value].open = true
+  EntryByref_id[node.value].open = true
 end
 
 ---@param node_value integer
@@ -133,7 +133,7 @@ function M:collapse_node(node_value)
   local node = self.tree:find(node_value)
   assert(node, "cannot locate node with given node_value")
 
-  EntryByIdentity[node.value].open = false
+  EntryByref_id[node.value].open = false
 end
 
 function M:collapse_all()
@@ -147,7 +147,7 @@ end
 ---@param node TreeNode
 function M:_collapse_recursive(node)
   local entry = EntryManager.get(node.value)
-  if entry:isdir() and entry.open then EntryByIdentity[node.value].open = false end
+  if entry:isdir() and entry.open then EntryByref_id[node.value].open = false end
 
   for _, child in ipairs(node.children or {}) do
     self:_collapse_recursive(child)
@@ -203,20 +203,20 @@ function M:_update(node)
       self.tree:delete(child.value)
     else
       local sym, hlg = git.status(child_entry.path)
-      EntryByIdentity[child.value].git_sym = sym
-      EntryByIdentity[child.value].git_hlg = hlg
+      EntryByref_id[child.value].git_sym = sym
+      EntryByref_id[child.value].git_hlg = hlg
     end
   end
 
   for _, entry in ipairs(entries) do
     if not child_paths[entry.path] then
-      local identity = EntryManager.set(false, entry.name, entry.path, entry.type, entry.link)
+      local ref_id = EntryManager.set(false, entry.name, entry.path, entry.type, entry.link)
       local sym, hlg = git.status(entry.path)
 
-      EntryByIdentity[identity].git_sym = sym
-      EntryByIdentity[identity].git_hlg = hlg
+      EntryByref_id[ref_id].git_sym = sym
+      EntryByref_id[ref_id].git_hlg = hlg
 
-      self.tree:insert(node.value, identity)
+      self.tree:insert(node.value, ref_id)
     end
   end
 
@@ -278,7 +278,7 @@ function M:_totable(node)
     type = entry.type,
     path = entry.path,
     link = entry.link,
-    identity = node.value,
+    ref_id = node.value,
     git_sym = entry.git_sym,
     git_hlg = entry.git_hlg,
     children = {},
@@ -299,14 +299,14 @@ end
 local function parse_lines(lines, root_entry)
   lines = util.filter_bl(lines)
 
-  local parsed_tree_root = { identity = root_entry.identity, path = root_entry.path, children = {} }
+  local parsed_tree_root = { ref_id = root_entry.ref_id, path = root_entry.path, children = {} }
   local parents = Stack.new()
   parents:push { node = parsed_tree_root, indentation = -1 }
 
   for _, line in ipairs(lines) do
     local name = eu.parse_name(line)
-    local identity = eu.parse_identity(line)
-    local indentation = eu.parse_indentation(line)
+    local ref_id = eu.parse_ref_id(line)
+    local indentation = eu.parse_indent_level(line)
 
     while true do
       local parent = parents:top()
@@ -316,7 +316,7 @@ local function parse_lines(lines, root_entry)
     end
 
     local parent = parents:top()
-    local node = { identity = identity, path = fs.joinpath(parent.node.path, name), children = {} }
+    local node = { ref_id = ref_id, path = fs.joinpath(parent.node.path, name), children = {} }
     parents:push { node = node, indentation = indentation }
     parent.node.type = "directory"
 
@@ -351,9 +351,9 @@ function M:diff_with_lines(lines)
 
   ---@param parsed_node table
   local function diffs(parsed_node)
-    if parsed_node.identity then
-      not_seen[parsed_node.identity] = false
-      table.insert(diff_table, { src = hash_table[parsed_node.identity], dst = parsed_node.path })
+    if parsed_node.ref_id then
+      not_seen[parsed_node.ref_id] = false
+      table.insert(diff_table, { src = hash_table[parsed_node.ref_id], dst = parsed_node.path })
     else
       table.insert(diff_table, { dst = parsed_node.path })
     end
@@ -365,8 +365,8 @@ function M:diff_with_lines(lines)
 
   diffs(parsed_tree)
 
-  for identity, path in pairs(hash_table) do
-    if not_seen[identity] then table.insert(diff_table, { src = path }) end
+  for ref_id, path in pairs(hash_table) do
+    if not_seen[ref_id] then table.insert(diff_table, { src = path }) end
   end
 
   local actions = { create = {}, delete = {}, move = {}, copy = {} }

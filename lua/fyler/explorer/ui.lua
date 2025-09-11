@@ -30,12 +30,12 @@ local function sort_nodes(nodes)
   return nodes
 end
 
-local function calculate_line_width(depth, icon, identity, name)
+local function calculate_line_width(depth, icon, ref_id, name)
   local icon_part = (not icon or icon == "") and "" or icon .. " "
-  local identity_part = string.format("/%05d", identity)
+  local ref_id_part = string.format("/%05d", ref_id)
   local name_part = " " .. name
 
-  return (2 * depth) + #icon_part + #identity_part + #name_part
+  return (2 * depth) + #icon_part + #ref_id_part + #name_part
 end
 
 local function calc_file_tree_width(node, depth)
@@ -44,7 +44,7 @@ local function calc_file_tree_width(node, depth)
 
   for _, child in ipairs(node.children) do
     local icon = icon_provider(child.type, child.name)
-    local width = calculate_line_width(depth, icon, child.identity, child.name)
+    local width = calculate_line_width(depth, icon, child.ref_id, child.name)
 
     max_width = math.max(max_width, width)
 
@@ -73,7 +73,7 @@ local function create_file_row(item, depth, width, icon, hl)
     highlight = icon_highlight,
   })
 
-  local identity_text = Text(string.format("/%05d", item.identity))
+  local ref_id_text = Text(string.format("/%05d", item.ref_id))
 
   local name_highlight = item.git_hlg or (is_dir and directory_name_highlight) or nil
   local name_text = Text(" " .. item.name, {
@@ -91,7 +91,7 @@ local function create_file_row(item, depth, width, icon, hl)
   return Row {
     indentation,
     icon_component,
-    identity_text,
+    ref_id_text,
     name_text,
     git_text,
   }

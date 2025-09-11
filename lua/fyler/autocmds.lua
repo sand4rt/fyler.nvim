@@ -45,7 +45,7 @@ function M.setup(config)
       desc = "Track current focused buffer in explorer",
       callback = function(arg)
         local instance = require("fyler.explorer").current()
-        if instance then util.debounce("focus_buffer", function() instance:_action "try_focus_buffer"(arg) end, 10) end
+        if instance then util.debounce("focus_buffer", function() instance:_action "track_buffer"(arg) end, 10) end
       end,
     })
   end
