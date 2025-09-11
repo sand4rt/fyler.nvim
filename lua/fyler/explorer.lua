@@ -58,6 +58,7 @@ function M:chdir(dir)
   assert(dir, "cannot change directory with empty path")
 
   self.file_tree = Tree.new(vim.fn.fnamemodify(dir, ":t"), true, dir, "directory")
+  self.file_tree:update()
 
   if self.win then self.win:update_title(string.format(" %s ", dir)) end
 end

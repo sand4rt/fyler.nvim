@@ -324,6 +324,7 @@ function M.try_focus_buffer(self)
 
     local current_dir = self:getcwd()
     if not current_dir then return end
+
     if not vim.startswith(arg.file, current_dir) then self:chdir(fn.fnamemodify(arg.file, ":h")) end
 
     local indentity = self.file_tree:focus_path(arg.file)
