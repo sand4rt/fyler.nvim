@@ -150,6 +150,45 @@ function M.n_goto_node(self)
 end
 
 ---@param self Explorer
+function M.n_collapse_node(self)
+  return function()
+    local ref_id = eu.parse_ref_id(api.nvim_get_current_line())
+    if not ref_id then return end
+
+    local entry = self.file_tree:node_entry(ref_id)
+    if not entry then return end
+
+    -- should not collapse root, so get it's id
+    local root_id = self.file_tree.tree.root and self.file_tree.tree.root.value
+    if entry:isdir() and ref_id == root_id then return end
+
+    local collapse_target = self.file_tree:find_parent(ref_id)
+    if not collapse_target then return end
+    if collapse_target == root_id then return end
+    local focus_ref_id = collapse_target
+
+    self.file_tree:collapse_node(collapse_target)
+
+    api.nvim_exec_autocmds("User", {
+      pattern = "DispatchRefresh",
+      data = {
+        after = function()
+          if not self.win:has_valid_winid() then return end
+          local marker = string.format("/%05d", focus_ref_id)
+          local lines = api.nvim_buf_get_lines(self.win.bufnr, 0, -1, false)
+          for ln, line in ipairs(lines) do
+            if line:find(marker, 1, true) then
+              api.nvim_win_set_cursor(self.win.winid, { ln, 0 })
+              break
+            end
+          end
+        end,
+      },
+    })
+  end
+end
+
+---@param self Explorer
 ---@param tbl table
 ---@return table
 local function get_tbl(self, tbl)
