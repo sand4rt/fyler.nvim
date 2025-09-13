@@ -60,7 +60,7 @@ function M.refresh()
   local dir = worktree_root()
   if not dir then return end
 
-  local out = system { "git", "status", "-z", "--porcelain", "--ignored" }
+  local out = system { "git", "status", "-z", "--porcelain" }
   if not out.stdout then return end
 
   local status_list = util.filter_bl(vim.split(out.stdout, "\0"))
