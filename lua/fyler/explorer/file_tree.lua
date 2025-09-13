@@ -136,6 +136,17 @@ function M:collapse_node(node_value)
   EntryByref_id[node.value].open = false
 end
 
+---@param node_value integer
+function M:find_parent(node_value)
+  assert(node_value, "cannot find node without node_value")
+
+  local node = self.tree:find(node_value)
+  assert(node, "cannot locate node with given node_value")
+
+  if not node.parent then return nil end
+  return node.parent.value
+end
+
 function M:collapse_all()
   if not self.tree.root then return end
 

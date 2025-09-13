@@ -111,6 +111,7 @@ function M:open(dir, kind)
     mappings      = {
       [reversed_maps["CloseView"]]    = self:_action "n_close",
       [reversed_maps["CollapseAll"]]  = self:_action "n_collapse_all",
+      [reversed_maps["CollapseNode"]] = self:_action "n_collapse_node",
       [reversed_maps["GotoCwd"]]      = self:_action "n_goto_cwd",
       [reversed_maps["GotoNode"]]     = self:_action "n_goto_node",
       [reversed_maps["GotoParent"]]   = self:_action "n_goto_parent",

@@ -56,6 +56,7 @@ Fyler supports plenty of options to customize. Following are default values
       ["="] = "GotoCwd",
       ["."] = "GotoNode",
       ["#"] = "CollapseAll",
+      ["<BS>"] = "CollapseNode",
     },
     track_current_buffer = true,
     win = {
