@@ -189,6 +189,7 @@ local defaults = {
     ["="] = "GotoCwd",
     ["."] = "GotoNode",
     ["#"] = "CollapseAll",
+    ["<BS>"] = "CollapseNode",
   },
   -- Auto current buffer tracking
   track_current_buffer = true,

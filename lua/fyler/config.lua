@@ -136,6 +136,7 @@ local function defaults()
       ["="] = "GotoCwd",
       ["."] = "GotoNode",
       ["#"] = "CollapseAll",
+      ["<BS>"] = "CollapseNode",
     },
     track_current_buffer = true,
     win = {
