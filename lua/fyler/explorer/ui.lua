@@ -111,7 +111,7 @@ file_tree = UiComponent.new(function(node, width, depth)
   local sorted_items = sort_nodes(node.children)
 
   for _, item in ipairs(sorted_items) do
-    local icon, hl = icon_provider(item.type, item.name)
+    local icon, hl = icon_provider(item.type, item.path)
 
     table.insert(children, create_file_row(item, depth, width, icon, hl))
 
