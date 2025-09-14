@@ -164,10 +164,16 @@ function M.n_collapse_node(self)
 
     local collapse_target = self.file_tree:find_parent(ref_id)
     if not collapse_target then return end
-    if collapse_target == root_id then return end
-    local focus_ref_id = collapse_target
+    if collapse_target == root_id and not entry.open then return end
+    local focus_ref_id
 
-    self.file_tree:collapse_node(collapse_target)
+    if entry:isdir() and entry.open then
+      self.file_tree:collapse_node(ref_id)
+      focus_ref_id = ref_id
+    else
+      self.file_tree:collapse_node(collapse_target)
+      focus_ref_id = collapse_target
+    end
 
     api.nvim_exec_autocmds("User", {
       pattern = "DispatchRefresh",
