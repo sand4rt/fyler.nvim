@@ -194,61 +194,172 @@ function M.n_collapse_node(self)
   end
 end
 
+local function get_parent_dir(path) return vim.fn.fnamemodify(path, ":h") end
+
+local function is_directory(path) return vim.fn.isdirectory(path) == 1 end
+
+local function sort_by_depth(paths, reverse)
+  table.sort(paths, function(a, b)
+    local depth_a = select(2, string.gsub(a, "/", ""))
+    local depth_b = select(2, string.gsub(b, "/", ""))
+    if reverse then
+      return depth_a > depth_b
+    else
+      return depth_a < depth_b
+    end
+  end)
+  return paths
+end
+
+local function get_ordered_operations(changes)
+  local operations = {}
+  local deleted_paths = {}
+
+  for _, change in ipairs(changes.delete) do
+    deleted_paths[change] = true
+  end
+
+  for _, change in ipairs(changes.move) do
+    deleted_paths[change.src] = true
+  end
+
+  local files_to_delete = {}
+  for _, change in ipairs(changes.delete) do
+    if not is_directory(change) then table.insert(files_to_delete, change) end
+  end
+  sort_by_depth(files_to_delete, true)
+
+  for _, change in ipairs(files_to_delete) do
+    table.insert(operations, { type = "delete", path = change })
+  end
+
+  local dirs_to_create = {}
+  local processed_dirs = {}
+
+  local all_destinations = {}
+
+  for _, change in ipairs(changes.create) do
+    if is_directory(change) then
+      table.insert(all_destinations, change)
+    else
+      table.insert(all_destinations, get_parent_dir(change))
+    end
+  end
+
+  for _, change in ipairs(changes.move) do
+    table.insert(all_destinations, get_parent_dir(change.dst))
+  end
+
+  for _, change in ipairs(changes.copy) do
+    table.insert(all_destinations, get_parent_dir(change.dst))
+  end
+
+  for _, dest in ipairs(all_destinations) do
+    local current = dest
+    while current and current ~= "." and current ~= "/" and not processed_dirs[current] do
+      if not vim.fn.isdirectory(current) == 1 and not deleted_paths[current] then
+        table.insert(dirs_to_create, current)
+        processed_dirs[current] = true
+      end
+      current = get_parent_dir(current)
+    end
+  end
+
+  sort_by_depth(dirs_to_create, false)
+
+  for _, dir in ipairs(dirs_to_create) do
+    table.insert(operations, { type = "create", path = dir })
+  end
+
+  for _, change in ipairs(changes.create) do
+    if not processed_dirs[change] then table.insert(operations, { type = "create", path = change }) end
+  end
+
+  for _, change in ipairs(changes.move) do
+    table.insert(operations, { type = "move", src = change.src, dst = change.dst })
+  end
+
+  for _, change in ipairs(changes.copy) do
+    table.insert(operations, { type = "copy", src = change.src, dst = change.dst })
+  end
+
+  local dirs_to_delete = {}
+  for _, change in ipairs(changes.delete) do
+    if is_directory(change) then table.insert(dirs_to_delete, change) end
+  end
+  sort_by_depth(dirs_to_delete, true)
+
+  for _, change in ipairs(dirs_to_delete) do
+    table.insert(operations, { type = "delete", path = change })
+  end
+
+  return operations
+end
+
 ---@param self Explorer
 ---@param tbl table
 ---@return table
 local function get_tbl(self, tbl)
   local lines = {}
   if not self then return lines end
-  if not vim.tbl_isempty(tbl.copy) then
-    table.insert(lines, { { str = "COPY", hlg = "FylerConfirmYellow" } })
-    for _, change in ipairs(tbl.copy) do
-      table.insert(lines, {
-        { str = "| " },
-        { str = fs.relpath(self:getcwd(), change.src), hlg = "FylerConfirmGrey" },
-        { str = " > " },
-        { str = fs.relpath(self:getcwd(), change.dst), hlg = "FylerConfirmGrey" },
-      })
+
+  local ordered_operations = get_ordered_operations(tbl)
+
+  local grouped_ops = {}
+  local seen_types = {}
+
+  for _, op in ipairs(ordered_operations) do
+    if not grouped_ops[op.type] then
+      grouped_ops[op.type] = {}
+      table.insert(seen_types, op.type)
     end
-    table.insert(lines, { { str = "" } })
+    table.insert(grouped_ops[op.type], op)
   end
 
-  if not vim.tbl_isempty(tbl.move) then
-    table.insert(lines, { { str = "MOVE", hlg = "FylerConfirmYellow" } })
-    for _, change in ipairs(tbl.move) do
-      table.insert(lines, {
-        { str = "| " },
-        { str = fs.relpath(self:getcwd(), change.src), hlg = "FylerConfirmGrey" },
-        { str = " > " },
-        { str = fs.relpath(self:getcwd(), change.dst), hlg = "FylerConfirmGrey" },
-      })
+  for _, op_type in ipairs(seen_types) do
+    local ops = grouped_ops[op_type]
+
+    if op_type == "delete" then
+      table.insert(lines, { { str = "DELETE", hlg = "FylerConfirmRed" } })
+      for _, op in ipairs(ops) do
+        table.insert(lines, {
+          { str = "| " },
+          { str = fs.relpath(self:getcwd(), op.path), hlg = "FylerConfirmGrey" },
+        })
+      end
+      table.insert(lines, { { str = "" } })
+    elseif op_type == "create" then
+      table.insert(lines, { { str = "CREATE", hlg = "FylerConfirmGreen" } })
+      for _, op in ipairs(ops) do
+        table.insert(lines, {
+          { str = "| " },
+          { str = fs.relpath(self:getcwd(), op.path), hlg = "FylerConfirmGrey" },
+        })
+      end
+      table.insert(lines, { { str = "" } })
+    elseif op_type == "move" then
+      table.insert(lines, { { str = "MOVE", hlg = "FylerConfirmYellow" } })
+      for _, op in ipairs(ops) do
+        table.insert(lines, {
+          { str = "| " },
+          { str = fs.relpath(self:getcwd(), op.src), hlg = "FylerConfirmGrey" },
+          { str = " > " },
+          { str = fs.relpath(self:getcwd(), op.dst), hlg = "FylerConfirmGrey" },
+        })
+      end
+      table.insert(lines, { { str = "" } })
+    elseif op_type == "copy" then
+      table.insert(lines, { { str = "COPY", hlg = "FylerConfirmYellow" } })
+      for _, op in ipairs(ops) do
+        table.insert(lines, {
+          { str = "| " },
+          { str = fs.relpath(self:getcwd(), op.src), hlg = "FylerConfirmGrey" },
+          { str = " > " },
+          { str = fs.relpath(self:getcwd(), op.dst), hlg = "FylerConfirmGrey" },
+        })
+      end
+      table.insert(lines, { { str = "" } })
     end
-
-    table.insert(lines, { { str = "" } })
-  end
-
-  if not vim.tbl_isempty(tbl.create) then
-    table.insert(lines, { { str = "CREATE", hlg = "FylerConfirmGreen" } })
-    for _, change in ipairs(tbl.create) do
-      table.insert(lines, {
-        { str = "| " },
-        { str = fs.relpath(self:getcwd(), change), hlg = "FylerConfirmGrey" },
-      })
-    end
-
-    table.insert(lines, { { str = "" } })
-  end
-
-  if not vim.tbl_isempty(tbl.delete) then
-    table.insert(lines, { { str = "DELETE", hlg = "FylerConfirmRed" } })
-    for _, change in ipairs(tbl.delete) do
-      table.insert(lines, {
-        { str = "| " },
-        { str = fs.relpath(self:getcwd(), change), hlg = "FylerConfirmGrey" },
-      })
-    end
-
-    table.insert(lines, { { str = "" } })
   end
 
   return lines
@@ -269,20 +380,18 @@ local function can_bypass(changes)
 end
 
 local function run_mutation(changes)
-  for _, change in ipairs(changes.copy) do
-    fs.copy(change.src, change.dst)
-  end
+  local ordered_operations = get_ordered_operations(changes)
 
-  for _, change in ipairs(changes.move) do
-    fs.move(change.src, change.dst)
-  end
-
-  for _, change in ipairs(changes.create) do
-    fs.create(change)
-  end
-
-  for _, change in ipairs(changes.delete) do
-    fs.delete(change)
+  for _, op in ipairs(ordered_operations) do
+    if op.type == "copy" then
+      fs.copy(op.src, op.dst)
+    elseif op.type == "move" then
+      fs.move(op.src, op.dst)
+    elseif op.type == "create" then
+      fs.create(op.path)
+    elseif op.type == "delete" then
+      fs.delete(op.path)
+    end
   end
 
   vim.schedule(function() api.nvim_exec_autocmds("User", { pattern = "DispatchRefresh" }) end)
