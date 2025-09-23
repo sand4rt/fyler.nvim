@@ -14,14 +14,9 @@ function M.abspath(path) return vim.fs.abspath(path) end
 
 function M.relpath(base, path) return vim.fs.relpath(base, path) end
 
-local function stat_exists(path) return not not uv.fs_stat(path) end
+local function stat_exists(path) return not not select(1, uv.fs_stat(path)) end
 
 function M.exists(path) return stat_exists(path) end
-
-function M.is_valid_path(path)
-  local clean_path = path:gsub("^fyler://", "")
-  return stat_exists(clean_path)
-end
 
 function M.reslink(link)
   local current_path = link

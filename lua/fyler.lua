@@ -1,39 +1,32 @@
 local M = {}
 
--- A local variable which prevents "Fyler.nvim" to re-setup
 local did_setup = false
 
--- Setup function setup various plugin components, Like config, autocommands, hooks and highlights.
--- It also exposes some "Fyler.nvim" APIS
----@param options FylerConfig
-function M.setup(options)
+---@param opts FylerConfig
+function M.setup(opts)
   if vim.fn.has "nvim-0.11" ~= 1 then return vim.notify "Fyler requires at least NVIM 0.11" end
 
-  -- Early return if already been setuped
   if did_setup then return end
   -- Overwrite default configuration before setuping other components
   local config = require "fyler.config"
-  config.setup(options)
+  config.setup(opts)
 
   require("fyler.autocmds").setup(config)
   require("fyler.hooks").setup(config)
   require("fyler.lib.hls").setup()
 
-  -- Mark setup as completed
   did_setup = true
 
   local explorer = require "fyler.explorer"
   local fs = require "fyler.lib.fs"
-  local log = require "fyler.log"
+  local util = require "fyler.lib.util"
 
-  -- "Fyler.nvim" API to launch explorer with defined options
   M.open = vim.schedule_wrap(function(opts)
     local dir = opts.dir or fs.cwd()
     local kind = opts.kind or config.values.win.kind
     local instance = explorer.instance(dir)
     local current = explorer.current()
-
-    if current and (current.dir ~= dir or current.win.kind ~= kind) then current:_action "n_close"() end
+    if current and (current.dir ~= dir or current.win.kind ~= kind) then current:close() end
 
     if instance then
       instance:open(dir, kind)
@@ -42,16 +35,12 @@ function M.setup(options)
     end
   end)
 
-  -- "Fyler.nvim" API to track (given or current) buffer
-  ---@param file string|nil
-  M.track_buffer = function(file)
+  ---@param name string|nil
+  M.track_buffer = function(name)
     local current = explorer.current()
-    if not current then
-      log.error "No existing explorer"
-      return
-    end
+    if not current then return end
 
-    current:_action "track_buffer" { file = file or vim.fn.expand "%:p" }
+    util.debounce("focus_buffer", 10, function() current:track_buffer(name or vim.fn.expand "%:p") end)
   end
 end
 

@@ -128,9 +128,9 @@ end
 local running = {}
 
 ---@param name string
----@param fn function
 ---@param timeout integer
-function M.debounce(name, fn, timeout)
+---@param fn function
+function M.debounce(name, timeout, fn)
   if running[name] then running[name]:stop() end
 
   running[name] = vim.defer_fn(function()

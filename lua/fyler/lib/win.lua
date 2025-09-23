@@ -68,6 +68,19 @@ function Win:has_valid_bufnr() return type(self.bufnr) == "number" and api.nvim_
 ---@return boolean
 function Win:is_visible() return self:has_valid_winid() and self:has_valid_bufnr() end
 
+---@return integer|nil, integer|nil
+function Win:get_cursor()
+  if not self:has_valid_winid() then return end
+
+  return util.unpack(api.nvim_win_get_cursor(self.winid))
+end
+
+---@param row integer
+---@param col integer
+function Win:set_cursor(row, col)
+  if self:has_valid_winid() then api.nvim_win_set_cursor(self.winid, { row, col }) end
+end
+
 function Win:focus()
   local windows = fn.win_findbuf(self.bufnr)
   if not windows or not windows[1] then return end

@@ -1,5 +1,9 @@
 local M = {}
 
+---@param path string|nil
+---@return boolean
+function M.is_protocol_path(path) return path and (not not path:match "^fyler://") or false end
+
 ---@param str string
 ---@return integer|nil
 function M.parse_ref_id(str) return tonumber(str:match "/(%d+)") end
