@@ -250,6 +250,20 @@ fyler.open({ dir = "~/" })
 fyler.open({ kind = "split_left_most" })
 ```
 
+## Telescope extension
+```lua
+local telescope = require "telescope"
+telescope.setup {
+  extensions = {
+    fyler_zoxide = {
+      ...
+    }
+  }
+}
+
+telescope.load_extension "fyler_zoxide"
+```
+
 ## TODOS
 
 - [x] Basic operations `CREATE | DELETE | MOVE | COPY`
@@ -258,6 +272,7 @@ fyler.open({ kind = "split_left_most" })
 - [x] LSP integration
 - [x] NETRW Hijacking
 - [x] Public APIs
+- [x] Telescope integration
 - [x] Track current buffer
 - [x] User command
 - [ ] File system watching
