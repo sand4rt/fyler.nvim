@@ -11,6 +11,7 @@ function Popup.new()
   local instance = {
     config = {
       buf_opts = {},
+      win_opts = {},
       mappings = {},
     },
   }
@@ -30,6 +31,13 @@ end
 ---@param value any
 function Popup:buf_opt(option, value)
   self.config.buf_opts[option] = value
+  return self
+end
+
+---@param option string
+---@param value any
+function Popup:win_opt(option, value)
+  self.config.win_opts[option] = value
   return self
 end
 
