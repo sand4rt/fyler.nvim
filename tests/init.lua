@@ -17,7 +17,9 @@ local function ensure_install(repo)
   if not path_exists(install_path) then
     vim.system({ "git", "clone", "--depth=1", "git@github.com:" .. repo .. ".git", install_path }):wait()
 
-    if vim.v.shell_error > 0 then return print("[FYLER.NVIM]: Failed to clone '" .. repo .. "'") end
+    if vim.v.shell_error > 0 then
+      return print("[FYLER.NVIM]: Failed to clone '" .. repo .. "'")
+    end
   end
 
   vim.opt.runtimepath:prepend(install_path)
@@ -30,7 +32,9 @@ local function run_tests()
 
   require("mini.test").run {
     collect = {
-      find_files = function() return vim.fn.globpath("tests", "**/test_*.lua", true, true) end,
+      find_files = function()
+        return vim.fn.globpath("tests", "**/test_*.lua", true, true)
+      end,
     },
   }
 end

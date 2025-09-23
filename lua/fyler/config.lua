@@ -216,7 +216,11 @@ function M.get_reversed_maps()
     end
   end
 
-  setmetatable(reversed_maps, { __index = function() return "<nop>" end })
+  setmetatable(reversed_maps, {
+    __index = function()
+      return "<nop>"
+    end,
+  })
 
   return reversed_maps
 end
@@ -224,7 +228,9 @@ end
 function M.get_user_mappings()
   local user_mappings = {}
   for k, v in pairs(M.values.mappings or {}) do
-    if type(v) == "function" then user_mappings[k] = v end
+    if type(v) == "function" then
+      user_mappings[k] = v
+    end
   end
 
   return user_mappings
@@ -237,14 +243,18 @@ end
 local function check_type(value, ref, allow_nil)
   local are_matched
   if type(ref) == "table" then
-    are_matched = util.if_any(ref, function(x) return type(value) == x end)
+    are_matched = util.if_any(ref, function(x)
+      return type(value) == x
+    end)
   elseif type(value) == ref then
     are_matched = true
   else
     are_matched = false
   end
 
-  if are_matched or (ref == "callable" and vim.is_callable(value)) or (allow_nil and value == nil) then return end
+  if are_matched or (ref == "callable" and vim.is_callable(value)) or (allow_nil and value == nil) then
+    return
+  end
 
   log.warn "[fyler.nvim] Your configuration might have some problems, Please run ':checkhealth fyler' for more details"
 end

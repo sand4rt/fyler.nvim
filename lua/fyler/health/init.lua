@@ -22,7 +22,9 @@ local type_validator = {
 
     if type(expected) == "table" then
       for _, exp_type in ipairs(expected) do
-        if value_type == exp_type then return true end
+        if value_type == exp_type then
+          return true
+        end
       end
       return false
     end
@@ -32,12 +34,16 @@ local type_validator = {
 
   ---@param value any
   ---@return boolean
-  is_callable = function(value) return vim.is_callable and vim.is_callable(value) or false end,
+  is_callable = function(value)
+    return vim.is_callable and vim.is_callable(value) or false
+  end,
 
   ---@param expected string|string[]
   ---@return string
   format_expected_types = function(expected)
-    if type(expected) == "table" then return table.concat(expected, " | ") end
+    if type(expected) == "table" then
+      return table.concat(expected, " | ")
+    end
     return expected
   end,
 }
@@ -115,7 +121,9 @@ local function get_config_schema()
       value = config.values.win,
       expected = "table",
       validator = function(value)
-        if type(value) == "table" then return true end
+        if type(value) == "table" then
+          return true
+        end
         return false
       end,
     },
@@ -137,7 +145,9 @@ local function validate_config_item(check)
     end
   end
 
-  if expected == "function" and type_validator.is_callable(value) then return true end
+  if expected == "function" and type_validator.is_callable(value) then
+    return true
+  end
 
   if not type_validator.is_valid_type(value, expected) then
     return false,
@@ -184,7 +194,9 @@ function M.check()
     ok "Configuration validated successfully"
   else
     local summary = string.format("Configuration validation completed with %d error(s)", error_count)
-    if warning_count > 0 then summary = summary .. string.format(" and %d warning(s)", warning_count) end
+    if warning_count > 0 then
+      summary = summary .. string.format(" and %d warning(s)", warning_count)
+    end
 
     error(summary)
   end

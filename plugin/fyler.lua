@@ -12,14 +12,17 @@ end, {
   nargs = "*",
   complete = function(arglead, cmdline)
     if arglead:find "^kind=" then
-      return util.tbl_map(
-        vim.tbl_keys(require("fyler.config").values.win.kind_presets),
-        function(kind_preset) return string.format("kind=%s", kind_preset) end
-      )
+      return util.tbl_map(vim.tbl_keys(require("fyler.config").values.win.kind_presets), function(kind_preset)
+        return string.format("kind=%s", kind_preset)
+      end)
     end
 
-    if arglead:find "^dir=" then return { "dir=" .. (vim.uv or vim.loop).cwd() } end
+    if arglead:find "^dir=" then
+      return { "dir=" .. (vim.uv or vim.loop).cwd() }
+    end
 
-    return util.tbl_filter({ "kind=", "dir=" }, function(arg) return cmdline:match(arg) == nil end)
+    return util.tbl_filter({ "kind=", "dir=" }, function(arg)
+      return cmdline:match(arg) == nil
+    end)
   end,
 })

@@ -31,10 +31,14 @@ end
 
 ---@param dir string|nil
 ---@return Explorer|nil
-function M.instance(dir) return instances[dir] end
+function M.instance(dir)
+  return instances[dir]
+end
 
 ---@return Explorer|nil
-function M.current() return M.instance(recentdir) end
+function M.current()
+  return M.instance(recentdir)
+end
 
 ---@param dir string
 ---@param config table
@@ -67,14 +71,20 @@ function M:chdir(dir)
   self.file_tree = Tree.new(vim.fn.fnamemodify(dir, ":t"), true, dir, "directory")
   self.file_tree:update()
 
-  if self.win then self.win:update_title(string.format(" %s ", dir)) end
+  if self.win then
+    self.win:update_title(string.format(" %s ", dir))
+  end
 end
 
 ---@return boolean
-function M:is_visible() return self.win and self.win:is_visible() end
+function M:is_visible()
+  return self.win and self.win:is_visible()
+end
 
 function M:focus()
-  if self.win then self.win:focus() end
+  if self.win then
+    self.win:focus()
+  end
 end
 
 ---@param dir string
@@ -154,47 +164,77 @@ function M:_action(name)
 end
 
 function M:close()
-  if self.win then self.win:hide() end
+  if self.win then
+    self.win:hide()
+  end
 end
 
 function M:constrain_cursor()
   local cur = api.nvim_get_current_line()
   local ref_id = e_util.parse_ref_id(cur)
-  if not ref_id then return end
+  if not ref_id then
+    return
+  end
 
   local _, ub = string.find(cur, ref_id)
-  if not self.win:has_valid_winid() then return end
+  if not self.win:has_valid_winid() then
+    return
+  end
 
   local row, col = self.win:get_cursor()
-  if not (row and col) then return end
+  if not (row and col) then
+    return
+  end
 
-  if col <= ub then self.win:set_cursor(row, ub + 1) end
+  if col <= ub then
+    self.win:set_cursor(row, ub + 1)
+  end
 end
 
 ---@param name string
 function M:track_buffer(name)
+  if not name then
+    return
+  end
+
   if e_util.is_protocol_path(name) then
-    if not self.win.old_bufnr then return end
-    if not util.is_valid_bufnr(self.win.old_bufnr) then return end
+    if not util.is_valid_bufnr(self.win.old_bufnr) then
+      return
+    end
 
     name = fn.bufname(self.win.old_bufnr)
-    if e_util.is_protocol_path(name) then return end
+    if e_util.is_protocol_path(name) then
+      return
+    end
   end
 
   name = fs.abspath(name)
-  if not fs.exists(name) then return end
+  if not fs.exists(name) then
+    return
+  end
 
   local current_dir = self:getcwd()
-  if not current_dir then return end
+  if not current_dir then
+    return
+  end
 
   local ref_id = self.file_tree:focus_path(name)
-  if not ref_id then return end
+  if not ref_id then
+    return
+  end
 
   self:dispatch_refresh(function()
-    if not self.win:has_valid_winid() then return end
+    if not self.win:has_valid_winid() then
+      return
+    end
+
+    self.win.old_bufnr = api.nvim_get_current_buf()
+    self.win.old_winid = api.nvim_get_current_win()
 
     for row, buf_line in ipairs(api.nvim_buf_get_lines(self.win.bufnr, 0, -1, false)) do
-      if buf_line:find(ref_id) then self.win:set_cursor(row, 0) end
+      if buf_line:find(ref_id) then
+        self.win:set_cursor(row, 0)
+      end
     end
   end)
 end
@@ -203,6 +243,10 @@ end
 ---@param after function
 M.dispatch_refresh = a.void_wrap(function(self, after)
   self.file_tree:update()
+
+  if not self.win:has_valid_bufnr() then
+    return
+  end
 
   local cache_undolevels
   self.win.ui:render {
@@ -214,8 +258,13 @@ M.dispatch_refresh = a.void_wrap(function(self, after)
     end,
 
     after = function()
-      if after then after() end
-      if not self.win:has_valid_bufnr() then return end
+      if after then
+        after()
+      end
+
+      if not self.win:has_valid_bufnr() then
+        return
+      end
 
       vim.bo[self.win.bufnr].undolevels = cache_undolevels
 
@@ -226,11 +275,15 @@ end)
 
 local extmark_namespace = api.nvim_create_namespace "Fyler-indent-scope"
 local function process_line(self, ln)
-  if not self.win:has_valid_bufnr() then return end
+  if not self.win:has_valid_bufnr() then
+    return
+  end
 
   local cur_line = util.unpack(api.nvim_buf_get_lines(self.win.bufnr, ln - 1, ln, false))
   local cur_indent = e_util.parse_indent_level(cur_line)
-  if cur_indent == 0 then return end
+  if cur_indent == 0 then
+    return
+  end
 
   local indent_depth = math.floor(cur_indent * 0.5)
   for i = 1, indent_depth do
@@ -249,8 +302,12 @@ local function process_line(self, ln)
 end
 
 function M:draw_indentscope()
-  if not self.win:has_valid_bufnr() then return end
-  if not self.config.values.indentscope.enabled then return end
+  if not self.win:has_valid_bufnr() then
+    return
+  end
+  if not self.config.values.indentscope.enabled then
+    return
+  end
 
   api.nvim_buf_clear_namespace(self.win.bufnr, extmark_namespace, 0, -1)
   for i = 1, api.nvim_buf_line_count(self.win.bufnr) do
@@ -258,9 +315,13 @@ function M:draw_indentscope()
   end
 end
 
-local function parent(path) return vim.fn.fnamemodify(path, ":h") end
+local function parent(path)
+  return vim.fn.fnamemodify(path, ":h")
+end
 
-local function isdir(path) return vim.fn.isdirectory(path) == 1 end
+local function isdir(path)
+  return vim.fn.isdirectory(path) == 1
+end
 
 local function sort_by_depth(paths, reverse)
   table.sort(paths, function(a, b)
@@ -289,7 +350,9 @@ local function get_ordered_operations(changes)
 
   local files_to_delete = {}
   for _, change in ipairs(changes.delete) do
-    if not isdir(change) then table.insert(files_to_delete, change) end
+    if not isdir(change) then
+      table.insert(files_to_delete, change)
+    end
   end
   sort_by_depth(files_to_delete, true)
 
@@ -337,7 +400,9 @@ local function get_ordered_operations(changes)
   end
 
   for _, change in ipairs(changes.create) do
-    if not processed_dirs[change] then table.insert(operations, { type = "create", path = change }) end
+    if not processed_dirs[change] then
+      table.insert(operations, { type = "create", path = change })
+    end
   end
 
   for _, change in ipairs(changes.move) do
@@ -350,7 +415,9 @@ local function get_ordered_operations(changes)
 
   local dirs_to_delete = {}
   for _, change in ipairs(changes.delete) do
-    if isdir(change) then table.insert(dirs_to_delete, change) end
+    if isdir(change) then
+      table.insert(dirs_to_delete, change)
+    end
   end
   sort_by_depth(dirs_to_delete, true)
 
@@ -366,7 +433,9 @@ end
 ---@return table
 local function get_tbl(self, tbl)
   local lines = {}
-  if not self then return lines end
+  if not self then
+    return lines
+  end
 
   local ordered_operations = get_ordered_operations(tbl)
 
@@ -433,10 +502,18 @@ end
 ---@param changes table
 ---@return boolean
 local function can_bypass(changes)
-  if #changes.copy > 1 then return false end
-  if #changes.move > 1 then return false end
-  if #changes.create > 5 then return false end
-  if not vim.tbl_isempty(changes.delete) then return false end
+  if #changes.copy > 1 then
+    return false
+  end
+  if #changes.move > 1 then
+    return false
+  end
+  if #changes.create > 5 then
+    return false
+  end
+  if not vim.tbl_isempty(changes.delete) then
+    return false
+  end
   return true
 end
 
@@ -456,7 +533,9 @@ local function run_mutation(changes)
   end
 end
 
-local function has_changes(changes) return #changes.create + #changes.delete + #changes.move + #changes.copy > 0 end
+local function has_changes(changes)
+  return #changes.create + #changes.delete + #changes.move + #changes.copy > 0
+end
 
 M.synchronize = a.void_wrap(function(self)
   local popups = require "fyler.popups"

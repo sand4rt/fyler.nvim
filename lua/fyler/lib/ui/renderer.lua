@@ -67,7 +67,9 @@ function Renderer:_render_text(component, current_col)
 
     return text_value, current_col + #text_value
   else
-    if text_value then table.insert(self.line, text_value) end
+    if text_value then
+      table.insert(self.line, text_value)
+    end
 
     if highlight then
       table.insert(self.highlight, {

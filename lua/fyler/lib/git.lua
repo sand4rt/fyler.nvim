@@ -43,25 +43,37 @@ local git_highlight_map = {
 
 local cached_status_map = {}
 
-local function system(cmd) return vim.system(cmd, { text = true }):wait() end
+local function system(cmd)
+  return vim.system(cmd, { text = true }):wait()
+end
 
 local function worktree_root()
   local out = system { "git", "rev-parse", "--show-toplevel" }
-  if not out.stdout then return end
+  if not out.stdout then
+    return
+  end
 
   return string.match(out.stdout, "^(.*)\n$")
 end
 
-function M.inside_worktree() return system({ "git", "rev-parse", "--is-inside-work-tree" }).code == 0 end
+function M.inside_worktree()
+  return system({ "git", "rev-parse", "--is-inside-work-tree" }).code == 0
+end
 
 function M.refresh()
-  if not M.inside_worktree() then return end
+  if not M.inside_worktree() then
+    return
+  end
 
   local dir = worktree_root()
-  if not dir then return end
+  if not dir then
+    return
+  end
 
   local out = system { "git", "status", "-z", "--porcelain" }
-  if not out.stdout then return end
+  if not out.stdout then
+    return
+  end
 
   local status_list = util.filter_bl(vim.split(out.stdout, "\0"))
   local status_map = {}
@@ -80,7 +92,9 @@ end
 function M.status(path)
   local normalized_path = fs.normalize(path)
   local status_info = cached_status_map[normalized_path]
-  if not status_info then return end
+  if not status_info then
+    return
+  end
 
   return config.values.git_status.symbols[status_info], git_highlight_map[status_info]
 end

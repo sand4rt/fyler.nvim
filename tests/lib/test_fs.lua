@@ -3,10 +3,14 @@ local test = require "mini.test"
 local T = test.new_set()
 local TEST_DATA_DIR = vim.fs.joinpath(FYLER_TESTING_DIR, "data")
 
-local function setup_test_env() vim.fn.mkdir(TEST_DATA_DIR, "p") end
+local function setup_test_env()
+  vim.fn.mkdir(TEST_DATA_DIR, "p")
+end
 
 local function cleanup_test_env()
-  if vim.fn.isdirectory(TEST_DATA_DIR) == 1 then vim.fn.delete(TEST_DATA_DIR, "rf") end
+  if vim.fn.isdirectory(TEST_DATA_DIR) == 1 then
+    vim.fn.delete(TEST_DATA_DIR, "rf")
+  end
 end
 
 T["cwd"] = function()
@@ -41,15 +45,6 @@ T["exists"] = function()
 
   vim.fn.delete(target_path, "rf")
   test.expect.equality(fs.exists(target_path), false)
-
-  cleanup_test_env()
-end
-
-T["is_valid_path"] = function()
-  setup_test_env()
-
-  test.expect.equality(fs.is_valid_path(TEST_DATA_DIR), true)
-  test.expect.equality(fs.is_valid_path "/nonexistent/path/12345", false)
 
   cleanup_test_env()
 end
@@ -278,14 +273,18 @@ T["errors"] = function()
   local test_file = vim.fs.joinpath(TEST_DATA_DIR, "not_dir.txt")
   vim.fn.writefile({ "content" }, test_file)
 
-  test.expect.error(function() fs.remove_file "/non/existent/file" end)
+  test.expect.error(function()
+    fs.remove_file "/non/existent/file"
+  end)
 
   local src = vim.fs.joinpath(TEST_DATA_DIR, "src.txt")
   local dst = vim.fs.joinpath(TEST_DATA_DIR, "dst.txt")
   vim.fn.writefile({ "src" }, src)
   vim.fn.writefile({ "dst" }, dst)
 
-  test.expect.error(function() fs.copy_file(src, dst) end)
+  test.expect.error(function()
+    fs.copy_file(src, dst)
+  end)
 
   cleanup_test_env()
 end

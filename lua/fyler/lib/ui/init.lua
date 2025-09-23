@@ -24,7 +24,9 @@ end
 
 ---@param component UiComponent
 function Ui:_render(component)
-  if not self.win:has_valid_bufnr() then return end
+  if not self.win:has_valid_bufnr() then
+    return
+  end
 
   local was_modifiable = util.get_buf_option(self.win.bufnr, "modifiable")
   util.set_buf_option(self.win.bufnr, "modifiable", true)
@@ -50,7 +52,9 @@ function Ui:_render(component)
     })
   end
 
-  if not was_modifiable then util.set_buf_option(self.win.bufnr, "modifiable", false) end
+  if not was_modifiable then
+    util.set_buf_option(self.win.bufnr, "modifiable", false)
+  end
 
   util.set_buf_option(self.win.bufnr, "modified", false)
 end
@@ -59,11 +63,15 @@ function Ui:render(opts)
   opts = opts or {}
 
   vim.schedule(function()
-    if opts.before then opts.before() end
+    if opts.before then
+      opts.before()
+    end
 
     self:_render(opts.ui_lines)
 
-    if opts.after then opts.after() end
+    if opts.after then
+      opts.after()
+    end
   end)
 end
 

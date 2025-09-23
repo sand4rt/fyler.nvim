@@ -33,17 +33,27 @@ function TreeNode:remove_child(child_value)
   end
 end
 
-function TreeNode:has_children() return #self.children > 0 end
+function TreeNode:has_children()
+  return #self.children > 0
+end
 
-function TreeNode:is_leaf() return #self.children == 0 end
+function TreeNode:is_leaf()
+  return #self.children == 0
+end
 
-function TreeNode:get_child_count() return #self.children end
+function TreeNode:get_child_count()
+  return #self.children
+end
 
-function TreeNode:get_child(index) return self.children[index] end
+function TreeNode:get_child(index)
+  return self.children[index]
+end
 
 function TreeNode:find_child(value)
   for _, child in ipairs(self.children) do
-    if child.value == value then return child end
+    if child.value == value then
+      return child
+    end
   end
 
   return nil
@@ -86,22 +96,30 @@ end
 
 ---@return TreeNode|nil
 function M:find(value)
-  if not self.root then return nil end
+  if not self.root then
+    return nil
+  end
 
   return self:_find_recursive(self.root, value)
 end
 
 function M:_find_recursive(node, value)
-  if node.value == value then return node end
+  if node.value == value then
+    return node
+  end
 
   for _, child in ipairs(node.children) do
     local found = self:_find_recursive(child, value)
-    if found then return found end
+    if found then
+      return found
+    end
   end
 end
 
 function M:delete(value)
-  if not self.root then return end
+  if not self.root then
+    return
+  end
 
   if self.root.value == value then
     local deleted_count = self:_count_nodes(self.root)
@@ -127,7 +145,9 @@ function M:_count_nodes(node)
 end
 
 function M:totable()
-  if not self.root then return nil end
+  if not self.root then
+    return nil
+  end
 
   return self:_node_to_table(self.root)
 end

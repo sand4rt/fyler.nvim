@@ -17,25 +17,21 @@ M.Row = UiComponent.new(function(children)
   }
 end)
 
-M.Text = UiComponent.new(
-  function(value, option)
-    return {
-      tag = "text",
-      value = value,
-      option = option,
-      children = {},
-    }
-  end
-)
+M.Text = UiComponent.new(function(value, option)
+  return {
+    tag = "text",
+    value = value,
+    option = option,
+    children = {},
+  }
+end)
 
-M.Extmark = UiComponent.new(
-  function(options)
-    return {
-      tag = "extmark",
-      option = options,
-      children = {},
-    }
-  end
-)
+M.Extmark = UiComponent.new(function(options)
+  return {
+    tag = "extmark",
+    option = options,
+    children = {},
+  }
+end)
 
 return M

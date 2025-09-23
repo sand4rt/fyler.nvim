@@ -15,10 +15,14 @@ function M.setup(config)
       pattern = "*",
       desc = "Hijack NETRW commands",
       callback = function(arg)
-        if api.nvim_get_current_buf() ~= arg.buf then return end
+        if api.nvim_get_current_buf() ~= arg.buf then
+          return
+        end
 
         local path = api.nvim_buf_get_name(0)
-        if vim.fn.isdirectory(path) ~= 1 then return end
+        if vim.fn.isdirectory(path) ~= 1 then
+          return
+        end
 
         api.nvim_buf_delete(0, { force = true })
         require("fyler").open { dir = path }
@@ -29,14 +33,18 @@ function M.setup(config)
   api.nvim_create_autocmd("ColorScheme", {
     group = augroup,
     desc = "Adjust highlight groups with respect to colorscheme",
-    callback = function() require("fyler.lib.hls").setup() end,
+    callback = function()
+      require("fyler.lib.hls").setup()
+    end,
   })
 
   if config.values.track_current_buffer then
     api.nvim_create_autocmd("BufEnter", {
       group = augroup,
       desc = "Track current focused buffer in explorer",
-      callback = function(arg) require("fyler").track_buffer(arg.file) end,
+      callback = function(arg)
+        require("fyler").track_buffer(arg.file)
+      end,
     })
   end
 
@@ -45,14 +53,23 @@ function M.setup(config)
     desc = "Drop explorer window when buffer inside it changes to NON FYLER BUFFER",
     callback = function(arg)
       local instance = require("fyler.explorer").current()
-      if not instance then return end
-      if not instance.win:has_valid_winid() then return end
+      if not instance then
+        return
+      end
+
+      if not instance.win:has_valid_winid() then
+        return
+      end
 
       local bufnr = arg.buf
       local bufname = api.nvim_buf_get_name(bufnr)
-      if require("fyler.explorer.util").is_protocol_path(bufname) then return end
+      if require("fyler.explorer.util").is_protocol_path(bufname) then
+        return
+      end
 
-      if api.nvim_win_get_buf(instance.win.winid) == bufnr then instance.win:recover() end
+      if api.nvim_win_get_buf(instance.win.winid) == bufnr then
+        instance.win:recover()
+      end
     end,
   })
 end

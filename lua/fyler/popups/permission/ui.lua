@@ -8,14 +8,11 @@ return UiComponent.new(function(message)
   for _, line in ipairs(message) do
     table.insert(
       children,
-      components.Row(util.tbl_map(
-        line,
-        function(word)
-          return components.Text(word.str, {
-            highlight = word.hlg,
-          })
-        end
-      ))
+      components.Row(util.tbl_map(line, function(word)
+        return components.Text(word.str, {
+          highlight = word.hlg,
+        })
+      end))
     )
   end
 

@@ -11,7 +11,9 @@ else
   icon_provider = require("fyler.integrations.icon")[config.values.icon_provider]
 end
 
-local function isdir(node) return node.type == "directory" end
+local function isdir(node)
+  return node.type == "directory"
+end
 
 local function sort_nodes(nodes)
   table.sort(nodes, function(x, y)
@@ -67,7 +69,9 @@ local function create_file_row(item, depth, width, icon, hl)
   local icon_text = ""
   local icon_highlight = is_dir and directory_icon_highlight or hl
 
-  if icon and icon ~= "" then icon_text = icon .. " " end
+  if icon and icon ~= "" then
+    icon_text = icon .. " "
+  end
 
   local icon_component = Text(icon_text, {
     highlight = icon_highlight,
@@ -106,7 +110,9 @@ file_tree = UiComponent.new(function(node, width, depth)
   depth = depth or 0
   width = width or calc_file_tree_width(node, depth)
 
-  if not node or not node.children then return { tag = "file_tree", children = {} } end
+  if not node or not node.children then
+    return { tag = "file_tree", children = {} }
+  end
 
   local children = {}
   local sorted_items = sort_nodes(node.children)

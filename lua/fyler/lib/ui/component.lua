@@ -24,7 +24,9 @@ function UiComponent.new(fn)
 
       return this
     end,
-    __index = function(_, name) return rawget(UiComponent, name) end,
+    __index = function(_, name)
+      return rawget(UiComponent, name)
+    end,
   }
 
   setmetatable(instance, mt)
@@ -33,7 +35,9 @@ function UiComponent.new(fn)
 end
 
 function UiComponent:width()
-  if self.tag == "text" then return string.len(self.value) end
+  if self.tag == "text" then
+    return string.len(self.value)
+  end
 
   if self.tag == "row" then
     local width = 0
@@ -48,7 +52,9 @@ function UiComponent:width()
     local width = 0
     for i = 1, #self.children do
       local c_width = self.children[i]:width()
-      if c_width > width then width = c_width end
+      if c_width > width then
+        width = c_width
+      end
     end
 
     return width

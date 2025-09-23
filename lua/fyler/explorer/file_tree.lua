@@ -40,7 +40,9 @@ function Entry.new(ref_id, open, name, path, type, link)
 end
 
 ---@return boolean
-function Entry:isdir() return self.type == "directory" end
+function Entry:isdir()
+  return self.type == "directory"
+end
 
 ---@type table<integer, Entry>
 local EntryByref_id = {}
@@ -66,7 +68,9 @@ end
 ---@param type string
 ---@param link string|nil
 function EntryManager.set(open, name, path, type, link)
-  if ref_idByPath[link or path] then return ref_idByPath[path] end
+  if ref_idByPath[link or path] then
+    return ref_idByPath[path]
+  end
 
   local ref_id = NextItemref_id
   NextItemref_id = NextItemref_id + 1
@@ -143,12 +147,16 @@ function M:find_parent(node_value)
   local node = self.tree:find(node_value)
   assert(node, "cannot locate node with given node_value")
 
-  if not node.parent then return nil end
+  if not node.parent then
+    return nil
+  end
   return node.parent.value
 end
 
 function M:collapse_all()
-  if not self.tree.root then return end
+  if not self.tree.root then
+    return
+  end
 
   for _, child in ipairs(self.tree.root.children) do
     self:_collapse_recursive(child)
@@ -158,7 +166,9 @@ end
 ---@param node TreeNode
 function M:_collapse_recursive(node)
   local entry = EntryManager.get(node.value)
-  if entry:isdir() and entry.open then EntryByref_id[node.value].open = false end
+  if entry:isdir() and entry.open then
+    EntryByref_id[node.value].open = false
+  end
 
   for _, child in ipairs(node.children or {}) do
     self:_collapse_recursive(child)
@@ -177,11 +187,15 @@ end
 
 ---@param node_value integer|nil
 function M:update(node_value)
-  if config.values.git_status.enabled then git.refresh() end
+  if config.values.git_status.enabled then
+    git.refresh()
+  end
 
   if node_value then
     local node = self.tree:find(node_value)
-    if not node then return end
+    if not node then
+      return
+    end
 
     self:_update(node)
   else
@@ -192,7 +206,9 @@ end
 ---@param node TreeNode
 function M:_update(node)
   local node_entry = EntryManager.get(node.value)
-  if not node_entry.open then return end
+  if not node_entry.open then
+    return
+  end
 
   local entries = fs.listdir(node_entry.path)
 
@@ -241,13 +257,19 @@ function M:focus_path(path)
   path = fs.normalize(path)
 
   local root_entry = EntryManager.get(self.tree.root.value)
-  if not vim.startswith(path, root_entry.path) then return nil end
+  if not vim.startswith(path, root_entry.path) then
+    return nil
+  end
 
   local relative_path = path:sub(#root_entry.path + 1)
-  if relative_path:sub(1, 1) == "/" then relative_path = relative_path:sub(2) end
+  if relative_path:sub(1, 1) == "/" then
+    relative_path = relative_path:sub(2)
+  end
 
   local parts = util.filter_bl(vim.split(relative_path, "/"))
-  if #parts == 0 then return nil end
+  if #parts == 0 then
+    return nil
+  end
 
   local current_node = self.tree.root
   local current_path = root_entry.path
@@ -268,7 +290,9 @@ function M:focus_path(path)
       end
     end
 
-    if not found_child then return nil end
+    if not found_child then
+      return nil
+    end
 
     current_node = found_child
     current_path = fs.joinpath(current_path, part)
@@ -278,7 +302,9 @@ function M:focus_path(path)
 end
 
 ---@return table
-function M:totable() return self:_totable(self.tree.root) end
+function M:totable()
+  return self:_totable(self.tree.root)
+end
 
 ---@param node TreeNode
 function M:_totable(node)
@@ -295,7 +321,9 @@ function M:_totable(node)
     children = {},
   }
 
-  if not entry.open then return table_node end
+  if not entry.open then
+    return table_node
+  end
 
   for _, child in ipairs(node.children) do
     table.insert(table_node.children, self:_totable(child))
@@ -321,7 +349,9 @@ local function parse_lines(lines, root_entry)
 
     while true do
       local parent = parents:top()
-      if not (parent.indentation >= indentation and parents:size() > 1) then break end
+      if not (parent.indentation >= indentation and parents:size() > 1) then
+        break
+      end
 
       parents:pop()
     end
@@ -350,7 +380,9 @@ function M:diff_with_lines(lines)
     not_seen[node.value] = true
     hash_table[node.value] = node_entry.link or node_entry.path
 
-    if not node_entry.open then return end
+    if not node_entry.open then
+      return
+    end
 
     for _, child in ipairs(node.children or {}) do
       traverse(child)
@@ -377,7 +409,9 @@ function M:diff_with_lines(lines)
   diffs(parsed_tree)
 
   for ref_id, path in pairs(hash_table) do
-    if not_seen[ref_id] then table.insert(diff_table, { src = path }) end
+    if not_seen[ref_id] then
+      table.insert(diff_table, { src = path })
+    end
   end
 
   local actions = { create = {}, delete = {}, move = {}, copy = {} }
@@ -388,8 +422,12 @@ function M:diff_with_lines(lines)
       groups[diff.src] = groups[diff.src] or {}
       table.insert(groups[diff.src], diff.dst)
     else
-      if diff.src then table.insert(actions.delete, diff.src) end
-      if diff.dst then table.insert(actions.create, diff.dst) end
+      if diff.src then
+        table.insert(actions.delete, diff.src)
+      end
+      if diff.dst then
+        table.insert(actions.create, diff.dst)
+      end
     end
   end
 
@@ -397,9 +435,13 @@ function M:diff_with_lines(lines)
     tbl = util.unique(tbl)
 
     if not (#tbl == 1 and tbl[1] == path) then
-      if util.if_any(tbl, function(x) return x == path end) then
+      if util.if_any(tbl, function(x)
+        return x == path
+      end) then
         util.tbl_each(tbl, function(x)
-          if path == x then return end
+          if path == x then
+            return
+          end
 
           table.insert(actions.copy, { src = path, dst = x })
         end)
@@ -407,7 +449,9 @@ function M:diff_with_lines(lines)
         table.insert(actions.move, { src = path, dst = tbl[1] })
         table.remove(tbl, 1)
 
-        util.tbl_each(tbl, function(x) table.insert(actions.copy, { src = path, dst = x }) end)
+        util.tbl_each(tbl, function(x)
+          table.insert(actions.copy, { src = path, dst = x })
+        end)
       end
     end
   end

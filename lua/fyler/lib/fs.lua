@@ -4,19 +4,33 @@ local hooks = require "fyler.hooks"
 local M = {}
 local uv = vim.uv or vim.loop
 
-function M.cwd() return uv.cwd() or vim.fn.getcwd(0) end
+function M.cwd()
+  return uv.cwd() or vim.fn.getcwd(0)
+end
 
-function M.normalize(path) return vim.fs.normalize(path) end
+function M.normalize(path)
+  return vim.fs.normalize(path)
+end
 
-function M.joinpath(...) return vim.fs.joinpath(...) end
+function M.joinpath(...)
+  return vim.fs.joinpath(...)
+end
 
-function M.abspath(path) return vim.fs.abspath(path) end
+function M.abspath(path)
+  return vim.fs.abspath(path)
+end
 
-function M.relpath(base, path) return vim.fs.relpath(base, path) end
+function M.relpath(base, path)
+  return vim.fs.relpath(base, path)
+end
 
-local function stat_exists(path) return not not select(1, uv.fs_stat(path)) end
+local function stat_exists(path)
+  return not not select(1, uv.fs_stat(path))
+end
 
-function M.exists(path) return stat_exists(path) end
+function M.exists(path)
+  return stat_exists(path)
+end
 
 function M.reslink(link)
   local current_path = link
@@ -24,7 +38,9 @@ function M.reslink(link)
 
   while stat do
     local target = uv.fs_readlink(current_path)
-    if not target then return current_path, stat.type end
+    if not target then
+      return current_path, stat.type
+    end
 
     current_path = target
     stat = uv.fs_stat(current_path)
@@ -35,7 +51,9 @@ end
 
 function M.listdir(path)
   local stat = uv.fs_stat(path)
-  if not (stat and stat.type == "directory") then return {} end
+  if not (stat and stat.type == "directory") then
+    return {}
+  end
 
   ---@diagnostic disable-next-line: param-type-mismatch
   local dir, open_err = uv.fs_opendir(path, nil, 1000)
@@ -76,7 +94,9 @@ function M.listdir(path)
 end
 
 function M.create_file(path)
-  if stat_exists(path) then return end
+  if stat_exists(path) then
+    return
+  end
 
   local fd, err = uv.fs_open(path, "a", 420)
   assert(fd, err or ("Failed to create file: " .. path))
@@ -93,7 +113,9 @@ end
 
 function M.remove_recursive(path)
   local stat = uv.fs_stat(path)
-  if not stat then return end
+  if not stat then
+    return
+  end
 
   local to_process = Stack.new()
   local to_delete = List.new()
@@ -121,14 +143,18 @@ end
 
 function M.create_dir(path)
   local stat = uv.fs_stat(path)
-  if stat then assert(stat.type ~= "directory", "Directory already exists: " .. path) end
+  if stat then
+    assert(stat.type ~= "directory", "Directory already exists: " .. path)
+  end
 
   local success, err = uv.fs_mkdir(path, 493)
   assert(success, err or ("Failed to create directory: " .. path))
 end
 
 function M.create_dir_recursive(path)
-  local parts = vim.tbl_filter(function(part) return part ~= "" end, vim.split(path, "/"))
+  local parts = vim.tbl_filter(function(part)
+    return part ~= ""
+  end, vim.split(path, "/"))
   local is_windows = vim.fn.has "win32" == 1 or vim.fn.has "win64" == 1
 
   local current_path = is_windows and parts[1] or ""
@@ -137,7 +163,9 @@ function M.create_dir_recursive(path)
   for i = start_index, #parts do
     current_path = current_path .. "/" .. parts[i]
 
-    if not stat_exists(current_path) then M.create_dir(current_path) end
+    if not stat_exists(current_path) then
+      M.create_dir(current_path)
+    end
   end
 end
 
@@ -170,7 +198,9 @@ end
 
 function M.copy_recursive(src_path, dst_path)
   local src_stat = uv.fs_stat(src_path)
-  if not src_stat then return end
+  if not src_stat then
+    return
+  end
 
   local dst_stat = uv.fs_stat(dst_path)
   assert(not dst_stat, "Destination path already exists: " .. dst_path)
@@ -217,7 +247,9 @@ end
 
 function M.delete(path)
   M.remove_recursive(path)
-  vim.schedule(function() hooks.on_delete(path) end)
+  vim.schedule(function()
+    hooks.on_delete(path)
+  end)
 end
 
 function M.move(src_path, dst_path)
@@ -225,12 +257,16 @@ function M.move(src_path, dst_path)
   M.create_dir_recursive(parent_path)
   M.move_path(src_path, dst_path)
 
-  vim.schedule(function() hooks.on_rename(src_path, dst_path) end)
+  vim.schedule(function()
+    hooks.on_rename(src_path, dst_path)
+  end)
 end
 
 function M.copy(src_path, dst_path)
   local src_stat = uv.fs_stat(src_path)
-  if not src_stat then return end
+  if not src_stat then
+    return
+  end
 
   local dst_stat = uv.fs_stat(dst_path)
   assert(not dst_stat, "Destination path already exists: " .. dst_path)

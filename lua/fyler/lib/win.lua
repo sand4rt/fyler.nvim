@@ -60,17 +60,25 @@ function Win.new(opts)
 end
 
 ---@return boolean
-function Win:has_valid_winid() return type(self.winid) == "number" and api.nvim_win_is_valid(self.winid) end
+function Win:has_valid_winid()
+  return type(self.winid) == "number" and api.nvim_win_is_valid(self.winid)
+end
 
 ---@return boolean
-function Win:has_valid_bufnr() return type(self.bufnr) == "number" and api.nvim_buf_is_valid(self.bufnr) end
+function Win:has_valid_bufnr()
+  return type(self.bufnr) == "number" and api.nvim_buf_is_valid(self.bufnr)
+end
 
 ---@return boolean
-function Win:is_visible() return self:has_valid_winid() and self:has_valid_bufnr() end
+function Win:is_visible()
+  return self:has_valid_winid() and self:has_valid_bufnr()
+end
 
 ---@return integer|nil, integer|nil
 function Win:get_cursor()
-  if not self:has_valid_winid() then return end
+  if not self:has_valid_winid() then
+    return
+  end
 
   return util.unpack(api.nvim_win_get_cursor(self.winid))
 end
@@ -78,12 +86,16 @@ end
 ---@param row integer
 ---@param col integer
 function Win:set_cursor(row, col)
-  if self:has_valid_winid() then api.nvim_win_set_cursor(self.winid, { row, col }) end
+  if self:has_valid_winid() then
+    api.nvim_win_set_cursor(self.winid, { row, col })
+  end
 end
 
 function Win:focus()
   local windows = fn.win_findbuf(self.bufnr)
-  if not windows or not windows[1] then return end
+  if not windows or not windows[1] then
+    return
+  end
 
   self.old_winid = api.nvim_get_current_win()
   self.old_bufnr = api.nvim_get_current_buf()
@@ -92,7 +104,9 @@ function Win:focus()
 end
 
 function Win:update_config(config)
-  if not self:has_valid_winid() then return end
+  if not self:has_valid_winid() then
+    return
+  end
 
   local old_config = api.nvim_win_get_config(self.winid)
 
@@ -100,7 +114,9 @@ function Win:update_config(config)
 end
 
 function Win:update_title(title)
-  if self.kind:match "^float" then self:update_config { title = title } end
+  if self.kind:match "^float" then
+    self:update_config { title = title }
+  end
 end
 
 function Win:config()
@@ -110,7 +126,9 @@ function Win:config()
 
   ---@param str string
   local function destructure(str)
-    if not str:match "[%d%.]+[%a]+" then return 0, 0 end
+    if not str:match "[%d%.]+[%a]+" then
+      return 0, 0
+    end
     local v, u = string.match(str, "([%d%.]+)([%a]+)")
     return tonumber(v), u
   end
@@ -204,14 +222,18 @@ function Win:config()
 end
 
 function Win:show()
-  if self:has_valid_winid() then return end
+  if self:has_valid_winid() then
+    return
+  end
 
   -- Saving alternative "bufnr" and "winid" for later use
   self.old_bufnr = api.nvim_get_current_buf()
   self.old_winid = api.nvim_get_current_win()
 
   self.bufnr = api.nvim_create_buf(false, true)
-  if self.bufname then api.nvim_buf_set_name(self.bufnr, self.bufname) end
+  if self.bufname then
+    api.nvim_buf_set_name(self.bufnr, self.bufname)
+  end
 
   local win_config = self:config()
   if win_config.split and (win_config.split:match "_all$" or win_config.split:match "_most$") then
@@ -228,7 +250,9 @@ function Win:show()
     end
 
     self.winid = api.nvim_get_current_win()
-    if not self.enter then api.nvim_set_current_win(self.old_winid) end
+    if not self.enter then
+      api.nvim_set_current_win(self.old_winid)
+    end
 
     api.nvim_win_set_buf(self.winid, self.bufnr)
   elseif self.kind:match "^replace" then
@@ -239,7 +263,9 @@ function Win:show()
 
     -- Trigger "BufEnter" event to focus buffer for floating window when "enter" enabled
     -- [IMPORTANT]: This is necessary because "self.winid" will not get set on time to automatically triggered.
-    if self.enter then vim.api.nvim_exec_autocmds("BufEnter", {}) end
+    if self.enter then
+      vim.api.nvim_exec_autocmds("BufEnter", {})
+    end
   end
 
   self.augroup = api.nvim_create_augroup("Fyler-augroup-" .. self.bufnr, { clear = true })
@@ -271,10 +297,14 @@ function Win:show()
     api.nvim_create_autocmd("User", { pattern = event, group = self.augroup, callback = callback })
   end
 
-  if self.render then self.render() end
+  if self.render then
+    self.render()
+  end
 end
 
-function Win:clear() api.nvim_clear_autocmds { group = self.augroup } end
+function Win:clear()
+  api.nvim_clear_autocmds { group = self.augroup }
+end
 
 function Win:hide()
   self:clear()
