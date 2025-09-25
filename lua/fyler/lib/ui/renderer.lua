@@ -42,11 +42,13 @@ end
 function Renderer:_render_text(component, current_col)
   local text_value = tostring(component.value or "")
   local highlight = component.option and component.option.highlight
+  local width = #text_value
 
   if self.flag.in_row then
     current_col = current_col or 0
 
     if component.option and component.option.virt_text then
+      width = #component.option.virt_text[1][1]
       table.insert(self.extmark, {
         line = self.flag.row_base_line,
         col = current_col,
@@ -65,7 +67,7 @@ function Renderer:_render_text(component, current_col)
       })
     end
 
-    return text_value, current_col + #text_value
+    return text_value, current_col + width
   else
     if text_value then
       table.insert(self.line, text_value)
