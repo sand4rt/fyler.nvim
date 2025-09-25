@@ -36,7 +36,7 @@ end
 
 function UiComponent:width()
   if self.tag == "text" then
-    return string.len(self.value)
+    return string.len(self.value or self.option.virt_text[1][1])
   end
 
   if self.tag == "row" then

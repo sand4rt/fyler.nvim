@@ -1,15 +1,15 @@
-local UiComponent = require "fyler.lib.ui.component"
-local components = require "fyler.ui_components"
+local Ui = require "fyler.lib.ui"
 local util = require "fyler.lib.util"
+local Component = Ui.Component
 
 ---@param message { str: string, hlg: string }[][]
-return UiComponent.new(function(message)
+return Component.new(function(message)
   local children = {}
   for _, line in ipairs(message) do
     table.insert(
       children,
-      components.Row(util.tbl_map(line, function(word)
-        return components.Text(word.str, {
+      Ui.Row(util.tbl_map(line, function(word)
+        return Ui.Text(word.str, {
           highlight = word.hlg,
         })
       end))

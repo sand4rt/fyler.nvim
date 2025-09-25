@@ -1,3 +1,4 @@
+local Component = require "fyler.lib.ui.component"
 local Renderer = require "fyler.lib.ui.renderer"
 local util = require "fyler.lib.util"
 
@@ -74,5 +75,32 @@ function Ui:render(opts)
     end
   end)
 end
+
+Ui.Component = Component
+
+---@param children UiComponent[]
+Ui.Column = Ui.Component.new(function(children)
+  return {
+    tag = "column",
+    children = children,
+  }
+end)
+
+---@param children UiComponent[]
+Ui.Row = Ui.Component.new(function(children)
+  return {
+    tag = "row",
+    children = children,
+  }
+end)
+
+Ui.Text = Ui.Component.new(function(value, option)
+  return {
+    tag = "text",
+    value = value,
+    option = option,
+    children = {},
+  }
+end)
 
 return Ui

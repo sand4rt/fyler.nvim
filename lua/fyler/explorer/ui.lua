@@ -1,8 +1,9 @@
-local UiComponent = require "fyler.lib.ui.component"
-local components = require "fyler.ui_components"
+local Ui = require "fyler.lib.ui"
 local config = require "fyler.config"
-local Text = components.Text
-local Row = components.Row
+local Component = Ui.Component
+local Text = Ui.Text
+local Row = Ui.Row
+local Column = Ui.Column
 
 local icon_provider
 if type(config.values.icon_provider) == "function" then
@@ -32,34 +33,49 @@ local function sort_nodes(nodes)
   return nodes
 end
 
-local function calculate_line_width(depth, icon, ref_id, name)
-  local icon_part = (not icon or icon == "") and "" or icon .. " "
-  local ref_id_part = string.format("/%05d", ref_id)
-  local name_part = " " .. name
-
-  return (2 * depth) + #icon_part + #ref_id_part + #name_part
-end
-
-local function calc_file_tree_width(node, depth)
+-- Flatten the tree into a list of file entries
+local function flatten_tree(node, depth, result)
   depth = depth or 0
-  local max_width = 0
+  result = result or {}
 
-  for _, child in ipairs(node.children) do
-    local icon = icon_provider(child.type, child.name)
-    local width = calculate_line_width(depth, icon, child.ref_id, child.name)
+  if not node or not node.children then
+    return result
+  end
 
-    max_width = math.max(max_width, width)
+  local sorted_items = sort_nodes(node.children)
 
-    if child.children and #child.children > 0 then
-      local child_width = calc_file_tree_width(child, depth + 1)
-      max_width = math.max(max_width, child_width)
+  for _, item in ipairs(sorted_items) do
+    local icon, hl = icon_provider(item.type, item.path)
+
+    if item.type == "directory" then
+      local icons = config.values.icon
+      local is_empty = item.open and item.children and #item.children == 0
+      local is_expanded = item.open or false
+
+      icon = is_empty and icons.directory_empty
+        or (is_expanded and icons.directory_expanded or icons.directory_collapsed)
+        or icon
+    end
+
+    -- Add this item to the flattened list
+    table.insert(result, {
+      item = item,
+      depth = depth,
+      icon = icon,
+      hl = hl,
+    })
+
+    -- Recursively add children if they exist
+    if item.children and #item.children > 0 then
+      flatten_tree(item, depth + 1, result)
     end
   end
 
-  return max_width
+  return result
 end
 
-local function create_file_row(item, depth, width, icon, hl)
+local function create_file_content(entry)
+  local item, depth, icon, hl = entry.item, entry.depth, entry.icon, entry.hl
   local indentation = Text(string.rep(" ", 2 * depth))
 
   local is_dir = isdir(item)
@@ -84,65 +100,66 @@ local function create_file_row(item, depth, width, icon, hl)
     highlight = name_highlight,
   })
 
-  local git_text = nil
-  if item.git_sym and item.git_hlg then
-    git_text = Text(nil, {
-      virt_text = { { item.git_sym, item.git_hlg } },
-      col = width,
-    })
-  end
-
+  -- Return Row of Text components for proper highlighting
   return Row {
     indentation,
     icon_component,
     ref_id_text,
     name_text,
-    git_text,
   }
+end
+
+local function create_git_symbol(entry)
+  local item = entry.item
+
+  if item.git_sym and item.git_hlg then
+    return Text(nil, {
+      virt_text = { { item.git_sym, item.git_hlg } },
+    })
+  else
+    return Text "" -- Empty text for files without git status
+  end
 end
 
 ---@type UiComponent
 local file_tree
 ---@param node table
----@param width integer|nil
 ---@param depth integer|nil
-file_tree = UiComponent.new(function(node, width, depth)
+file_tree = Component.new(function(node, depth)
   depth = depth or 0
-  width = width or calc_file_tree_width(node, depth)
 
   if not node or not node.children then
     return { tag = "file_tree", children = {} }
   end
 
-  local children = {}
-  local sorted_items = sort_nodes(node.children)
+  -- Flatten the entire tree structure
+  local flattened_entries = flatten_tree(node, depth)
 
-  for _, item in ipairs(sorted_items) do
-    local icon, hl = icon_provider(item.type, item.path)
-
-    if item.type == "directory" then
-      local icons = config.values.icon
-      local is_empty = item.open and item.children and #item.children == 0
-      local is_expanded = item.open or false
-
-      icon = is_empty and icons.directory_empty
-        or (is_expanded and icons.directory_expanded or icons.directory_collapsed)
-        or icon
-    end
-
-    table.insert(children, create_file_row(item, depth, width, icon, hl))
-
-    if item.children and #item.children > 0 then
-      local child_tree = file_tree(item, width, depth + 1)
-      for _, child in ipairs(child_tree.children) do
-        table.insert(children, child)
-      end
-    end
+  if #flattened_entries == 0 then
+    return { tag = "file_tree", children = {} }
   end
 
+  -- Build first column (main content)
+  local main_content_column = {}
+  for _, entry in ipairs(flattened_entries) do
+    table.insert(main_content_column, create_file_content(entry))
+  end
+
+  -- Build second column (git symbols)
+  local git_symbols_column = {}
+  for _, entry in ipairs(flattened_entries) do
+    table.insert(git_symbols_column, create_git_symbol(entry))
+  end
+
+  -- Return single Row with two Columns
   return {
     tag = "file_tree",
-    children = children,
+    children = {
+      Row {
+        Column(main_content_column),
+        Column(git_symbols_column),
+      },
+    },
   }
 end)
 
