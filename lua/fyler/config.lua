@@ -100,14 +100,14 @@ local function defaults()
     git_status = {
       enabled = true,
       symbols = {
-        Untracked = "●",
-        Added = "✚",
-        Modified = "●",
-        Deleted = "✖",
-        Renamed = "➜",
-        Copied = "C",
-        Conflict = "‼",
-        Ignored = "○",
+        Untracked = "?",
+        Added = "+",
+        Modified = "*",
+        Deleted = "x",
+        Renamed = ">",
+        Copied = "~",
+        Conflict = "!",
+        Ignored = "#",
       },
     },
     hooks = {

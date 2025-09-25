@@ -37,7 +37,7 @@
   </h4>
   <img
     alt="Showcase"
-    src="https://github.com/user-attachments/assets/f0e7e86f-88a7-488e-9309-4302f0b6fdf2"
+    src="https://github.com/user-attachments/assets/1984d7f5-d569-4fa9-a243-4938dca7a40c"
   />
 </div>
 
@@ -149,14 +149,14 @@ local defaults = {
   git_status = {
     enabled = true,
     symbols = {
-      Untracked = "●",
-      Added = "✚",
-      Modified = "●",
-      Deleted = "✖",
-      Renamed = "➜",
-      Copied = "C",
-      Conflict = "‼",
-      Ignored = "○",
+      Untracked = "?",
+      Added = "+",
+      Modified = "*",
+      Deleted = "x",
+      Renamed = ">",
+      Copied = "~",
+      Conflict = "!",
+      Ignored = "#",
     },
   },
   hooks = {

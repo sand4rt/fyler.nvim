@@ -20,14 +20,14 @@ Fyler supports plenty of options to customize. Following are default values
     git_status = {
       enabled = true,
       symbols = {
-        Untracked = "●",
-        Added = "✚",
-        Modified = "●",
-        Deleted = "✖",
-        Renamed = "➜",
-        Copied = "C",
-        Conflict = "‼",
-        Ignored = "○",
+        Untracked = "?",
+        Added = "+",
+        Modified = "*",
+        Deleted = "x",
+        Renamed = ">",
+        Copied = "~",
+        Conflict = "!",
+        Ignored = "#",
       },
     },
     hooks = {
