@@ -35,7 +35,7 @@ function M.n_select(self)
     else
       if util.is_valid_winid(self.win.old_winid) then
         if self.config.values.close_on_select then
-          self.win:hide()
+          self:close()
         end
 
         api.nvim_set_current_win(self.win.old_winid)

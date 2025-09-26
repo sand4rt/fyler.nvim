@@ -228,8 +228,10 @@ function M:track_buffer(name)
       return
     end
 
-    self.win.old_bufnr = api.nvim_get_current_buf()
-    self.win.old_winid = api.nvim_get_current_win()
+    if not e_util.is_protocol_path(api.nvim_buf_get_name(0)) then
+      self.win.old_bufnr = api.nvim_get_current_buf()
+      self.win.old_winid = api.nvim_get_current_win()
+    end
 
     for row, buf_line in ipairs(api.nvim_buf_get_lines(self.win.bufnr, 0, -1, false)) do
       if buf_line:find(ref_id) then
