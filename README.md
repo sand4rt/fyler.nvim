@@ -1,78 +1,83 @@
-<div>
-  <div align="center">
-    <br/>
-    <br/>
-    <br/>
+<div align="center">
+  <br/>
+  <br/>
+  <br/>
+  <img
+    width="320"
+    height="320"
+    alt="Fyler.nvim Logo"
+    src="https://github.com/user-attachments/assets/f0de0c60-5911-4aa4-bf13-9f16dc18e4b4"
+  />
+  <br/>
+  <br/>
+  <br/>
+  <h1>Fyler.nvim</h1>
+  <p><strong>A modern file manager for Neovim with git integration, LSP support, and intuitive navigation</strong></p>
+  <div>
     <img
-      width="250"
-      alt="fyler-logo"
-      src="https://github.com/user-attachments/assets/24838a97-e3d0-4451-ae69-433f52f816a1"
+      alt="License"
+      src="https://img.shields.io/github/license/A7Lavinraj/fyler.nvim?style=for-the-badge&logo=starship&color=ee999f&logoColor=D9E0EE&labelColor=302D41"
     />
-    <br/>
-    <br/>
-    <br/>
-    <h1>Fyler.nvim</h1>
-    <table>
-      <tr>
-        <td>
-          <strong>A file manager for <a href="https://neovim.io">Neovim</a></strong>
-        </td>
-      </tr>
-    </table>
-    <div>
-      <img
-        alt="License"
-        src="https://img.shields.io/github/license/A7Lavinraj/fyler.nvim?style=for-the-badge&logo=starship&color=ee999f&logoColor=D9E0EE&labelColor=302D41"
-      />
-      <img
-        alt="Stars"
-        src="https://img.shields.io/github/stars/A7Lavinraj/fyler.nvim?style=for-the-badge&logo=starship&color=c69ff5&logoColor=D9E0EE&labelColor=302D41"
-      />
-    </div>
+    <img
+      alt="Stars"
+      src="https://img.shields.io/github/stars/A7Lavinraj/fyler.nvim?style=for-the-badge&logo=starship&color=c69ff5&logoColor=D9E0EE&labelColor=302D41"
+    />
   </div>
-  <h4 align="center">
+  <br/>
+  <h4>
     <a href="https://youtube.com/playlist?list=PLE5gu3yOYmtiTiC1J3BysrcormCt_eWuq&si=L6yEiJI7rNuCp5cy">Live Streams</a>
     ·
     <a href="https://github.com/A7Lavinraj/fyler.nvim/wiki">Wiki Page</a>
   </h4>
-  <img
-    alt="Showcase"
-    src="https://github.com/user-attachments/assets/1984d7f5-d569-4fa9-a243-4938dca7a40c"
-  />
 </div>
+
+## Showcase
+
+<img
+  alt="Showcase"
+  src="https://github.com/user-attachments/assets/1984d7f5-d569-4fa9-a243-4938dca7a40c"
+/>
+
+## Features
+
+### Completed
+
+- [x] **File Operations** - Create, delete, move, and copy files and directories
+- [x] **Git Integration** - Visual git status indicators for tracked files
+- [x] **LSP Integration** - Enhanced file management with language server support
+- [x] **Smart Navigation** - Auto-tracking of current buffer and directory navigation
+- [x] **Telescope Integration** - Seamless integration with Telescope for enhanced workflow
+- [x] **Customizable Interface** - Configurable mappings, icons, and window behavior
+- [x] **Multiple Icon Providers** - Support for both mini.icons and nvim-web-devicons
+- [x] **Indentation Guides** - Visual directory structure representation
+- [x] **Netrw Hijacking** - Replace default file explorer
+- [x] **Public API** - Programmatic access for advanced users
+- [x] **User Commands** - Simple command interface
+
+### Planned
+
+- [ ] **File System Watching** - Real-time updates for file changes
+- [ ] **Fuzzy Finding** - Built-in search capabilities
+- [ ] **SSH Integration** - Remote file management support
 
 ## Installation
 
-> [!IMPORTANT]
-> Please be careful while choosing between `stable` and `latest` version.
->
-> - `stable` branch updates on releases.
-> - `stable` version documentation might be different.
-> - `main` branch updates frequently(can have bugs).
+### Stable Version (Recommended)
 
-### Stable version
+The stable branch updates only on releases and provides the most reliable experience.
 
-> [!NOTE]
-> Please refer to `stable` version [documentation page](https://github.com/A7Lavinraj/fyler.nvim/blob/stable/README.md). Latest version documentation might not be compatible for stable version.
-
-<details open>
-  <summary><a href="https://github.com/folke/lazy.nvim"><strong>Lazy.nvim</strong></a> (recommended)</summary>
+**Using Lazy.nvim:**
 
 ```lua
 {
   "A7Lavinraj/fyler.nvim",
   dependencies = { "nvim-mini/mini.icons" },
   branch = "stable",
-  ---@module 'fyler'
-  ---@type FylerSetupOptions
   opts = {}
 }
 ```
 
-</details>
-
-<details>
-  <summary><a href="https://github.com/nvim-mini/mini.deps"><strong>Mini.deps</strong></a></summary>
+**Using Mini.deps:**
 
 ```lua
 add({
@@ -82,70 +87,69 @@ add({
 })
 ```
 
-</details>
+### Latest Version
 
-### Latest version
+The main branch includes the newest features but may contain bugs.
 
-<details open>
-  <summary><a href="https://github.com/folke/lazy.nvim"><strong>Lazy.nvim</strong></a> (recommended)</summary>
-
-You can use default setup with `mini.icons`
+**Using Lazy.nvim with mini.icons:**
 
 ```lua
 {
   "A7Lavinraj/fyler.nvim",
   dependencies = { "nvim-mini/mini.icons" },
-  ---@module 'fyler'
-  ---@type FylerSetupOptions
   opts = {}
 }
 ```
 
-Or change to `nvim-web-devicons`
+**Using Lazy.nvim with nvim-web-devicons:**
 
 ```lua
 {
   "A7Lavinraj/fyler.nvim",
   dependencies = { "nvim-tree/nvim-web-devicons" },
-  ---@module 'fyler'
-  ---@type FylerSetupOptions
   opts = { icon_provider = "nvim_web_devicons" }
 }
 ```
 
-</details>
+## Quick Start
 
-<details>
-  <summary><a href="https://github.com/nvim-mini/mini.deps"><strong>Mini.deps</strong></a></summary>
+### Using Commands
 
-```lua
-add({
-  source = "A7Lavinraj/fyler.nvim",
-  depends = { "nvim-mini/mini.icons" },
-})
+```vim
+:Fyler                    " Open with default options
+:Fyler kind=split_left    " Open in specific window layout
+:Fyler dir=~/projects     " Open specific directory
 ```
 
+### Using Lua API
+
 ```lua
-add({
-  source = "A7Lavinraj/fyler.nvim",
-  depends = { "nvim-tree/nvim-web-devicons" },
-})
+local fyler = require("fyler")
+
+-- Basic usage
+fyler.open()
+
+-- Open specific directory
+fyler.open({ dir = "~/" })
+
+-- Open with custom window layout
+fyler.open({ kind = "split_left_most" })
 ```
 
-</details>
+## Configuration
 
-<details open>
-  <summary>(Default configuration)</summary>
+Fyler.nvim works out of the box with sensible defaults. Here's the complete configuration reference:
 
 ```lua
-local defaults = {
-  -- Changes explorer closing behaviour when a file get selected
+require("fyler").setup({
+  -- Close explorer when file is selected
   close_on_select = true,
-  -- Changes explorer behaviour to auto confirm simple edits
+  -- Auto-confirm simple file operations
   confirm_simple = false,
-  -- Changes explorer behaviour to hijack NETRW
+  -- Replace netrw as default explorer
   default_explorer = false,
-  -- Changes git statuses visibility
+
+  -- Git integration
   git_status = {
     enabled = true,
     symbols = {
@@ -159,26 +163,34 @@ local defaults = {
       Ignored = "#",
     },
   },
+
   hooks = {
-    on_delete = nil, -- function(path) end
-    on_rename = nil, -- function(src_path, dst_path) end
-    on_highlight = nil -- function(hl_groups, palette) end
+    -- function(path) end
+    on_delete = nil,
+    -- function(src_path, dst_path) end
+    on_rename = nil,
+    -- function(hl_groups, palette) end
+    on_highlight = nil,
   },
-  -- Custom icons for various directory states
+
+  -- Directory icons
   icon = {
     directory_collapsed = nil,
     directory_empty = nil,
     directory_expanded = nil,
   },
-  -- Changes icon provider
+
+  -- Icon provider (none, mini_icons or nvim_web_devicons)
   icon_provider = "mini_icons",
-  -- Changes Indentation marker properties
+
+  -- Indentation guides
   indentscope = {
     enabled = true,
     group = "FylerIndentMarker",
     marker = "│",
   },
-  -- Changes mappings for associated view
+
+  -- Key mappings
   mappings = {
     ["q"] = "CloseView",
     ["<CR>"] = "Select",
@@ -191,119 +203,82 @@ local defaults = {
     ["#"] = "CollapseAll",
     ["<BS>"] = "CollapseNode",
   },
-  -- Auto current buffer tracking
+
+  -- Buffer tracking
   track_current_buffer = true,
+
+  -- Window configuration
   win = {
-    -- Changes window border
+    -- Window border style
     border = "single",
-    -- Changes buffer options
-    buf_opts = {
-      -- buffer options
-    },
-    -- Changes window kind
+    -- Default window kind
     kind = "replace",
-    -- Changes window kind preset
+
+    -- Window kind presets
     kind_presets = {
-      -- values can be "(0,1]rel" or "{1...}abs"
-
-      -- <preset_name> = {
-      --   height = "",
-      --   width = "",
-      --   top = "",
-      --   left = ""
-      -- }
-
-      -- replace = {},
+      -- Define custom layouts
+      -- Values: "(0,1]rel" for relative or "{1...}abs" for absolute
     },
-    -- Changes window options
-    win_opts = {
-      -- window options
-    },
+
+    -- Buffer and window options
+    buf_opts = {}, -- Custom buffer options
+    win_opts = {}, -- Custom window options
   },
-}
+})
 ```
 
-</details>
+## Telescope Integration
 
-## Usage
-
-You can either open Fyler by `Fyler` command
-
-```vim
-:Fyler             " Open with default options
-:Fyler kind=<kind> " Open with specific window kind
-:Fyler dir=<path>  " Open with specific directory
-```
-
-Or using lua api
+Fyler.nvim includes a Telescope extension for enhanced directory navigation:
 
 ```lua
-local fyler = require("fyler")
+local telescope = require("telescope")
 
--- Open with default options
-fyler.open()
-
--- Open with specific directory
-fyler.open({ dir = "~/" })
-
--- Open with specific kind
-fyler.open({ kind = "split_left_most" })
-```
-
-## Telescope extension
-```lua
-local telescope = require "telescope"
-telescope.setup {
+telescope.setup({
   extensions = {
     fyler_zoxide = {
-      ...
+      -- Extension configuration
     }
   }
-}
+})
 
-telescope.load_extension "fyler_zoxide"
+telescope.load_extension("fyler_zoxide")
 ```
 
-## TODOS
+## Documentation
 
-- [x] Basic operations `CREATE | DELETE | MOVE | COPY`
-- [x] GIT integration
-- [x] Indentation guides
-- [x] LSP integration
-- [x] NETRW Hijacking
-- [x] Public APIs
-- [x] Telescope integration
-- [x] Track current buffer
-- [x] User command
-- [ ] File system watching
-- [ ] Fuzzy finding
-- [ ] SSH integration
+- **Wiki**: Comprehensive documentation available on the [Wiki page](https://github.com/A7Lavinraj/fyler.nvim/wiki)
+- **Live Streams**: Development streams on [YouTube](https://youtube.com/playlist?list=PLE5gu3yOYmtiTiC1J3BysrcormCt_eWuq&si=L6yEiJI7rNuCp5cy)
+- **Stable Documentation**: [Stable branch documentation](https://github.com/A7Lavinraj/fyler.nvim/blob/stable/README.md)
 
-## Have problems with fyler.nvim?
+## Contributing
 
-1. Search for existing [issues](https://github.com/A7Lavinraj/fyler.nvim/issues)
-2. If related issue is not there then open a new one
+We welcome contributions! Please read our [Contributing Guidelines](https://github.com/A7Lavinraj/fyler.nvim/blob/main/CONTRIBUTING.md) before submitting pull requests.
 
-## Want to contribute to this project?
+## Issues and Support
 
-- Please read the [CONTRIBUTING.md](https://github.com/A7Lavinraj/fyler.nvim/blob/main/CONTRIBUTING.md)
+If you encounter any problems:
 
-## Similar plugins
+1. Search existing [issues](https://github.com/A7Lavinraj/fyler.nvim/issues) to see if your problem has been reported
+2. If no related issue exists, please open a new one with detailed information
+
+## Similar Projects
+
+If fyler.nvim doesn't meet your needs, consider these alternatives:
 
 - [mini.files](https://github.com/nvim-mini/mini.files)
 - [oil.nvim](https://github.com/stevearc/oil.nvim)
 
-## Codebase inspiration
+## Acknowledgments
 
-- [mini.nvim](https://github.com/nvim-telescope/telescope.nvim)
-- [neogit](https://github.com/NeogitOrg/neogit)
-- [plenary.nvim](https://github.com/nvim-telescope/telescope.nvim)
-- [snacks.rename](https://github.com/folke/snacks.nvim/blob/main/docs/rename.md)
-- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
+This project draws inspiration from several excellent Neovim plugins and libraries:
 
-<div align="center">
-  <h2>Special thanks to all contributors</h2>
-  <a href="https://github.com/A7Lavinraj/fyler.nvim/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=A7Lavinraj/fyler.nvim" alt="Contributors" />
-  </a>
-</div>
+- [mini.nvim](https://github.com/nvim-telescope/telescope.nvim) - Clean, efficient plugin architecture
+- [neogit](https://github.com/NeogitOrg/neogit) - Git integration patterns
+- [plenary.nvim](https://github.com/nvim-telescope/telescope.nvim) - Utility functions
+- [snacks.rename](https://github.com/folke/snacks.nvim/blob/main/docs/rename.md) - File renaming implementation
+- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Fuzzy finding and UI patterns
+
+## License
+
+This project is licensed under the Apache-2.0 License. See the repository for full license details.
