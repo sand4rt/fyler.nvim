@@ -5,5 +5,5 @@ vim.cmd [[
 
   syn match FylerReferenceId /\/\d* / conceal
 
-  let b:current_syntax = "fyler"
+  let b:current_syntax = "Fyler"
 ]]

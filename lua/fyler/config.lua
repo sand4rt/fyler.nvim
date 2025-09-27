@@ -142,8 +142,8 @@ local function defaults()
     win = {
       border = vim.fn.has "nvim-0.11" == 1 and vim.o.winborder or "rounded",
       buf_opts = {
-        filetype = "fyler",
-        syntax = "fyler",
+        filetype = "Fyler",
+        syntax = "Fyler",
         buflisted = false,
         buftype = "acwrite",
         expandtab = true,

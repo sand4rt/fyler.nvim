@@ -45,21 +45,21 @@ function Entry:isdir()
 end
 
 ---@type table<integer, Entry>
-local EntryByref_id = {}
+local EntryByRefId = {}
 
 ---@type table<string, integer>
-local ref_idByPath = {}
+local RefIdByPath = {}
 
-local NextItemref_id = 1
+local NextItemRefId = 1
 local EntryManager = {}
 
 ---@param ref_id integer
 ---@return Entry
 function EntryManager.get(ref_id)
   assert(ref_id, "cannot find entry without ref_id")
-  assert(EntryByref_id[ref_id], "cannot locate entry with given ref_id")
+  assert(EntryByRefId[ref_id], "cannot locate entry with given ref_id")
 
-  return vim.deepcopy(EntryByref_id[ref_id])
+  return vim.deepcopy(EntryByRefId[ref_id])
 end
 
 ---@param open boolean
@@ -68,22 +68,22 @@ end
 ---@param type string
 ---@param link string|nil
 function EntryManager.set(open, name, path, type, link)
-  if ref_idByPath[link or path] then
-    return ref_idByPath[path]
+  if RefIdByPath[link or path] then
+    return RefIdByPath[path]
   end
 
-  local ref_id = NextItemref_id
-  NextItemref_id = NextItemref_id + 1
-  EntryByref_id[ref_id] = Entry.new(ref_id, open, name, path, type, link)
-  ref_idByPath[link or path] = ref_id
+  local ref_id = NextItemRefId
+  NextItemRefId = NextItemRefId + 1
+  EntryByRefId[ref_id] = Entry.new(ref_id, open, name, path, type, link)
+  RefIdByPath[link or path] = ref_id
 
   return ref_id
 end
 
 function EntryManager.reset()
-  EntryByref_id = {}
-  ref_idByPath = {}
-  NextItemref_id = 1
+  EntryByRefId = {}
+  RefIdByPath = {}
+  NextItemRefId = 1
 end
 
 ---@class FileTree
@@ -127,7 +127,7 @@ function M:expand_node(node_value)
   local node = self.tree:find(node_value)
   assert(node, "cannot locate node with given node_value")
 
-  EntryByref_id[node.value].open = true
+  EntryByRefId[node.value].open = true
 end
 
 ---@param node_value integer
@@ -137,7 +137,7 @@ function M:collapse_node(node_value)
   local node = self.tree:find(node_value)
   assert(node, "cannot locate node with given node_value")
 
-  EntryByref_id[node.value].open = false
+  EntryByRefId[node.value].open = false
 end
 
 ---@param node_value integer
@@ -167,7 +167,7 @@ end
 function M:_collapse_recursive(node)
   local entry = EntryManager.get(node.value)
   if entry:isdir() and entry.open then
-    EntryByref_id[node.value].open = false
+    EntryByRefId[node.value].open = false
   end
 
   for _, child in ipairs(node.children or {}) do
@@ -230,8 +230,8 @@ function M:_update(node)
       self.tree:delete(child.value)
     else
       local sym, hlg = git.status(child_entry.path)
-      EntryByref_id[child.value].git_sym = sym
-      EntryByref_id[child.value].git_hlg = hlg
+      EntryByRefId[child.value].git_sym = sym
+      EntryByRefId[child.value].git_hlg = hlg
     end
   end
 
@@ -240,8 +240,8 @@ function M:_update(node)
       local ref_id = EntryManager.set(false, entry.name, entry.path, entry.type, entry.link)
       local sym, hlg = git.status(entry.path)
 
-      EntryByref_id[ref_id].git_sym = sym
-      EntryByref_id[ref_id].git_hlg = hlg
+      EntryByRefId[ref_id].git_sym = sym
+      EntryByRefId[ref_id].git_hlg = hlg
 
       self.tree:insert(node.value, ref_id)
     end

@@ -62,8 +62,8 @@ Fyler supports plenty of options to customize. Following are default values
     win = {
       border = "single",
       buf_opts = {
-        filetype = "fyler",
-        syntax = "fyler",
+        filetype = "Fyler",
+        syntax = "Fyler",
         buflisted = false,
         buftype = "acwrite",
         expandtab = true,
