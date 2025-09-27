@@ -42,23 +42,23 @@
 
 ### Completed
 
-- [x] **File Operations** - Create, delete, move, and copy files and directories
-- [x] **Git Integration** - Visual git status indicators for tracked files
-- [x] **LSP Integration** - Enhanced file management with language server support
-- [x] **Smart Navigation** - Auto-tracking of current buffer and directory navigation
-- [x] **Telescope Integration** - Seamless integration with Telescope for enhanced workflow
-- [x] **Customizable Interface** - Configurable mappings, icons, and window behavior
-- [x] **Multiple Icon Providers** - Support for both mini.icons and nvim-web-devicons
-- [x] **Indentation Guides** - Visual directory structure representation
-- [x] **Netrw Hijacking** - Replace default file explorer
-- [x] **Public API** - Programmatic access for advanced users
-- [x] **User Commands** - Simple command interface
+- [x] **File Operations**
+- [x] **Git Integration**
+- [x] **LSP Integration**
+- [x] **Smart Navigation**
+- [x] **Telescope Integration**
+- [x] **Customizable Interface**
+- [x] **Multiple Icon Providers**
+- [x] **Indentation Guides**
+- [x] **Netrw Hijacking**
+- [x] **Public API**
+- [x] **User Commands**
 
 ### Planned
 
-- [ ] **File System Watching** - Real-time updates for file changes
-- [ ] **Fuzzy Finding** - Built-in search capabilities
-- [ ] **SSH Integration** - Remote file management support
+- [ ] **File System Watching**
+- [ ] **Fuzzy Finding**
+- [ ] **SSH Integration**
 
 ## Installation
 
@@ -204,6 +204,19 @@ require("fyler").setup({
     ["<BS>"] = "CollapseNode",
   },
 
+  popups = {
+    permission = {
+      -- Respective popup configuration:
+      -- border
+      -- height
+      -- width
+      -- left
+      -- right
+      -- top
+      -- bottom
+    }
+  }
+
   -- Buffer tracking
   track_current_buffer = true,
 
@@ -273,11 +286,11 @@ If fyler.nvim doesn't meet your needs, consider these alternatives:
 
 This project draws inspiration from several excellent Neovim plugins and libraries:
 
-- [mini.nvim](https://github.com/nvim-telescope/telescope.nvim) - Clean, efficient plugin architecture
-- [neogit](https://github.com/NeogitOrg/neogit) - Git integration patterns
-- [plenary.nvim](https://github.com/nvim-telescope/telescope.nvim) - Utility functions
-- [snacks.rename](https://github.com/folke/snacks.nvim/blob/main/docs/rename.md) - File renaming implementation
-- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Fuzzy finding and UI patterns
+- [mini.nvim](https://github.com/nvim-telescope/telescope.nvim)
+- [neogit](https://github.com/NeogitOrg/neogit)
+- [plenary.nvim](https://github.com/nvim-telescope/telescope.nvim)
+- [snacks.rename](https://github.com/folke/snacks.nvim/blob/main/docs/rename.md)
+- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
 
 ## License
 
