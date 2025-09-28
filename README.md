@@ -46,7 +46,7 @@
 - [x] **Git Integration**
 - [x] **LSP Integration**
 - [x] **Smart Navigation**
-- [x] **Telescope Integration**
+- [x] **Telescope Extension**
 - [x] **Customizable Interface**
 - [x] **Multiple Icon Providers**
 - [x] **Indentation Guides**
@@ -240,7 +240,7 @@ require("fyler").setup({
 })
 ```
 
-## Telescope Integration
+## Telescope Extension
 
 Fyler.nvim includes a Telescope extension for enhanced directory navigation:
 
