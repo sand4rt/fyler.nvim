@@ -25,6 +25,7 @@ local util = require "fyler.lib.util"
 ---| "SelectTab"
 ---| "SelectVSplit"
 ---| "CollapseAll"
+---| "CollapseNode"
 
 ---@class FylerConfigIndentScope
 ---@field enabled boolean
