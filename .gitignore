@@ -6,3 +6,6 @@
 
 # Take notes for any potential thing to remember
 .notes
+
+# Docs helptags file
+doc/tags
