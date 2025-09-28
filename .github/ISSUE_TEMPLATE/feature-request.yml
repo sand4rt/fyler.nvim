@@ -1,5 +1,6 @@
 name: Feature request
 description: Describe a feature you would like to see
+title: "[FEAT] "
 labels: [feature-request]
 body:
   - type: textarea
