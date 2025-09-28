@@ -146,7 +146,7 @@ function M:open(dir, kind)
       ["DispatchRefresh"] = function() self:dispatch_refresh() end,
       ["DrawIndentscope"] = function() self:draw_indentscope() end,
     },
-    user_mappings = self.config.get_user_mappings(),
+    user_mappings = self:_action_mod(self.config.get_user_mappings()),
     width         = win.width,
     win_opts      = win.win_opts,
   }
@@ -161,6 +161,19 @@ function M:_action(name)
   assert(action, string.format("action %s is not available", name))
 
   return action(self)
+end
+
+---@param user_mappings table<string, function>
+---@return table<string, function>
+function M:_action_mod(user_mappings)
+  local actions = {}
+  for keys, fn in pairs(user_mappings) do
+    actions[keys] = function()
+      fn(self)
+    end
+  end
+
+  return actions
 end
 
 function M:close()
