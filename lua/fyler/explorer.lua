@@ -182,6 +182,14 @@ function M:close()
   end
 end
 
+---@return Entry|nil
+function M:cursor_node_entry()
+  local ref_id = e_util.parse_ref_id(api.nvim_get_current_line())
+  if ref_id then
+    return self.file_tree:node_entry(ref_id)
+  end
+end
+
 function M:constrain_cursor()
   local cur = api.nvim_get_current_line()
   local ref_id = e_util.parse_ref_id(cur)
