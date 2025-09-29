@@ -214,8 +214,8 @@ require("fyler").setup({
       -- right
       -- top
       -- bottom
-    }
-  }
+    },
+  },
 
   -- Buffer tracking
   track_current_buffer = true,
