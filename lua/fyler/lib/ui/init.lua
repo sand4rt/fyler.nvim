@@ -10,6 +10,33 @@ local api = vim.api
 local Ui = {}
 Ui.__index = Ui
 
+Ui.Component = Component
+
+---@param children UiComponent[]
+Ui.Column = Ui.Component.new(function(children)
+  return {
+    tag = "column",
+    children = children,
+  }
+end)
+
+---@param children UiComponent[]
+Ui.Row = Ui.Component.new(function(children)
+  return {
+    tag = "row",
+    children = children,
+  }
+end)
+
+Ui.Text = Ui.Component.new(function(value, option)
+  return {
+    tag = "text",
+    value = value,
+    option = option,
+    children = {},
+  }
+end)
+
 ---@param win Win
 ---@return Ui
 function Ui.new(win)
@@ -30,7 +57,10 @@ function Ui:_render(component)
   end
 
   local was_modifiable = util.get_buf_option(self.win.bufnr, "modifiable")
+  local undolevels = util.get_buf_option(self.win.bufnr, "undolevels")
+
   util.set_buf_option(self.win.bufnr, "modifiable", true)
+  util.set_buf_option(self.win.bufnr, "undolevels", -1)
 
   self.renderer:render(component)
 
@@ -58,49 +88,17 @@ function Ui:_render(component)
   end
 
   util.set_buf_option(self.win.bufnr, "modified", false)
+  util.set_buf_option(self.win.bufnr, "undolevels", undolevels)
 end
 
-function Ui:render(opts)
-  opts = opts or {}
-
+function Ui:render(component, callback)
   vim.schedule(function()
-    if opts.before then
-      opts.before()
-    end
+    self:_render(component)
 
-    self:_render(opts.ui_lines)
-
-    if opts.after then
-      opts.after()
+    if callback then
+      callback()
     end
   end)
 end
-
-Ui.Component = Component
-
----@param children UiComponent[]
-Ui.Column = Ui.Component.new(function(children)
-  return {
-    tag = "column",
-    children = children,
-  }
-end)
-
----@param children UiComponent[]
-Ui.Row = Ui.Component.new(function(children)
-  return {
-    tag = "row",
-    children = children,
-  }
-end)
-
-Ui.Text = Ui.Component.new(function(value, option)
-  return {
-    tag = "text",
-    value = value,
-    option = option,
-    children = {},
-  }
-end)
 
 return Ui

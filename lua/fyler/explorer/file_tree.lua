@@ -186,6 +186,7 @@ function M:add_child(parent_value, open, name, path, type, link)
 end
 
 ---@param node_value integer|nil
+---@return FileTree
 function M:update(node_value)
   if config.values.git_status.enabled then
     git.refresh()
@@ -194,13 +195,15 @@ function M:update(node_value)
   if node_value then
     local node = self.tree:find(node_value)
     if not node then
-      return
+      return self
     end
 
     self:_update(node)
   else
     self:_update(self.tree.root)
   end
+
+  return self
 end
 
 ---@param node TreeNode

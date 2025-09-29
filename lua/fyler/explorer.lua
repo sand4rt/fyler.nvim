@@ -263,37 +263,9 @@ function M:track_buffer(name)
 end
 
 ---@param self Explorer
----@param after function
-M.dispatch_refresh = a.void_wrap(function(self, after)
-  self.file_tree:update()
-
-  if not self.win:has_valid_bufnr() then
-    return
-  end
-
-  local cache_undolevels
-  self.win.ui:render {
-    ui_lines = ui(self.file_tree:totable()),
-
-    before = function()
-      cache_undolevels = vim.bo[self.win.bufnr].undolevels
-      vim.bo[self.win.bufnr].undolevels = -1
-    end,
-
-    after = function()
-      if after then
-        after()
-      end
-
-      if not self.win:has_valid_bufnr() then
-        return
-      end
-
-      vim.bo[self.win.bufnr].undolevels = cache_undolevels
-
-      self:draw_indentscope()
-    end,
-  }
+---@param callback function
+M.dispatch_refresh = a.void_wrap(function(self, callback)
+  self.win.ui:render(ui(self.file_tree:update():totable()), callback)
 end)
 
 local extmark_namespace = api.nvim_create_namespace "Fyler-indent-scope"

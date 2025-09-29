@@ -32,9 +32,7 @@ M.create = a.wrap(vim.schedule_wrap(function(message, on_choice)
     :left(popup.left)
     :render(function(self)
       return function()
-        self.win.ui:render {
-          ui_lines = ui(message),
-        }
+        self.win.ui:render(ui(message))
       end
     end)
     :top(popup.top)
