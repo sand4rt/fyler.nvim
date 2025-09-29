@@ -7,7 +7,7 @@ local api = vim.api
 ---@param self Explorer
 function M.n_close(self)
   return function()
-    self.win:hide()
+    self:close()
   end
 end
 
@@ -59,7 +59,7 @@ function M.n_select_tab(self)
     if not entry:isdir() then
       if util.is_valid_winid(self.win.old_winid) then
         if self.config.values.close_on_select then
-          self.win:hide()
+          self:close()
         end
 
         vim.cmd.tabedit(entry.path)
@@ -80,7 +80,7 @@ function M.n_select_v_split(self)
     if not entry:isdir() then
       if util.is_valid_winid(self.win.old_winid) then
         if self.config.values.close_on_select then
-          self.win:hide()
+          self:close()
         end
 
         api.nvim_set_current_win(self.win.old_winid)
@@ -103,7 +103,7 @@ function M.n_select_split(self)
       if util.is_valid_winid(self.win.old_winid) then
         api.nvim_set_current_win(self.win.old_winid)
         if self.config.values.close_on_select then
-          self.win:hide()
+          self:close()
         end
 
         api.nvim_set_current_win(self.win.old_winid)

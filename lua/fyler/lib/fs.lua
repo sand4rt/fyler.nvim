@@ -1,8 +1,13 @@
 local List = require "fyler.lib.structs.list"
 local Stack = require "fyler.lib.structs.stack"
 local hooks = require "fyler.hooks"
+local util = require "fyler.lib.util"
 local M = {}
 local uv = vim.uv or vim.loop
+
+M.IS_MAC = uv.os_uname().sysname == "Darwin"
+M.IS_WINDOWS = uv.os_uname().version:match "Windows"
+M.IS_LINUX = not (M.IS_WINDOWS or M.IS_MAC)
 
 function M.cwd()
   return uv.cwd() or vim.fn.getcwd(0)
@@ -152,13 +157,9 @@ function M.create_dir(path)
 end
 
 function M.create_dir_recursive(path)
-  local parts = vim.tbl_filter(function(part)
-    return part ~= ""
-  end, vim.split(path, "/"))
-  local is_windows = vim.fn.has "win32" == 1 or vim.fn.has "win64" == 1
-
-  local current_path = is_windows and parts[1] or ""
-  local start_index = is_windows and 2 or 1
+  local parts = util.filter_bl(vim.split(path, "/"))
+  local current_path = M.IS_WINDOWS and parts[1] or ""
+  local start_index = M.IS_WINDOWS and 2 or 1
 
   for i = start_index, #parts do
     current_path = current_path .. "/" .. parts[i]
