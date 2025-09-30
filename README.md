@@ -126,17 +126,17 @@ The main branch includes the newest features but may contain bugs.
 ```lua
 local fyler = require("fyler")
 
--- Basic usage
-fyler.open()
+-- Open Fyler with optional settings
+fyler.open({
+  dir = "~/",              -- (Optional) Start in specific directory
+  kind = "split_left_most" -- (Optional) Use custom window layout
+})
 
--- Open specific directory
-fyler.open({ dir = "~/" })
-
--- Open with custom window layout
-fyler.open({ kind = "split_left_most" })
-
--- Toggle open/close
-fyler.toggle()
+-- Toggle Fyler with optional settings 
+fyler.toggle({
+  dir = "~/",              -- (Optional) Start in specific directory
+  kind = "split_left_most" -- (Optional) Use custom window layout
+})
 ```
 
 ## Configuration
