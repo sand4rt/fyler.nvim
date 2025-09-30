@@ -260,6 +260,7 @@ function M:focus_path(path)
   path = fs.normalize(path)
 
   local root_entry = EntryManager.get(self.tree.root.value)
+  root_entry.path = fs.normalize(root_entry.path)
   if not vim.startswith(path, root_entry.path) then
     return nil
   end
