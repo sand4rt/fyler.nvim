@@ -134,6 +134,9 @@ fyler.open({ dir = "~/" })
 
 -- Open with custom window layout
 fyler.open({ kind = "split_left_most" })
+
+-- Toggle open/close
+fyler.toggle()
 ```
 
 ## Configuration
