@@ -30,18 +30,27 @@ function M.setup(opts)
     opts = opts or {}
     local dir = opts.dir or fs.cwd()
     local kind = opts.kind or config.values.win.kind
-    local instance = explorer.instance(dir)
+
     local current = explorer.current()
     if current and (current.dir ~= dir or current.win.kind ~= kind) then
       current:close()
     end
 
-    if instance then
-      instance:open(dir, kind)
-    else
-      explorer.new(dir, config):open(dir, kind)
-    end
+    (explorer.instance(dir) or explorer.new(dir, config)):open(dir, kind)
   end)
+
+  M.toggle = function()
+    local current = explorer.current()
+    if not current then
+      current = explorer.new(fs.cwd(), config)
+    end
+
+    if current:is_visible() then
+      current:close()
+    else
+      current:open(current:getcwd() or fs.cwd(), (current.win and current.win.kind or config.values.win.kind))
+    end
+  end
 
   ---@param name string|nil
   M.track_buffer = function(name)
@@ -50,8 +59,9 @@ function M.setup(opts)
       return
     end
 
+    local buffer_path = name or vim.fn.expand "%:p"
     util.debounce("focus_buffer", 10, function()
-      current:track_buffer(name or vim.fn.expand "%:p")
+      current:track_buffer(buffer_path)
     end)
   end
 end
