@@ -68,7 +68,7 @@ end
 function M:chdir(dir)
   assert(dir, "cannot change directory with empty path")
 
-  self.file_tree = Tree.new(vim.fn.fnamemodify(dir, ":t"), true, dir, "directory")
+  self.file_tree = Tree.new(fn.fnamemodify(dir, ":t"), true, dir, "directory")
   self.file_tree:update()
 
   if self.win then
@@ -79,6 +79,12 @@ end
 ---@return boolean
 function M:is_visible()
   return self.win and self.win:is_visible()
+end
+
+---@param dir string
+---@param kind WinKind
+function M:eq_with(dir, kind)
+  return self.dir == dir and self.win.kind == kind
 end
 
 function M:focus()
