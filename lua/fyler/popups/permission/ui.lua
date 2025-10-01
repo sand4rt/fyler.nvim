@@ -9,12 +9,27 @@ return Component.new(function(message)
     table.insert(
       children,
       Ui.Row(util.tbl_map(line, function(word)
-        return Ui.Text(word.str, {
-          highlight = word.hlg,
-        })
+        return Ui.Text(word.str, { highlight = word.hlg })
       end))
     )
   end
+
+  table.insert(
+    children,
+    Ui.Row {
+      Ui.Text("───────────", { highlight = "FylerIndentMarker" }),
+    }
+  )
+  table.insert(
+    children,
+    Ui.Row {
+      Ui.Text("[Y]", { highlight = "FylerYellow" }),
+      Ui.Text "es",
+      Ui.Text "  ",
+      Ui.Text("[N]", { highlight = "FylerYellow" }),
+      Ui.Text "o",
+    }
+  )
 
   return {
     tag = "permission",
