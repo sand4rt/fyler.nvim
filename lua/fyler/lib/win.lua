@@ -31,6 +31,8 @@ local util = require "fyler.lib.util"
 ---@field namespace integer
 ---@field old_bufnr integer|nil
 ---@field old_winid integer|nil
+---@field on_hide function|nil
+---@field on_show function|nil
 ---@field render function|nil
 ---@field right string|nil
 ---@field title string|string[]|nil
@@ -268,6 +270,10 @@ function Win:show()
     end
   end
 
+  if self.on_show then
+    self.on_show()
+  end
+
   self.augroup = api.nvim_create_augroup("Fyler-augroup-" .. self.bufnr, { clear = true })
   self.namespace = api.nvim_create_namespace("Fyler-namespace-" .. self.bufnr)
 
@@ -316,7 +322,7 @@ function Win:hide()
       and util.is_valid_bufnr(self.old_bufnr)
       and api.nvim_buf_is_loaded(self.old_bufnr)
     then
-      api.nvim_win_set_buf(self.winid, self.old_bufnr)
+      util.try(api.nvim_win_set_buf, self.winid, self.old_bufnr)
     end
 
     util.try(api.nvim_buf_delete, self.bufnr, { force = true })
@@ -327,6 +333,10 @@ function Win:hide()
 
   self.winid = nil
   self.bufnr = nil
+
+  if self.on_hide then
+    self.on_hide()
+  end
 end
 
 -- Handle case when user open a NON FYLER BUFFER in "Fyler" window

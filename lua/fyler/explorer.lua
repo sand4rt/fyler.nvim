@@ -462,42 +462,34 @@ local function get_tbl(self, tbl)
     local ops = grouped_ops[op_type]
 
     if op_type == "delete" then
-      table.insert(lines, { { str = "DELETE", hlg = "FylerConfirmRed" } })
+      table.insert(lines, { { str = "DELETE", hlg = "FylerRed" } })
       for _, op in ipairs(ops) do
-        table.insert(lines, {
-          { str = "| " },
-          { str = fs.relpath(self:getcwd(), op.path), hlg = "FylerConfirmGrey" },
-        })
+        table.insert(lines, { { str = fs.relpath(self:getcwd(), op.path) } })
       end
       table.insert(lines, { { str = "" } })
     elseif op_type == "create" then
-      table.insert(lines, { { str = "CREATE", hlg = "FylerConfirmGreen" } })
+      table.insert(lines, { { str = "CREATE", hlg = "FylerGreen" } })
       for _, op in ipairs(ops) do
-        table.insert(lines, {
-          { str = "| " },
-          { str = fs.relpath(self:getcwd(), op.path), hlg = "FylerConfirmGrey" },
-        })
+        table.insert(lines, { { str = fs.relpath(self:getcwd(), op.path) } })
       end
       table.insert(lines, { { str = "" } })
     elseif op_type == "move" then
-      table.insert(lines, { { str = "MOVE", hlg = "FylerConfirmYellow" } })
+      table.insert(lines, { { str = "MOVE", hlg = "FylerYellow" } })
       for _, op in ipairs(ops) do
         table.insert(lines, {
-          { str = "| " },
-          { str = fs.relpath(self:getcwd(), op.src), hlg = "FylerConfirmGrey" },
+          { str = fs.relpath(self:getcwd(), op.src) },
           { str = " > " },
-          { str = fs.relpath(self:getcwd(), op.dst), hlg = "FylerConfirmGrey" },
+          { str = fs.relpath(self:getcwd(), op.dst) },
         })
       end
       table.insert(lines, { { str = "" } })
     elseif op_type == "copy" then
-      table.insert(lines, { { str = "COPY", hlg = "FylerConfirmYellow" } })
+      table.insert(lines, { { str = "COPY", hlg = "FylerYellow" } })
       for _, op in ipairs(ops) do
         table.insert(lines, {
-          { str = "| " },
-          { str = fs.relpath(self:getcwd(), op.src), hlg = "FylerConfirmGrey" },
+          { str = fs.relpath(self:getcwd(), op.src) },
           { str = " > " },
-          { str = fs.relpath(self:getcwd(), op.dst), hlg = "FylerConfirmGrey" },
+          { str = fs.relpath(self:getcwd(), op.dst) },
         })
       end
       table.insert(lines, { { str = "" } })

@@ -75,10 +75,10 @@ function M.setup()
 
   -- stylua: ignore start
   local hl_groups = {
-    FylerConfirmGreen    = { fg = palette.green },
-    FylerConfirmGrey     = { fg = palette.grey },
-    FylerConfirmRed      = { fg = palette.red },
-    FylerConfirmYellow   = { fg = palette.yellow },
+    FylerGreen           = { fg = palette.green },
+    FylerGrey            = { fg = palette.grey },
+    FylerRed             = { fg = palette.red },
+    FylerYellow          = { fg = palette.yellow },
     FylerFSDirectoryIcon = { fg = palette.blue },
     FylerFSDirectoryName = { fg = palette.fg },
     FylerFSFile          = { fg = palette.white },

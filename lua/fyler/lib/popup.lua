@@ -96,6 +96,18 @@ function Popup:width(width)
   return self
 end
 
+---@param fn function
+function Popup:on_show(fn)
+  self.config.on_show = fn
+  return self
+end
+
+---@param fn function
+function Popup:on_hide(fn)
+  self.config.on_hide = fn
+  return self
+end
+
 function Popup:create()
   self.win = Win.new(self.config)
   self.win:show()
