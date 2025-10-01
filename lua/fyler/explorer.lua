@@ -384,7 +384,14 @@ local function get_ordered_operations(changes)
 
   for _, dest in ipairs(all_destinations) do
     local current = dest
-    while current and current ~= "." and current ~= "/" and not processed_dirs[current] do
+
+    while
+      current
+      and current ~= "."
+      and current ~= "/"
+      and not current:find "^[A-Za-z]:/$"
+      and not processed_dirs[current]
+    do
       if not vim.fn.isdirectory(current) == 1 and not deleted_paths[current] then
         table.insert(dirs_to_create, current)
         processed_dirs[current] = true
