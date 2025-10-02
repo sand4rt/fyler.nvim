@@ -25,6 +25,7 @@ function M.setup(opts)
   local explorer = require "fyler.explorer"
   local fs = require "fyler.lib.fs"
   local util = require "fyler.lib.util"
+  local e_util = require "fyler.explorer.util"
 
   ---@return Explorer|nil
   M.current = function()
@@ -37,13 +38,13 @@ function M.setup(opts)
     return explorer.instance(dir) or explorer.new(dir, config)
   end
 
-  ---@param opts table|nil
+  ---@param e_opts table|nil
   ---@return string dir, string kind
-  local function get_dir_and_kind(opts)
-    opts = opts or {}
+  local function get_dir_and_kind(e_opts)
+    e_opts = e_opts or {}
     local current = M.current()
-    local dir = opts.dir or (current and current:getcwd()) or fs.cwd()
-    local kind = opts.kind or (current and current.win and current.win.kind) or config.values.win.kind
+    local dir = e_opts.dir or (current and current:getcwd()) or fs.cwd()
+    local kind = e_opts.kind or (current and current.win and current.win.kind) or config.values.win.kind
     return dir, kind
   end
 
@@ -54,8 +55,8 @@ function M.setup(opts)
     return get_or_create_instance(dir)
   end
 
-  M.open = vim.schedule_wrap(function(opts)
-    local dir, kind = get_dir_and_kind(opts)
+  M.open = vim.schedule_wrap(function(e_opts)
+    local dir, kind = get_dir_and_kind(e_opts)
 
     local current = M.current()
     if current and not current:eq_with(dir, kind) then
@@ -72,12 +73,12 @@ function M.setup(opts)
     end
   end
 
-  M.toggle = function(opts)
-    local dir, kind = get_dir_and_kind(opts)
+  M.toggle = function(e_opts)
+    local dir, kind = get_dir_and_kind(e_opts)
     local current = M.current()
 
     if current then
-      if current:eq_with(dir, kind) then
+      if e_util.is_protocol_path(dir) or current:eq_with(dir, kind) then
         if current:is_visible() then
           current:close()
         else
