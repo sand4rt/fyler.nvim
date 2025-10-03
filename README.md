@@ -190,7 +190,7 @@ require("fyler").setup({
   indentscope = {
     enabled = true,
     group = "FylerIndentMarker",
-    marker = "│",
+    marker = "▕",
   },
 
   -- Key mappings

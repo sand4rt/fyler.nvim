@@ -162,7 +162,7 @@ local function defaults()
     indentscope = {
       enabled = true,
       group = "FylerIndentMarker",
-      marker = "│",
+      marker = "▕",
     },
     mappings = {
       ["q"] = "CloseView",

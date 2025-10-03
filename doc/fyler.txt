@@ -62,7 +62,7 @@ Fyler supports plenty of options to customize. Following are default values
     indentscope = {
       enabled = true,
       group = "FylerIndentMarker",
-      marker = "│",
+      marker = "▕",
     },
     mappings = {
       ["q"] = "CloseView",
