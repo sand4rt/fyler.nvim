@@ -1,18 +1,8 @@
 <div align="center">
-  <br/>
-  <br/>
-  <br/>
-  <img
-    width="320"
-    height="320"
-    alt="Fyler.nvim Logo"
-    src="https://github.com/user-attachments/assets/f0de0c60-5911-4aa4-bf13-9f16dc18e4b4"
-  />
-  <br/>
-  <br/>
-  <br/>
   <h1>Fyler.nvim</h1>
+
   <p><strong>A modern file manager for Neovim with git integration, LSP support, and intuitive navigation</strong></p>
+
   <div>
     <img
       alt="License"
@@ -23,42 +13,14 @@
       src="https://img.shields.io/github/stars/A7Lavinraj/fyler.nvim?style=for-the-badge&logo=starship&color=c69ff5&logoColor=D9E0EE&labelColor=302D41"
     />
   </div>
-  <br/>
-  <h4>
-    <a href="https://youtube.com/playlist?list=PLE5gu3yOYmtiTiC1J3BysrcormCt_eWuq&si=L6yEiJI7rNuCp5cy">Live Streams</a>
-    ·
-    <a href="https://github.com/A7Lavinraj/fyler.nvim/wiki">Wiki Page</a>
-  </h4>
 </div>
 
-## Showcase
+<br>
 
 <img
   alt="Showcase"
-  src="https://github.com/user-attachments/assets/1984d7f5-d569-4fa9-a243-4938dca7a40c"
+  src="https://github.com/user-attachments/assets/86081f07-7400-4766-9540-d1150523e3ed"
 />
-
-## Features
-
-### Completed
-
-- [x] **File Operations**
-- [x] **Git Integration**
-- [x] **LSP Integration**
-- [x] **Smart Navigation**
-- [x] **Telescope Extension**
-- [x] **Customizable Interface**
-- [x] **Multiple Icon Providers**
-- [x] **Indentation Guides**
-- [x] **Netrw Hijacking**
-- [x] **Public API**
-- [x] **User Commands**
-
-### Planned
-
-- [ ] **File System Watching**
-- [ ] **Fuzzy Finding**
-- [ ] **SSH Integration**
 
 ## Installation
 
@@ -132,7 +94,7 @@ fyler.open({
   kind = "split_left_most" -- (Optional) Use custom window layout
 })
 
--- Toggle Fyler with optional settings 
+-- Toggle Fyler with optional settings
 fyler.toggle({
   dir = "~/",              -- (Optional) Start in specific directory
   kind = "split_left_most" -- (Optional) Use custom window layout
@@ -144,31 +106,7 @@ fyler.toggle({
 Fyler.nvim works out of the box with sensible defaults. Here's the complete configuration reference:
 
 ```lua
-require("fyler").setup({
-  -- Close explorer when file is selected
-  close_on_select = true,
-  -- Auto-confirm simple file operations
-  confirm_simple = false,
-  -- Replace netrw as default explorer
-  default_explorer = false,
-  -- Move deleted files/directories to the system trash
-  delete_to_trash = false,
-
-  -- Git integration
-  git_status = {
-    enabled = true,
-    symbols = {
-      Untracked = "?",
-      Added = "+",
-      Modified = "*",
-      Deleted = "x",
-      Renamed = ">",
-      Copied = "~",
-      Conflict = "!",
-      Ignored = "#",
-    },
-  },
-
+{
   hooks = {
     -- function(path) end
     on_delete = nil,
@@ -177,72 +115,122 @@ require("fyler").setup({
     -- function(hl_groups, palette) end
     on_highlight = nil,
   },
-
-  -- Directory icons
-  icon = {
-    directory_collapsed = nil,
-    directory_empty = nil,
-    directory_expanded = nil,
+  integrations = {
+    icon = "mini_icons",
   },
-
-  -- Icon provider (none, mini_icons or nvim_web_devicons)
-  icon_provider = "mini_icons",
-
-  -- Indentation guides
-  indentscope = {
-    enabled = true,
-    group = "FylerIndentMarker",
-    marker = "│",
-  },
-
-  -- Key mappings
-  mappings = {
-    ["q"] = "CloseView",
-    ["<CR>"] = "Select",
-    ["<C-t>"] = "SelectTab",
-    ["|"] = "SelectVSplit",
-    ["-"] = "SelectSplit",
-    ["^"] = "GotoParent",
-    ["="] = "GotoCwd",
-    ["."] = "GotoNode",
-    ["#"] = "CollapseAll",
-    ["<BS>"] = "CollapseNode",
-  },
-
-  popups = {
-    permission = {
-      -- Respective popup configuration:
-      -- border
-      -- height
-      -- width
-      -- left
-      -- right
-      -- top
-      -- bottom
+  views = {
+    finder = {
+      -- Close explorer when file is selected
+      close_on_select = true,
+      -- Auto-confirm simple file operations
+      confirm_simple = false,
+      -- Replace netrw as default explorer
+      default_explorer = false,
+      -- Move deleted files/directories to the system trash
+      delete_to_trash = false,
+      -- Git status
+      git_status = {
+        enabled = true,
+        symbols = {
+          Untracked = "?",
+          Added = "+",
+          Modified = "*",
+          Deleted = "x",
+          Renamed = ">",
+          Copied = "~",
+          Conflict = "!",
+          Ignored = "#",
+        },
+      },
+      -- Icons for directory states
+      icon = {
+        directory_collapsed = nil,
+        directory_empty = nil,
+        directory_expanded = nil,
+      },
+      -- Indentation guides
+      indentscope = {
+        enabled = true,
+        group = "FylerIndentMarker",
+        marker = "│",
+      },
+      -- Key mappings
+      mappings = {
+        ["q"] = "CloseView",
+        ["<CR>"] = "Select",
+        ["<C-t>"] = "SelectTab",
+        ["|"] = "SelectVSplit",
+        ["-"] = "SelectSplit",
+        ["^"] = "GotoParent",
+        ["="] = "GotoCwd",
+        ["."] = "GotoNode",
+        ["#"] = "CollapseAll",
+        ["<BS>"] = "CollapseNode",
+      },
+      -- Current file tracking
+      follow_current_file = true,
+      -- File system watching(includes git status)
+      watcher = {
+        enabled = false,
+      },
+      -- Window configuration
+      win = {
+        border = vim.o.winborder == "" and "single" or vim.o.winborder,
+        buf_opts = {
+          filetype = "fyler",
+          syntax = "fyler",
+          buflisted = false,
+          buftype = "acwrite",
+          expandtab = true,
+          shiftwidth = 2,
+        },
+        kind = "replace",
+        kinds = {
+          float = {
+            height = "70%",
+            width = "70%",
+            top = "10%",
+            left = "15%",
+          },
+          replace = {},
+          split_above = {
+            height = "70%",
+          },
+          split_above_all = {
+            height = "70%",
+          },
+          split_below = {
+            height = "70%",
+          },
+          split_below_all = {
+            height = "70%",
+          },
+          split_left = {
+            width = "70%",
+          },
+          split_left_most = {
+            width = "30%",
+          },
+          split_right = {
+            width = "30%",
+          },
+          split_right_most = {
+            width = "30%",
+          },
+        },
+        win_opts = {
+          concealcursor = "nvic",
+          conceallevel = 3,
+          cursorline = false,
+          number = false,
+          relativenumber = false,
+          winhighlight = "Normal:FylerNormal",
+          wrap = false,
+        },
+      },
     },
   },
-
-  -- Buffer tracking
-  track_current_buffer = true,
-
-  -- Window configuration
-  win = {
-    -- Window border style
-    border = "single",
-    -- Default window kind
-    kind = "replace",
-
-    -- Window kind presets
-    kind_presets = {
-      -- Define custom layouts
-      -- Values: "(0,1]rel" for relative or "{1...}abs" for absolute
-    },
-
-    -- Buffer and window options
-    buf_opts = {}, -- Custom buffer options
-    win_opts = {}, -- Custom window options
-  },
-})
+}
 ```
 
 Enable `delete_to_trash` to send deletions to your operating system's trash (macOS `~/.Trash`, Linux XDG Trash, Windows Recycle Bin) instead of removing files permanently.
@@ -259,13 +247,13 @@ local telescope = require("telescope")
 
 telescope.setup({
   extensions = {
-    fyler_zoxide = {
+    fyler = {
       -- Extension configuration
     }
   }
 })
 
-telescope.load_extension("fyler_zoxide")
+telescope.load_extension("fyler")
 ```
 
 ## Documentation

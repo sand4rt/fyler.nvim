@@ -1,151 +1,52 @@
-================================================================================
-INTRODUCTION                                                        *fyler.nvim*
+                                                                    *Fyler.nvim*
+INTRODUCTION
 
-Fyler.nvim is a file manager which can edit file system like a buffer.
+Fyler.nvim is a neovim file manager plugin based on buffer based file editing.
 
-How it different from |oil.nvim|?
-- It provides tree view
+Why Fyler.nvim over |oil.nvim|?
+- It provides tree view.
+- Users can now have full overview of project without going back and
+  forth between directories.
 
+Getting started with Fyler:
+1. Run `:checkhealth fyler` to make sure everything is in right place.
+2. Fyler must be setup correctly before used. See |Fyler.Config|
 
-================================================================================
-CONFIGURATION                                                     *fyler.config*
+USAGE
 
-Fyler supports plenty of options to customize. Following are default values
+Fyler can be used through commands:
 
+`:Fyler dir=... kind=...
+
+Here `dir` is just a path and `kind` could be anything from following:
+
+- `float`
+- `replace`
+- `split_above`
+- `split_above_all`
+- `split_below`
+- `split_below_all`
+- `split_left`
+- `split_left_most`
+- `split_right`
+- `split_right_most`
+
+Fyler can be used through lua API:
 >lua
+  local fyler = require("fyler")
 
-  ---@return string
-  local function border()
-    if vim.fn.has "nvim-0.11" == 1 and vim.o.winborder ~= "" then
-      return vim.o.winborder
-    end
-
-    return "rounded"
-  end
-
-  local function winhighlight()
-    return table.concat({
-      "Normal:FylerNormal",
-      "FloatBorder:FylerBorder",
-      "FloatTitle:FylerBorder",
-    }, ",")
-  end
-
-  local defaults = {
-    close_on_select = true,
-    confirm_simple = false,
-    default_explorer = false,
-    delete_to_trash = false,
-    git_status = {
-      enabled = true,
-      symbols = {
-        Untracked = "?",
-        Added = "+",
-        Modified = "*",
-        Deleted = "x",
-        Renamed = ">",
-        Copied = "~",
-        Conflict = "!",
-        Ignored = "#",
-      },
-    },
-    hooks = {
-      on_delete = nil,
-      on_rename = nil,
-      on_highlight = nil,
-    },
-    icon = {
-      directory_collapsed = nil,
-      directory_empty = nil,
-      directory_expanded = nil,
-    },
-    icon_provider = "mini_icons",
-    indentscope = {
-      enabled = true,
-      group = "FylerIndentMarker",
-      marker = "│",
-    },
-    mappings = {
-      ["q"] = "CloseView",
-      ["<CR>"] = "Select",
-      ["<C-t>"] = "SelectTab",
-      ["|"] = "SelectVSplit",
-      ["-"] = "SelectSplit",
-      ["^"] = "GotoParent",
-      ["="] = "GotoCwd",
-      ["."] = "GotoNode",
-      ["#"] = "CollapseAll",
-      ["<BS>"] = "CollapseNode",
-    },
-    popups = {
-      permission = {
-        border = border(),
-        width = "0.4rel",
-        height = "0.3rel",
-        top = "0.35rel",
-        left = "0.3rel",
-      },
-    },
-    track_current_buffer = true,
-    win = {
-      border = border(),
-      buf_opts = {
-        filetype = "Fyler",
-        syntax = "Fyler",
-        buflisted = false,
-        buftype = "acwrite",
-        expandtab = true,
-        shiftwidth = 2,
-      },
-      kind = "replace",
-      kind_presets = {
-        float = {
-          height = "0.7rel",
-          width = "0.7rel",
-          top = "0.1rel",
-          left = "0.15rel",
-        },
-        replace = {},
-        split_above = {
-          height = "0.7rel",
-        },
-        split_above_all = {
-          height = "0.7rel",
-        },
-        split_below = {
-          height = "0.7rel",
-        },
-        split_below_all = {
-          height = "0.7rel",
-        },
-        split_left = {
-          width = "0.3rel",
-        },
-        split_left_most = {
-          width = "0.3rel",
-        },
-        split_right = {
-          width = "0.3rel",
-        },
-        split_right_most = {
-          width = "0.3rel",
-        },
-      },
-      win_opts = {
-        concealcursor = "nvic",
-        conceallevel = 3,
-        cursorline = true,
-        number = true,
-        relativenumber = true,
-        winhighlight = winhighlight()
-        wrap = false,
-      },
-    },
-  }
+  fyler.open({ dir = "...", kind = "..." })
 <
 
-When `delete_to_trash` is enabled Fyler moves files and directories into the
-operating system trash instead of permanently deleting them. Items that are
-already inside the trash directory are removed permanently.
+------------------------------------------------------------------------------
+                                                                  *Fyler.Config*
+CONFIGURATION
 
- vim:tw=78:ts=8:ft=help:norl:
+To setup Fyler put following code anywhere in your neovim runtime:
+>lua
+  require("fyler").setup()
+<
+To know more about plugin customization. visit:
+https://github.com/A7Lavinraj/fyler.nvim/wiki/configuration-options
+
+ vim:tw=78:ts=8:noet:ft=help:norl:

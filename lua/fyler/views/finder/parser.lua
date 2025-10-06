@@ -28,10 +28,4 @@ function M.parse_name(str)
   end
 end
 
-function M.fyler_auto_indent()
-  local prevlnum = vim.v.lnum - 1
-  local previndent = vim.fn.indent(prevlnum)
-  return previndent
-end
-
 return M

@@ -1,9 +1,11 @@
+local Path = require "fyler.lib.path"
+local Process = require "fyler.lib.process"
 local config = require "fyler.config"
-local fs = require "fyler.lib.fs"
 local util = require "fyler.lib.util"
+
 local M = {}
 
-local git_status_map = {
+local icon_map = {
   ["??"] = "Untracked",
   ["A "] = "Added",
   ["AM"] = "Added",
@@ -30,7 +32,7 @@ local git_status_map = {
   ["!!"] = "Ignored",
 }
 
-local git_highlight_map = {
+local hl_map = {
   Untracked = "FylerGitUntracked",
   Added = "FylerGitAdded",
   Modified = "FylerGitModified",
@@ -41,62 +43,63 @@ local git_highlight_map = {
   Ignored = "FylerGitIgnored",
 }
 
-local cached_status_map = {}
-
-local function system(cmd)
-  return vim.system(cmd, { text = true }):wait()
+function M.map_entries(root_dir, entries)
+  local status_map =
+    util.tbl_merge_force(M.build_modified_lookup_for(root_dir), M.build_ignored_lookup_for(root_dir, entries))
+  return util.tbl_map(entries, function(e)
+    return {
+      config.values.views.finder.git_status.symbols[icon_map[status_map[e]]] or "",
+      hl_map[icon_map[status_map[e]]],
+    }
+  end)
 end
 
-local function worktree_root()
-  local out = system { "git", "rev-parse", "--show-toplevel" }
-  if not out.stdout then
-    return
-  end
-
-  return string.match(out.stdout, "^(.*)\n$")
+---@return string
+function M.worktree_root()
+  return Process.new({
+    path = "git",
+    args = { "rev-parse", "--show-toplevel" },
+  })
+    :spawn()
+    :out()
 end
 
-function M.inside_worktree()
-  return system({ "git", "rev-parse", "--is-inside-work-tree" }).code == 0
+---@param dir string
+function M.build_modified_lookup_for(dir)
+  local process = Process.new({
+    path = "git",
+    args = { "-C", dir, "status", "--porcelain" },
+  }):spawn()
+
+  local lookup = {}
+  for _, line in process:stdout_iter() do
+    if line ~= "" then
+      local symbol = line:sub(1, 2)
+      local path = Path.new(dir):join(line:sub(4)):absolute()
+      lookup[path] = symbol
+    end
+  end
+
+  return lookup
 end
 
-function M.refresh()
-  if not M.inside_worktree() then
-    return
+---@param dir string
+---@param stdin string|string[]
+function M.build_ignored_lookup_for(dir, stdin)
+  local process = Process.new({
+    path = "git",
+    args = { "-C", dir, "check-ignore", "--stdin" },
+    stdin = table.concat(util.tbl_wrap(stdin), "\n"),
+  }):spawn()
+
+  local lookup = {}
+  for _, line in process:stdout_iter() do
+    if line ~= "" then
+      lookup[line] = "!!"
+    end
   end
 
-  local dir = worktree_root()
-  if not dir then
-    return
-  end
-
-  local out = system { "git", "status", "-z", "--porcelain" }
-  if not out.stdout then
-    return
-  end
-
-  local status_list = util.filter_bl(vim.split(out.stdout, "\0"))
-  local status_map = {}
-
-  for _, status in ipairs(status_list) do
-    local symbol = string.sub(status, 1, 2)
-    local path = string.sub(status, 4)
-    status_map[fs.joinpath(dir, fs.normalize(path))] = git_status_map[symbol]
-  end
-
-  cached_status_map = status_map
-end
-
----@param path string
----@return string|nil, string|nil, string|nil
-function M.status(path)
-  local normalized_path = fs.normalize(path)
-  local status_info = cached_status_map[normalized_path]
-  if not status_info then
-    return
-  end
-
-  return config.values.git_status.symbols[status_info], git_highlight_map[status_info]
+  return lookup
 end
 
 return M

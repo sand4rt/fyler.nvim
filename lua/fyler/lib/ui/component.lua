@@ -48,7 +48,7 @@ function UiComponent:width()
     return width
   end
 
-  if self.tag == "column" then
+  if self.children then
     local width = 0
     for i = 1, #self.children do
       local c_width = self.children[i]:width()
@@ -58,6 +58,33 @@ function UiComponent:width()
     end
 
     return width
+  end
+
+  error "UNIMPLEMENTED"
+end
+
+function UiComponent:height()
+  if self.tag == "text" then
+    return 1
+  end
+
+  if self.tag == "row" then
+    local max_height = 0
+    for i = 1, #self.children do
+      local child_height = self.children[i]:height()
+      if child_height > max_height then
+        max_height = child_height
+      end
+    end
+    return max_height
+  end
+
+  if self.children then
+    local total_height = 0
+    for i = 1, #self.children do
+      total_height = total_height + self.children[i]:height()
+    end
+    return total_height
   end
 
   error "UNIMPLEMENTED"
