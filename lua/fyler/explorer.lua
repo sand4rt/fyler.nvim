@@ -251,7 +251,7 @@ function M:track_buffer(name)
   end
 
   self:dispatch_refresh(function()
-    if not self.win:has_valid_winid() then
+    if not (self.win:has_valid_winid() and self.win:has_valid_bufnr()) then
       return
     end
 
