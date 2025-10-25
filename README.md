@@ -151,6 +151,8 @@ require("fyler").setup({
   confirm_simple = false,
   -- Replace netrw as default explorer
   default_explorer = false,
+  -- Move deleted files/directories to the system trash
+  delete_to_trash = false,
 
   -- Git integration
   git_status = {
@@ -242,6 +244,11 @@ require("fyler").setup({
   },
 })
 ```
+
+Enable `delete_to_trash` to send deletions to your operating system's trash (macOS `~/.Trash`, Linux XDG Trash, Windows Recycle Bin) instead of removing files permanently.
+Fyler automatically performs a permanent delete if the target already lives inside the trash directory.
+
+**Note**: When moving files across different filesystems (e.g., to a trash directory on a different drive), the operation automatically falls back to copy-then-delete, which may be slower for large files or directories. Windows operations include a 30-second timeout to prevent hanging.
 
 ## Telescope Extension
 
