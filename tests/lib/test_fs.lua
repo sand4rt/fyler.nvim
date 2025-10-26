@@ -1,7 +1,29 @@
+local config = require "fyler.config"
 local fs = require "fyler.lib.fs"
+local hooks = require "fyler.hooks"
 local test = require "mini.test"
 local T = test.new_set()
 local TEST_DATA_DIR = vim.fs.joinpath(FYLER_TESTING_DIR, "data")
+
+local function with_trash_backend(backend, fn)
+  local ok, err = pcall(function()
+    fs.set_trash_backend(backend)
+    fn()
+  end)
+
+  fs.reset_trash_backend()
+
+  if not ok then
+    error(err)
+  end
+end
+
+local function configure_delete_to_trash(enabled)
+  config.setup { delete_to_trash = enabled }
+  hooks.setup(config)
+end
+
+configure_delete_to_trash(false)
 
 local function setup_test_env()
   vim.fn.mkdir(TEST_DATA_DIR, "p")
@@ -299,6 +321,156 @@ T["reslink"] = function()
   test.expect.equality(respath, target_file)
   test.expect.equality(restype, "file")
 
+  cleanup_test_env()
+end
+
+if fs.IS_LINUX then
+  T["delete_to_trash moves files into XDG trash"] = function()
+    setup_test_env()
+
+    local original_xdg = vim.env.XDG_DATA_HOME
+    local ok, err = pcall(function()
+      local xdg_home = vim.fs.joinpath(TEST_DATA_DIR, "xdg")
+      vim.env.XDG_DATA_HOME = xdg_home
+
+      configure_delete_to_trash(true)
+
+      local source_file = vim.fs.joinpath(TEST_DATA_DIR, "sample.txt")
+      vim.fn.writefile({ "dummy" }, source_file)
+
+      fs.delete(source_file)
+      test.expect.equality(fs.exists(source_file), false)
+
+      local trash_files = vim.fs.joinpath(xdg_home, "Trash", "files")
+      local trash_info = vim.fs.joinpath(xdg_home, "Trash", "info")
+      local trashed_file = vim.fs.joinpath(trash_files, "sample.txt")
+      local trashed_info = vim.fs.joinpath(trash_info, "sample.txt.trashinfo")
+
+      test.expect.equality(fs.exists(trashed_file), true)
+      test.expect.equality(fs.exists(trashed_info), true)
+    end)
+
+    configure_delete_to_trash(false)
+    vim.env.XDG_DATA_HOME = original_xdg
+    cleanup_test_env()
+
+    if not ok then
+      error(err)
+    end
+  end
+
+  T["delete_to_trash permanently removes items already in trash"] = function()
+    setup_test_env()
+
+    local original_xdg = vim.env.XDG_DATA_HOME
+    local ok, err = pcall(function()
+      local xdg_home = vim.fs.joinpath(TEST_DATA_DIR, "xdg")
+      vim.env.XDG_DATA_HOME = xdg_home
+
+      configure_delete_to_trash(true)
+
+      local trash_files = vim.fs.joinpath(xdg_home, "Trash", "files")
+      vim.fn.mkdir(trash_files, "p")
+
+      local existing = vim.fs.joinpath(trash_files, "existing.txt")
+      vim.fn.writefile({ "content" }, existing)
+      test.expect.equality(fs.exists(existing), true)
+
+      fs.delete(existing)
+      test.expect.equality(fs.exists(existing), false)
+    end)
+
+    configure_delete_to_trash(false)
+    vim.env.XDG_DATA_HOME = original_xdg
+    cleanup_test_env()
+
+    if not ok then
+      error(err)
+    end
+  end
+end
+
+T["delete_to_trash uses configured backend when enabled"] = function()
+  setup_test_env()
+
+  configure_delete_to_trash(true)
+
+  local test_file = vim.fs.joinpath(TEST_DATA_DIR, "stubbed.txt")
+  vim.fn.writefile({ "content" }, test_file)
+
+  local moved_path
+  local backend = {
+    move = function(path)
+      moved_path = path
+      vim.fn.delete(path)
+      return true
+    end,
+    is_in_trash = function()
+      return false
+    end,
+  }
+
+  with_trash_backend(backend, function()
+    fs.delete(test_file)
+  end)
+
+  test.expect.equality(moved_path, vim.fn.fnamemodify(test_file, ":p"))
+  test.expect.equality(fs.exists(test_file), false)
+
+  configure_delete_to_trash(false)
+  cleanup_test_env()
+end
+
+T["delete_to_trash bypasses backend when disabled"] = function()
+  setup_test_env()
+
+  configure_delete_to_trash(false)
+
+  local test_file = vim.fs.joinpath(TEST_DATA_DIR, "noop.txt")
+  vim.fn.writefile({ "content" }, test_file)
+
+  local backend = {
+    move = function()
+      error "trash backend should not be invoked when delete_to_trash is disabled"
+    end,
+    is_in_trash = function()
+      return false
+    end,
+  }
+
+  with_trash_backend(backend, function()
+    fs.delete(test_file)
+  end)
+
+  test.expect.equality(fs.exists(test_file), false)
+
+  cleanup_test_env()
+end
+
+T["delete_to_trash permanently deletes items already flagged as trashed"] = function()
+  setup_test_env()
+
+  configure_delete_to_trash(true)
+
+  local test_file = vim.fs.joinpath(TEST_DATA_DIR, "already_trashed.txt")
+  vim.fn.writefile({ "content" }, test_file)
+
+  local backend = {
+    move = function()
+      error "trash backend move should not be called for paths already in trash"
+    end,
+    is_in_trash = function()
+      return true
+    end,
+  }
+
+  with_trash_backend(backend, function()
+    fs.delete(test_file)
+  end)
+
+  test.expect.equality(fs.exists(test_file), false)
+
+  configure_delete_to_trash(false)
   cleanup_test_env()
 end
 

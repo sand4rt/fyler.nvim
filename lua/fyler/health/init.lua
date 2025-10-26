@@ -102,6 +102,11 @@ local function get_config_schema()
       expected = "boolean",
     },
     {
+      path = "config.values.delete_to_trash",
+      value = config.values.delete_to_trash,
+      expected = "boolean",
+    },
+    {
       path = "config.values.git_status",
       value = config.values.git_status,
       expected = "table",

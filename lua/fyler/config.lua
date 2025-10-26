@@ -61,6 +61,7 @@ local util = require "fyler.lib.util"
 ---@field close_on_select boolean
 ---@field confirm_simple boolean
 ---@field default_explorer boolean
+---@field delete_to_trash boolean
 ---@field git_status FylerConfigGitStatus
 ---@field hooks FylerConfigHooks
 ---@field icon table<string, string>
@@ -101,6 +102,7 @@ local util = require "fyler.lib.util"
 ---@field close_on_select boolean|nil
 ---@field confirm_simple boolean|nil
 ---@field default_explorer boolean|nil
+---@field delete_to_trash boolean|nil
 ---@field git_status FylerConfigGitStatus|nil
 ---@field hooks FylerSetupOptionsHooks|nil
 ---@field icon_provider FylerConfigIconProvider|nil
@@ -135,6 +137,7 @@ local function defaults()
     close_on_select = true,
     confirm_simple = false,
     default_explorer = false,
+    delete_to_trash = false,
     git_status = {
       enabled = true,
       symbols = {
@@ -323,6 +326,7 @@ function M.setup(opts)
     { M.values.close_on_select, "boolean" },
     { M.values.confirm_simple, "boolean" },
     { M.values.default_explorer, "boolean" },
+    { M.values.delete_to_trash, "boolean" },
     { M.values.git_status, "table" },
     { M.values.hooks, "table" },
     { M.values.hooks.on_delete, "function", true },
