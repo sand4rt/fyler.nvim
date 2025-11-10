@@ -319,7 +319,7 @@ Finder.synchronize = a.void_wrap(function(self)
   local operations = self.files:diff_with_lines(buf_lines)
   local can_mutate
   if vim.tbl_isempty(operations) then
-    can_mutate = false
+    self:dispatch_refresh()
   elseif config.values.views.finder.confirm_simple and can_skip_confirmation(operations) then
     can_mutate = true
   else
@@ -330,7 +330,7 @@ Finder.synchronize = a.void_wrap(function(self)
     run_mutation(operations)
   end
 
-  if can_mutate and not vim.tbl_isempty(operations) then
+  if can_mutate then
     self:dispatch_refresh()
   end
 end)
