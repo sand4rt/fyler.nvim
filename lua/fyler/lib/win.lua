@@ -1,4 +1,3 @@
-local Ui = require "fyler.lib.ui"
 local util = require "fyler.lib.util"
 
 ---@alias WinKind
@@ -17,7 +16,7 @@ local util = require "fyler.lib.util"
 ---@field augroup integer
 ---@field autocmds table
 ---@field border string|string[]
----@field bottom string|nil
+---@field bottom integer|string|nil
 ---@field buf_opts table
 ---@field bufname string
 ---@field bufnr integer|nil
@@ -26,7 +25,7 @@ local util = require "fyler.lib.util"
 ---@field footer_pos string|nil
 ---@field height string
 ---@field kind WinKind
----@field left string|nil
+---@field left integer|string|nil
 ---@field mappings table
 ---@field namespace integer
 ---@field old_bufnr integer|nil
@@ -34,28 +33,25 @@ local util = require "fyler.lib.util"
 ---@field on_hide function|nil
 ---@field on_show function|nil
 ---@field render function|nil
----@field right string|nil
+---@field right integer|string|nil
 ---@field title string|string[]|nil
 ---@field title_pos string|nil
----@field top string|nil
+---@field top integer|string|nil
 ---@field ui Ui
 ---@field user_autocmds table
 ---@field user_mappings table
----@field width string
+---@field width integer|string
 ---@field win_opts table
 ---@field winid integer|nil
 local Win = {}
 Win.__index = Win
-
-local api = vim.api
-local fn = vim.fn
 
 ---@return Win
 function Win.new(opts)
   opts = opts or {}
 
   local instance = util.tbl_merge_keep(opts, { kind = "float" })
-  instance.ui = Ui.new(instance)
+  instance.ui = require("fyler.lib.ui").new(instance)
   setmetatable(instance, Win)
 
   return instance
@@ -63,17 +59,24 @@ end
 
 ---@return boolean
 function Win:has_valid_winid()
-  return type(self.winid) == "number" and api.nvim_win_is_valid(self.winid)
+  return type(self.winid) == "number" and vim.api.nvim_win_is_valid(self.winid)
 end
 
 ---@return boolean
 function Win:has_valid_bufnr()
-  return type(self.bufnr) == "number" and api.nvim_buf_is_valid(self.bufnr)
+  return type(self.bufnr) == "number" and vim.api.nvim_buf_is_valid(self.bufnr)
 end
 
 ---@return boolean
 function Win:is_visible()
   return self:has_valid_winid() and self:has_valid_bufnr()
+end
+
+---@return integer|nil
+function Win:winbuf()
+  if self:has_valid_winid() then
+    return vim.api.nvim_win_get_buf(self.winid)
+  end
 end
 
 ---@return integer|nil, integer|nil
@@ -82,27 +85,27 @@ function Win:get_cursor()
     return
   end
 
-  return util.unpack(api.nvim_win_get_cursor(self.winid))
+  return util.unpack(vim.api.nvim_win_get_cursor(self.winid))
 end
 
 ---@param row integer
 ---@param col integer
 function Win:set_cursor(row, col)
   if self:has_valid_winid() then
-    api.nvim_win_set_cursor(self.winid, { row, col })
+    vim.api.nvim_win_set_cursor(self.winid, { row, col })
   end
 end
 
 function Win:focus()
-  local windows = fn.win_findbuf(self.bufnr)
+  local windows = vim.fn.win_findbuf(self.bufnr)
   if not windows or not windows[1] then
     return
   end
 
-  self.old_winid = api.nvim_get_current_win()
-  self.old_bufnr = api.nvim_get_current_buf()
+  self.old_winid = vim.api.nvim_get_current_win()
+  self.old_bufnr = vim.api.nvim_get_current_buf()
 
-  api.nvim_set_current_win(windows[1])
+  vim.api.nvim_set_current_win(windows[1])
 end
 
 function Win:update_config(config)
@@ -110,9 +113,9 @@ function Win:update_config(config)
     return
   end
 
-  local old_config = api.nvim_win_get_config(self.winid)
+  local old_config = vim.api.nvim_win_get_config(self.winid)
 
-  api.nvim_win_set_config(self.winid, util.tbl_merge_force(old_config, config))
+  vim.api.nvim_win_set_config(self.winid, util.tbl_merge_force(old_config, config))
 end
 
 function Win:update_title(title)
@@ -126,13 +129,19 @@ function Win:config()
     style = "minimal",
   }
 
-  ---@param str string
-  local function destructure(str)
-    if not str:match "[%d%.]+[%a]+" then
-      return 0, 0
+  ---@param dim integer|string
+  ---@return integer|nil, boolean|nil
+  local function resolve_dim(dim)
+    if type(dim) == "number" then
+      return dim, false
+    elseif type(dim) == "string" then
+      local is_percentage = dim:match "%%$"
+      if is_percentage then
+        return tonumber(dim:match "^(.*)%%$") * 0.01, true
+      else
+        return tonumber(dim), false
+      end
     end
-    local v, u = string.match(str, "([%d%.]+)([%a]+)")
-    return tonumber(v), u
   end
 
   if self.kind:match "^split_" then
@@ -149,49 +158,41 @@ function Win:config()
     winconfig.row = 0
     winconfig.col = 0
 
-    if self.top and self.top ~= "none" then
-      local value, unit = destructure(self.top)
-      if unit == "rel" then
-        winconfig.row = math.ceil(value * vim.o.lines)
-      elseif unit == "abs" then
-        winconfig.row = value
+    if not (not self.top and self.top == "none") then
+      local magnitude, is_percentage = resolve_dim(self.top)
+      if is_percentage then
+        winconfig.row = math.ceil(magnitude * vim.o.lines)
       else
-        error(string.format("[fyler.nvim] Unknown unit '%s'", unit))
+        winconfig.row = magnitude
       end
     end
 
-    if self.right and self.right ~= "none" then
-      local rv, ru = destructure(self.right)
-      local wv = destructure(self.width)
-      if ru == "rel" then
-        winconfig.col = math.ceil((1 - rv - wv) * vim.o.columns)
-      elseif ru == "abs" then
-        winconfig.col = (vim.o.columns - rv - wv)
+    if not (not self.right or self.right == "none") then
+      local right_magnitude, is_percentage = resolve_dim(self.right)
+      local width_magnitude = resolve_dim(self.width)
+      if is_percentage then
+        winconfig.col = math.ceil((1 - right_magnitude - width_magnitude) * vim.o.columns)
       else
-        error(string.format("[fyler.nvim] Unknown unit '%s'", ru))
+        winconfig.col = (vim.o.columns - right_magnitude - width_magnitude)
       end
     end
 
-    if self.bottom and self.bottom ~= "none" then
-      local value, unit = destructure(self.bottom)
-      local hv = destructure(self.height)
-      if unit == "rel" then
-        winconfig.row = math.ceil((1 - value - hv) * vim.o.lines)
-      elseif unit == "abs" then
-        winconfig.row = (vim.o.lines - value - hv)
+    if not (not self.bottom or self.bottom == "none") then
+      local bottom_magnitude, is_percentage = resolve_dim(self.bottom)
+      local height_magnitude = resolve_dim(self.height)
+      if is_percentage then
+        winconfig.row = math.ceil((1 - bottom_magnitude - height_magnitude) * vim.o.lines)
       else
-        error(string.format("[fyler.nvim] Unknown unit '%s'", unit))
+        winconfig.row = (vim.o.lines - bottom_magnitude - height_magnitude)
       end
     end
 
-    if self.left and self.left ~= "none" then
-      local value, unit = destructure(self.left)
-      if unit == "rel" then
-        winconfig.col = math.ceil(value * vim.o.columns)
-      elseif unit == "abs" then
-        winconfig.col = value
+    if not (not self.left and self.left == "none") then
+      local magnitude, is_percentage = resolve_dim(self.left)
+      if is_percentage then
+        winconfig.col = math.ceil(magnitude * vim.o.columns)
       else
-        error(string.format("[fyler.nvim] Unknown unit '%s'", unit))
+        winconfig.col = magnitude
       end
     end
   else
@@ -199,24 +200,20 @@ function Win:config()
   end
 
   if self.width then
-    local value, unit = destructure(self.width)
-    if unit == "rel" then
-      winconfig.width = math.ceil(value * vim.o.columns)
-    elseif unit == "abs" then
-      winconfig.width = value
+    local magnitude, is_percentage = resolve_dim(self.width)
+    if is_percentage then
+      winconfig.width = math.ceil(magnitude * vim.o.columns)
     else
-      error(string.format("[fyler.nvim] Unknown unit '%s'", unit))
+      winconfig.width = magnitude
     end
   end
 
   if self.height then
-    local value, unit = destructure(self.height)
-    if unit == "rel" then
-      winconfig.height = math.ceil(value * vim.o.lines)
-    elseif unit == "abs" then
-      winconfig.height = value
+    local magnitude, is_percentage = resolve_dim(self.height)
+    if is_percentage then
+      winconfig.height = math.ceil(magnitude * vim.o.lines)
     else
-      error(string.format("[fyler.nvim] Unknown unit '%s'", unit))
+      winconfig.height = magnitude
     end
   end
 
@@ -229,39 +226,39 @@ function Win:show()
   end
 
   -- Saving alternative "bufnr" and "winid" for later use
-  self.old_bufnr = api.nvim_get_current_buf()
-  self.old_winid = api.nvim_get_current_win()
+  self.old_bufnr = vim.api.nvim_get_current_buf()
+  self.old_winid = vim.api.nvim_get_current_win()
 
-  self.bufnr = api.nvim_create_buf(false, true)
+  self.bufnr = vim.api.nvim_create_buf(false, true)
   if self.bufname then
-    api.nvim_buf_set_name(self.bufnr, self.bufname)
+    vim.api.nvim_buf_set_name(self.bufnr, self.bufname)
   end
 
   local win_config = self:config()
   if win_config.split and (win_config.split:match "_all$" or win_config.split:match "_most$") then
     if win_config.split == "left_most" then
-      api.nvim_command(string.format("topleft %dvsplit", win_config.width))
+      vim.api.nvim_command(string.format("topleft %dvsplit", win_config.width))
     elseif win_config.split == "above_all" then
-      api.nvim_command(string.format("topleft %dsplit", win_config.height))
+      vim.api.nvim_command(string.format("topleft %dsplit", win_config.height))
     elseif win_config.split == "right_most" then
-      api.nvim_command(string.format("botright %dvsplit", win_config.width))
+      vim.api.nvim_command(string.format("botright %dvsplit", win_config.width))
     elseif win_config.split == "below_all" then
-      api.nvim_command(string.format("botright %dsplit", win_config.height))
+      vim.api.nvim_command(string.format("botright %dsplit", win_config.height))
     else
       error(string.format("Invalid window kind `%s`", win_config.split))
     end
 
-    self.winid = api.nvim_get_current_win()
+    self.winid = vim.api.nvim_get_current_win()
     if not self.enter then
-      api.nvim_set_current_win(self.old_winid)
+      vim.api.nvim_set_current_win(self.old_winid)
     end
 
-    api.nvim_win_set_buf(self.winid, self.bufnr)
+    vim.api.nvim_win_set_buf(self.winid, self.bufnr)
   elseif self.kind:match "^replace" then
     self.winid = vim.api.nvim_get_current_win()
-    api.nvim_win_set_buf(self.winid, self.bufnr)
+    vim.api.nvim_win_set_buf(self.winid, self.bufnr)
   else
-    self.winid = api.nvim_open_win(self.bufnr, self.enter, win_config)
+    self.winid = vim.api.nvim_open_win(self.bufnr, self.enter, win_config)
 
     -- Trigger "BufEnter" event to focus buffer for floating window when "enter" enabled
     -- [IMPORTANT]: This is necessary because "self.winid" will not get set on time to automatically triggered.
@@ -274,8 +271,8 @@ function Win:show()
     self.on_show()
   end
 
-  self.augroup = api.nvim_create_augroup("Fyler-augroup-" .. self.bufnr, { clear = true })
-  self.namespace = api.nvim_create_namespace("Fyler-namespace-" .. self.bufnr)
+  self.augroup = vim.api.nvim_create_augroup("fyler_augroup_" .. self.bufnr, { clear = true })
+  self.namespace = vim.api.nvim_create_namespace("fyler_namespace_" .. self.bufnr)
 
   for keys, v in pairs(self.mappings or {}) do
     for _, k in ipairs(util.tbl_wrap(keys)) do
@@ -296,11 +293,11 @@ function Win:show()
   end
 
   for event, callback in pairs(self.autocmds or {}) do
-    api.nvim_create_autocmd(event, { group = self.augroup, buffer = self.bufnr, callback = callback })
+    vim.api.nvim_create_autocmd(event, { group = self.augroup, buffer = self.bufnr, callback = callback })
   end
 
   for event, callback in pairs(self.user_autocmds or {}) do
-    api.nvim_create_autocmd("User", { pattern = event, group = self.augroup, callback = callback })
+    vim.api.nvim_create_autocmd("User", { pattern = event, group = self.augroup, callback = callback })
   end
 
   if self.render then
@@ -308,27 +305,21 @@ function Win:show()
   end
 end
 
-function Win:clear()
-  api.nvim_clear_autocmds { group = self.augroup }
-end
-
 function Win:hide()
-  self:clear()
-
   -- Recover alternate buffer if using "replace"|"split" window kind
   if self.kind:match "^replace" then
     if
       util.is_valid_winid(self.winid)
       and util.is_valid_bufnr(self.old_bufnr)
-      and api.nvim_buf_is_loaded(self.old_bufnr)
+      and vim.api.nvim_buf_is_loaded(self.old_bufnr)
     then
-      util.try(api.nvim_win_set_buf, self.winid, self.old_bufnr)
+      util.try(vim.api.nvim_win_set_buf, self.winid, self.old_bufnr)
     end
 
-    util.try(api.nvim_buf_delete, self.bufnr, { force = true })
+    util.try(vim.api.nvim_buf_delete, self.bufnr, { force = true })
   else
-    util.try(api.nvim_win_close, self.winid, true)
-    util.try(api.nvim_buf_delete, self.bufnr, { force = true })
+    util.try(vim.api.nvim_win_close, self.winid, true)
+    util.try(vim.api.nvim_buf_delete, self.bufnr, { force = true })
   end
 
   self.winid = nil
@@ -341,18 +332,16 @@ end
 
 -- Handle case when user open a NON FYLER BUFFER in "Fyler" window
 function Win:recover()
-  self:clear()
-
   if self.kind:match "^replace" or self.kind:match "^split" then
-    util.try(api.nvim_buf_delete, self.bufnr, { force = true })
+    util.try(vim.api.nvim_buf_delete, self.bufnr, { force = true })
   else
-    local cached_bufnr = api.nvim_get_current_buf()
-    util.try(api.nvim_win_close, self.winid, true)
-    util.try(api.nvim_buf_delete, self.bufnr, { force = true })
+    local cached_bufnr = vim.api.nvim_get_current_buf()
+    util.try(vim.api.nvim_win_close, self.winid, true)
+    util.try(vim.api.nvim_buf_delete, self.bufnr, { force = true })
 
     if util.is_valid_winid(self.old_winid) then
-      api.nvim_win_set_buf(self.old_winid, cached_bufnr)
-      api.nvim_set_current_win(self.old_winid)
+      vim.api.nvim_win_set_buf(self.old_winid, cached_bufnr)
+      vim.api.nvim_set_current_win(self.old_winid)
     end
   end
 end

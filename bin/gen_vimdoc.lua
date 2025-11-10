@@ -26,17 +26,37 @@ local function ensure_install(repo)
 end
 
 local function run_tests()
-  ensure_install "nvim-mini/mini.test"
+  ensure_install "nvim-mini/mini.doc"
 
   vim.opt.runtimepath:prepend "."
 
-  require("mini.test").run {
-    collect = {
-      find_files = function()
-        return vim.fn.globpath("tests", "**/test_*.lua", true, true)
-      end,
+  local minidoc = require "mini.doc"
+  minidoc.generate(
+    {
+      "lua/fyler.lua",
+      "lua/fyler/config.lua",
     },
-  }
+    "doc/fyler.txt",
+    {
+      hooks = {
+        file = function() end,
+        sections = {
+          ["@return"] = function(s)
+            s.parent:clear_lines()
+          end,
+          ["@alias"] = function(s)
+            s.parent:clear_lines()
+          end,
+          ["@class"] = function(s)
+            s.parent:clear_lines()
+          end,
+          ["@param"] = function(s)
+            s.parent:clear_lines()
+          end,
+        },
+      },
+    }
+  )
 end
 
 run_tests()

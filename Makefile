@@ -1,7 +1,7 @@
 .SILENT:
-.PHONY: check format lint test
+.PHONY: check format lint test doc
 
-check: format lint test
+check: format lint test doc
 
 format:
 	@printf "\033[34mFYLER.NVIM - Code Formatting\033[0m\n\033[34m────────────────────────────\033[0m\n"
@@ -13,4 +13,8 @@ lint:
 
 test:
 	@printf "\033[34mFYLER.NVIM - Running Tests\033[0m\n\033[34m────────────────────────────\033[0m\n"
-	@nvim -l tests/init.lua
+	@nvim -l bin/run_unit_tests.lua
+
+doc:
+	@printf "\033[34mFYLER.NVIM - Generating vim docs\033[0m\n\033[34m────────────────────────────\033[0m\n"
+	@nvim -l bin/gen_vimdoc.lua

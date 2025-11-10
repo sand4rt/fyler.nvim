@@ -44,7 +44,7 @@ return telescope.register_extension {
     setup = function(opts)
       default_opts = util.tbl_merge_force(default_opts, opts)
     end,
-    fyler_zoxide = function()
+    zoxide = function()
       pickers
         .new(default_opts, {
           debounce = 100,
