@@ -17,8 +17,8 @@ function M.register(path, callback)
     return
   end
 
-  M._instances[_path:absolute()] = assert(vim.uv.new_fs_event())
-  M._instances[_path:absolute()]:start(_path:absolute(), {}, callback)
+  M._instances[_path:normalize()] = assert(vim.uv.new_fs_event())
+  M._instances[_path:normalize()]:start(_path:normalize(), {}, callback)
 end
 
 ---@param path string
@@ -28,7 +28,7 @@ function M.unregister(path)
   end
 
   local _path = Path.new(path)
-  local fs_event = M._instances[_path:absolute()]
+  local fs_event = M._instances[_path:normalize()]
   if not fs_event then
     return
   end

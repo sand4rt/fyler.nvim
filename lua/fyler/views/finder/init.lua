@@ -6,6 +6,7 @@ local config = require "fyler.config"
 local fs = require "fyler.lib.fs"
 local input = require "fyler.input"
 local parser = require "fyler.views.finder.parser"
+local trash = require "fyler.lib.trash"
 local ui = require "fyler.views.finder.ui"
 local util = require "fyler.lib.util"
 
@@ -288,7 +289,7 @@ local function run_mutation(operations)
       fs.create(operation.path, operation.entry_type == "directory")
     elseif operation.type == "delete" then
       if config.values.views.finder.delete_to_trash then
-        fs.trash(operation.path)
+        trash.dump(operation.path)
       else
         fs.delete(operation.path)
       end
@@ -345,7 +346,7 @@ local M = {
 ---@param config table
 ---@return string, WinKind
 local function compute_opts(dir, kind, config)
-  return Path.new(dir or fs.cwd()):absolute(), kind or config.values.views.finder.win.kind
+  return Path.new(dir or fs.cwd()):normalize(), kind or config.values.views.finder.win.kind
 end
 
 function M.open(dir, kind)
@@ -397,7 +398,7 @@ function M.track_buffer(name)
     name = vim.api.nvim_buf_get_name(current.win.old_bufnr)
   end
 
-  current:track_buffer(Path.new(name):absolute())
+  current:track_buffer(Path.new(name):normalize())
 end
 
 ---@return boolean

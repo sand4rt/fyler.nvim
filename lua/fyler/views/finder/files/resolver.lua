@@ -31,7 +31,7 @@ end
 ---@param path string
 ---@return string[]
 function Resolver:path_to_segments(path)
-  local normalized = Path.new(path):normalize():absolute()
+  local normalized = Path.new(path):normalize()
 
   if not vim.startswith(normalized, self.root_path) then
     local segments = vim.split(normalized, "/")
@@ -66,7 +66,7 @@ end
 function Resolver:mark_operation(path, op_type, value, entry_type)
   local path_obj = Path.new(path)
   local is_dir = path_obj:is_dir()
-  local normalized = path_obj:normalize():absolute()
+  local normalized = path_obj:normalize()
 
   local segments = self:path_to_segments(normalized)
   local node = self.trie:find(segments)
@@ -90,7 +90,7 @@ function Resolver:mark_operation(path, op_type, value, entry_type)
     end
     -- value is a string (destination path) for move/copy
     if type(value) == "string" then
-      local dest_normalized = Path.new(value):normalize():absolute()
+      local dest_normalized = Path.new(value):normalize()
       table.insert(node.value[op_type], dest_normalized)
     end
   end
@@ -107,7 +107,7 @@ function Resolver:analyze_and_mark_creates(parsed_tree)
         ref_id_locations[node.ref_id] = {}
       end
       -- Normalize path before storing
-      local normalized = Path.new(node.path):normalize():absolute()
+      local normalized = Path.new(node.path):normalize()
       table.insert(ref_id_locations[node.ref_id], normalized)
     else
       local has_children = node.children and #node.children > 0
@@ -135,7 +135,7 @@ function Resolver:mark_deletes_and_track_current(files, ref_id_locations)
 
   local function traverse(node)
     local entry = files.manager:get(node.value)
-    local normalized = Path.new(entry.path):normalize():absolute()
+    local normalized = Path.new(entry.path):normalize()
     current_ref_to_path[node.value] = normalized
 
     if not ref_id_locations[node.value] then
