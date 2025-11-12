@@ -271,8 +271,8 @@ function Win:show()
     self.on_show()
   end
 
-  self.augroup = vim.api.nvim_create_augroup("fyler_augroup_" .. self.bufnr, { clear = true })
-  self.namespace = vim.api.nvim_create_namespace("fyler_namespace_" .. self.bufnr)
+  self.augroup = vim.api.nvim_create_augroup("fyler_augroup_win_" .. self.bufnr, { clear = true })
+  self.namespace = vim.api.nvim_create_namespace("fyler_namespace_win_" .. self.bufnr)
 
   for keys, v in pairs(self.mappings or {}) do
     for _, k in ipairs(util.tbl_wrap(keys)) do

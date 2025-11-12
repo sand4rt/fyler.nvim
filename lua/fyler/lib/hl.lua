@@ -86,12 +86,12 @@ function M.setup()
     FylerGitUntracked    = { fg = palette.cyan },
     FylerGreen           = { fg = palette.green },
     FylerGrey            = { fg = palette.grey },
-    FylerIndentMarker    = { fg = palette.dark_grey },
     FylerRed             = { fg = palette.red },
     FylerYellow          = { fg = palette.yellow },
 
-    FylerNormal          = { default = true, link = "Normal" },
-    FylerBorder          = { default = true, link = "FylerNormal" },
+    FylerBorder          = { link = "FylerNormal" },
+    FylerIndentMarker    = { link = "FylerGrey" },
+    FylerNormal          = { link = "Normal" },
   }
   -- stylua: ignore end
 
