@@ -55,7 +55,7 @@ function Path.new(path)
 
   local instance = {
     _path = absolute,
-    _sep = Path.is_windows() and "\\" or "/",
+    _sep = "/",
   }
 
   setmetatable(instance, Path)
