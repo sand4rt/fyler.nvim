@@ -31,7 +31,7 @@ function Files.new(opts)
 
   local path = Path.new(instance.root_path):join ".git"
   if path:exists() then
-    watcher.register(path:absolute(), function(_, filename)
+    watcher.register(path:normalize(), function(_, filename)
       if filename == "index" then
         instance.finder:dispatch_refresh()
       end
@@ -205,7 +205,7 @@ end
 function Files:add_child(parent_ref_id, opts)
   local parent_entry = self.manager:get(parent_ref_id)
 
-  opts.path = Path.new(parent_entry.path):join(opts.name):absolute()
+  opts.path = Path.new(parent_entry.path):join(opts.name):normalize()
 
   local child_ref_id = self.manager:set(opts)
 
@@ -374,7 +374,7 @@ function Files:_parse_lines(lines, root_entry)
     local parent = parents:top()
     local node = {
       ref_id = ref_id,
-      path = Path.new(parent.node.path):join(name):absolute(),
+      path = Path.new(parent.node.path):join(name):normalize(),
       children = {},
     }
     parents:push { node = node, indentation = indent_level }

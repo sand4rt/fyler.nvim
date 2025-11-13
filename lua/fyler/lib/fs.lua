@@ -9,6 +9,25 @@ function c.cwd()
 end
 
 ---@param path string
+---@param data string|string[]
+function c.write(path, data)
+  local _path = Path.new(path)
+
+  c.mkdir(_path:parent():normalize(), { p = true })
+
+  local fd = assert(vim.uv.fs_open(_path:normalize(), "w", 420))
+  local bytes, err = vim.uv.fs_write(fd, data)
+
+  if not bytes then
+    assert(vim.uv.fs_close(fd))
+    c.rm(_path:normalize())
+    error(string.format("Failed to write to %s: %s", path, err))
+  end
+
+  assert(vim.uv.fs_close(fd))
+end
+
+---@param path string
 function c.ls(path)
   local _path = Path.new(path)
   if not (_path:exists() and _path:is_dir()) then
@@ -17,7 +36,7 @@ function c.ls(path)
 
   local contents = {}
   ---@diagnostic disable-next-line: param-type-mismatch
-  local dir = vim.uv.fs_opendir(_path:absolute(), nil, 1000)
+  local dir = vim.uv.fs_opendir(_path:normalize(), nil, 1000)
   if not dir then
     return
   end
@@ -34,12 +53,12 @@ function c.ls(path)
             name = e.name,
             path = p,
             type = t or "file",
-            link = f:absolute(),
+            link = f:normalize(),
           }
         else
           return {
             name = e.name,
-            path = f:absolute(),
+            path = f:normalize(),
             type = e.type,
           }
         end
@@ -57,7 +76,7 @@ function c.touch(path)
 
   local _path = Path.new(path)
 
-  local fd = assert(vim.uv.fs_open(_path:absolute(), "a", 420))
+  local fd = assert(vim.uv.fs_open(_path:normalize(), "a", 420))
   assert(vim.uv.fs_close(fd))
 end
 
@@ -72,7 +91,7 @@ function c.mkdir(path, flags)
       pcall(c.mkdir, prefix)
     end
   else
-    assert(vim.uv.fs_mkdir(_path:absolute(), 493))
+    assert(vim.uv.fs_mkdir(_path:normalize(), 493))
   end
 end
 
@@ -108,13 +127,13 @@ function c.rm(path, flags)
   if _path:is_dir() then
     assert(flags.r, "cannot remove directory without -r flag: " .. path)
 
-    for _, e in _read_dir_iter(_path:absolute()) do
-      c.rm(_path:join(e.name):absolute(), flags)
+    for _, e in _read_dir_iter(_path:normalize()) do
+      c.rm(_path:join(e.name):normalize(), flags)
     end
 
-    assert(vim.uv.fs_rmdir(_path:absolute()))
+    assert(vim.uv.fs_rmdir(_path:normalize()))
   else
-    assert(vim.uv.fs_unlink(_path:absolute()))
+    assert(vim.uv.fs_unlink(_path:normalize()))
   end
 end
 
@@ -127,18 +146,18 @@ function c.mv(src, dst)
 
   assert(_src:exists(), "source does not exist: " .. src)
 
-  pcall(c.mkdir, _dst:parent():absolute(), { p = true })
+  pcall(c.mkdir, _dst:parent():normalize(), { p = true })
 
   if _src:is_dir() then
-    pcall(c.mkdir, _dst:absolute(), { p = true })
+    pcall(c.mkdir, _dst:normalize(), { p = true })
 
-    for _, e in _read_dir_iter(_src:absolute()) do
-      c.mv(_src:join(e.name):absolute(), _dst:join(e.name):absolute())
+    for _, e in _read_dir_iter(_src:normalize()) do
+      c.mv(_src:join(e.name):normalize(), _dst:join(e.name):normalize())
     end
 
-    assert(vim.uv.fs_rmdir(_src:absolute()))
+    assert(vim.uv.fs_rmdir(_src:normalize()))
   else
-    assert(vim.uv.fs_rename(_src:absolute(), _dst:absolute()))
+    assert(vim.uv.fs_rename(_src:normalize(), _dst:normalize()))
   end
 end
 
@@ -155,38 +174,38 @@ function c.cp(src, dst, flags)
   if _src:is_dir() then
     assert(flags.r, "cannot copy directory without -r flag: " .. src)
 
-    pcall(c.mkdir, _dst:absolute(), { p = true })
+    pcall(c.mkdir, _dst:normalize(), { p = true })
 
-    for _, e in _read_dir_iter(_src:absolute()) do
-      c.cp(_src:join(e.name):absolute(), _dst:join(e.name):absolute(), flags)
+    for _, e in _read_dir_iter(_src:normalize()) do
+      c.cp(_src:join(e.name):normalize(), _dst:join(e.name):normalize(), flags)
     end
   else
-    pcall(c.mkdir, _dst:parent():absolute(), { p = true })
+    pcall(c.mkdir, _dst:parent():normalize(), { p = true })
 
-    assert(vim.uv.fs_copyfile(_src:absolute(), _dst:absolute()))
+    assert(vim.uv.fs_copyfile(_src:normalize(), _dst:normalize()))
   end
 end
 
 ---@param path string
 ---@param is_dir boolean|nil
 function c.create(path, is_dir)
-  local _path = Path.new(path):normalize()
+  local _path = Path.new(path)
 
-  c.mkdir(_path:parent():absolute(), { p = true })
+  c.mkdir(_path:parent():normalize(), { p = true })
 
   if is_dir then
-    c.mkdir(_path:absolute())
+    c.mkdir(_path:normalize())
   else
-    c.touch(_path:absolute())
+    c.touch(_path:normalize())
   end
 end
 
 ---@param path string
 function c.delete(path)
   local _path = Path.new(path)
-  c.rm(_path:absolute(), { r = true })
+  c.rm(_path:normalize(), { r = true })
 
-  hooks.on_delete(_path:absolute())
+  hooks.on_delete(_path:normalize())
 end
 
 ---@param src string
@@ -194,86 +213,15 @@ end
 function c.move(src, dst)
   local _src = Path.new(src)
   local _dst = Path.new(dst)
-  c.mv(_src:absolute(), _dst:absolute())
+  c.mv(_src:normalize(), _dst:normalize())
 
-  hooks.on_rename(_src:absolute(), _dst:absolute())
+  hooks.on_rename(_src:normalize(), _dst:normalize())
 end
 
 ---@param src string
 ---@param dst string
 function c.copy(src, dst)
-  c.cp(Path.new(src):absolute(), Path.new(dst):absolute(), { r = true })
-end
-
----@param path string
-function c.trash(path)
-  assert(path, "path is not provided")
-  local _path = Path.new(path)
-
-  assert(_path:exists(), "path does not exist: " .. path)
-  local abs_path = _path:absolute()
-
-  if Path.is_windows() then
-    local ps_script = string.format(
-      [[
-        $timeoutSeconds = 30;
-        $job = Start-Job -ScriptBlock {
-          Add-Type -AssemblyName Microsoft.VisualBasic;
-          $ErrorActionPreference = 'Stop';
-          $item = Get-Item -LiteralPath '%s';
-          if ($item.PSIsContainer) {
-            [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteDirectory('%s', 'OnlyErrorDialogs', 'SendToRecycleBin');
-          } else {
-            [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%s', 'OnlyErrorDialogs', 'SendToRecycleBin');
-          }
-        };
-        $completed = Wait-Job -Job $job -Timeout $timeoutSeconds;
-        if ($completed) {
-          $result = Receive-Job -Job $job -ErrorAction SilentlyContinue -ErrorVariable jobError;
-          Remove-Job -Job $job -Force;
-          if ($jobError) {
-            Write-Error $jobError;
-            exit 1;
-          }
-        } else {
-          Remove-Job -Job $job -Force;
-          Write-Error 'Operation timed out after 30 seconds';
-          exit 1;
-        }
-      ]],
-      abs_path,
-      abs_path,
-      abs_path
-    )
-
-    local Process = require "fyler.lib.process"
-    local proc = Process.new({
-      path = "powershell",
-      args = { "-NoProfile", "-NonInteractive", "-Command", ps_script },
-    }):spawn()
-
-    assert(proc.code == 0, "failed to move to recycle bin: " .. (proc:err() or ""))
-  else
-    local home = os.getenv "HOME"
-    assert(home, "could not determine home directory")
-
-    local trash_dir = Path.new(home):join ".Trash"
-    if not trash_dir:exists() then
-      c.mkdir(trash_dir:absolute(), { p = true })
-    end
-
-    local filename = vim.fn.fnamemodify(abs_path, ":t")
-    local timestamp = os.date "%Y%m%d_%H%M%S"
-    local name, ext = filename:match "^(.+)(%..+)$"
-    if not name then
-      name = filename
-      ext = ""
-    end
-
-    local trash_filename = string.format("%s_%s%s", name, timestamp, ext)
-    local trash_path = trash_dir:join(trash_filename)
-    c.mv(abs_path, trash_path:absolute())
-  end
+  c.cp(Path.new(src):normalize(), Path.new(dst):normalize(), { r = true })
 end
 
 local function builder(fn)
