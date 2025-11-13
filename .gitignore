@@ -9,3 +9,9 @@
 
 # Docs helptags file
 doc/tags
+
+# python env
+.venv
+
+# python cache
+__pycache__

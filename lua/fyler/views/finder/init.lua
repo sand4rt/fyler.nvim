@@ -4,6 +4,7 @@ local Win = require "fyler.lib.win"
 local a = require "fyler.lib.async"
 local config = require "fyler.config"
 local fs = require "fyler.lib.fs"
+local indent = require "fyler.views.finder.indent"
 local input = require "fyler.input"
 local parser = require "fyler.views.finder.parser"
 local trash = require "fyler.lib.trash"
@@ -100,6 +101,8 @@ function Finder:open(kind)
       [rev_maps["SelectTab"]]    = self:_action "n_select_tab",
       [rev_maps["SelectVSplit"]] = self:_action "n_select_v_split",
     },
+    on_show       = function() indent.enable(self.win) end,
+    on_hide       = function() indent.disable() end,
     render        = function() self:dispatch_refresh() end,
     right         = view.win.right,
     title         = string.format(" %s ", self.dir),
@@ -115,59 +118,6 @@ function Finder:open(kind)
   -- stylua: ignore end
 
   self.win:show()
-end
-
----@param line string
----@return table|nil
-local function get_indent_cols(line)
-  if line == "" then
-    return nil
-  end
-
-  local indent_len = 0
-  for i = 1, #line do
-    if line:byte(i) == 32 then
-      indent_len = i
-    else
-      break
-    end
-  end
-
-  if indent_len < 2 then
-    return nil
-  end
-
-  local positions = {}
-  for col = 0, indent_len - 2, 2 do
-    positions[#positions + 1] = col
-  end
-
-  return positions
-end
-
-function Finder:draw_indentscope()
-  if not self.win or not self.win.bufnr then
-    return
-  end
-
-  local indent_namespace = vim.api.nvim_create_namespace "fyler_indentscope"
-  vim.api.nvim_buf_clear_namespace(self.win.bufnr, indent_namespace, 0, -1)
-
-  local buffer_lines = vim.api.nvim_buf_get_lines(self.win.bufnr, 0, -1, false)
-  for line_number, line in ipairs(buffer_lines) do
-    for _, column_number in ipairs(get_indent_cols(line) or {}) do
-      vim.api.nvim_buf_set_extmark(self.win.bufnr, indent_namespace, line_number - 1, column_number, {
-        virt_text_pos = "overlay",
-        hl_mode = "combine",
-        virt_text = {
-          {
-            config.values.views.finder.indentscope.marker,
-            config.values.views.finder.indentscope.group,
-          },
-        },
-      })
-    end
-  end
 end
 
 function Finder:close()
@@ -231,10 +181,6 @@ Finder.dispatch_refresh = a.void_wrap(function(self, on_render)
     self.win.ui:render(ui.files(self.files:update():totable()), function()
       if on_render then
         on_render()
-      end
-
-      if config.values.views.finder.indentscope.enabled then
-        self:draw_indentscope()
       end
     end)
   end)

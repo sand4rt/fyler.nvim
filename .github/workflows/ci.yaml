@@ -32,7 +32,11 @@ jobs:
       - uses: folke/github/neovim@main
       - name: Installing dependencies
         run: |
-          git config --global core.compression 0
-          git clone https://github.com/nvim-mini/mini.test .tests/repos/mini.test
-      - name: Running tests
+          git clone --depth=1 https://github.com/nvim-mini/mini.test .tests/repos/mini.test
+          git clone --depth=1 https://github.com/nvim-mini/mini.icons .tests/repos/mini.icons
+          git clone --depth=1 https://github.com/nvim-tree/nvim-web-devicons .tests/repos/nvim-web-devicons
+          pip install pynvim
+      - name: Running unit tests
         run: make test
+      - name: Running E2E tests
+        run: make spec

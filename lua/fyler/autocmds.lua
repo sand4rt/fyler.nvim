@@ -1,6 +1,6 @@
 local M = {}
 
-local augroup = vim.api.nvim_create_augroup("Fyler-augroup-global", { clear = true })
+local augroup = vim.api.nvim_create_augroup("fyler_augroup_global", { clear = true })
 
 function M.setup(config)
   local fyler = require "fyler"
