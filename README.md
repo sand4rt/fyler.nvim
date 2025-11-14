@@ -224,7 +224,7 @@ Fyler.nvim works out of the box with sensible defaults. Here's the complete conf
           cursorline = false,
           number = false,
           relativenumber = false,
-          winhighlight = "Normal:FylerNormal",
+          winhighlight = "Normal:FylerNormal,NormalNC:FylerNormalNC",
           wrap = false,
         },
       },
