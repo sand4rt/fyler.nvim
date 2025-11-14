@@ -92,13 +92,14 @@ function M.setup()
     FylerBorder          = { link = "FylerNormal" },
     FylerIndentMarker    = { link = "FylerGrey" },
     FylerNormal          = { link = "Normal" },
+    FylerNormalNC        = { link = "NormalNC" },
   }
   -- stylua: ignore end
 
   require("fyler.hooks").on_highlight(hl_groups, palette)
 
   for k, v in pairs(hl_groups) do
-    vim.api.nvim_set_hl(0, k, v)
+    vim.api.nvim_set_hl(0, k, vim.tbl_extend("keep", v, { default = true }))
   end
 end
 
