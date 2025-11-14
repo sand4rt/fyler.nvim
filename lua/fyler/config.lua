@@ -267,6 +267,8 @@ local function defaults()
             relativenumber = false,
             winhighlight = "Normal:FylerNormal,NormalNC:FylerNormalNC",
             wrap = false,
+            winfixwidth = true,
+            winfixheight = true,
           },
         },
       },

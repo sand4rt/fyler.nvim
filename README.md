@@ -226,6 +226,8 @@ Fyler.nvim works out of the box with sensible defaults. Here's the complete conf
           relativenumber = false,
           winhighlight = "Normal:FylerNormal,NormalNC:FylerNormalNC",
           wrap = false,
+          winfixwidth = true,
+          winfixheight = true,
         },
       },
     },
