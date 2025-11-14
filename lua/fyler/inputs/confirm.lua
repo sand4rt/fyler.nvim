@@ -66,7 +66,7 @@ function Confirm:open(options, message, on_submit)
     top        = top,
     width      = width,
     win_opts   = {
-      winhighlight = "Normal:FylerNormal"
+      winhighlight = "Normal:FylerNormal,NormalNC:FylerNormalNC"
     }
   }
   -- stylua: ignore end

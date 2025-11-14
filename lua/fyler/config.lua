@@ -265,7 +265,7 @@ local function defaults()
             cursorline = false,
             number = false,
             relativenumber = false,
-            winhighlight = "Normal:FylerNormal",
+            winhighlight = "Normal:FylerNormal,NormalNC:FylerNormalNC",
             wrap = false,
           },
         },
