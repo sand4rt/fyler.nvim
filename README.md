@@ -198,24 +198,36 @@ Fyler.nvim works out of the box with sensible defaults. Here's the complete conf
           },
           split_above_all = {
             height = "70%",
+            win_opts = {
+              winfixheight = true, -- keep the window height fixed when other windows resize
+            },
           },
           split_below = {
             height = "70%",
           },
           split_below_all = {
             height = "70%",
+            win_opts = {
+              winfixheight = true,
+            },
           },
           split_left = {
             width = "70%",
           },
           split_left_most = {
             width = "30%",
+            win_opts = {
+              winfixwidth = true, -- keep the window width fixed when other windows resize
+            },
           },
           split_right = {
             width = "30%",
           },
           split_right_most = {
             width = "30%",
+            win_opts = {
+              winfixwidth = true,
+            },
           },
         },
         win_opts = {
@@ -226,8 +238,6 @@ Fyler.nvim works out of the box with sensible defaults. Here's the complete conf
           relativenumber = false,
           winhighlight = "Normal:FylerNormal,NormalNC:FylerNormalNC",
           wrap = false,
-          winfixwidth = true,
-          winfixheight = true,
         },
       },
     },
