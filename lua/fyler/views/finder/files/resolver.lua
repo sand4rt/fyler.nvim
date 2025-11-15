@@ -135,11 +135,11 @@ function Resolver:mark_deletes_and_track_current(files, ref_id_locations)
 
   local function traverse(node)
     local entry = files.manager:get(node.value)
-    local normalized = Path.new(entry.path):normalize()
+    local normalized = Path.new(entry.link or entry.path):normalize()
     current_ref_to_path[node.value] = normalized
 
     if not ref_id_locations[node.value] then
-      self:mark_operation(entry.path, "delete", true)
+      self:mark_operation(entry.link or entry.path, "delete", true)
     end
 
     if not entry.open then
