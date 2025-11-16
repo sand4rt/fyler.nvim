@@ -27,6 +27,7 @@ local util = require "fyler.lib.util"
 ---@field kind WinKind
 ---@field left integer|string|nil
 ---@field mappings table
+---@field mappings_opts vim.keymap.set.Opts
 ---@field namespace integer
 ---@field old_bufnr integer|nil
 ---@field old_winid integer|nil
@@ -273,15 +274,17 @@ function Win:show()
 
   self.augroup = vim.api.nvim_create_augroup("fyler_augroup_win_" .. self.bufnr, { clear = true })
   self.namespace = vim.api.nvim_create_namespace("fyler_namespace_win_" .. self.bufnr)
+  local mappings_opts = self.mappings_opts or {}
+  mappings_opts.buffer = self.bufnr
 
   for keys, v in pairs(self.mappings or {}) do
     for _, k in ipairs(util.tbl_wrap(keys)) do
-      vim.keymap.set("n", k, v, { buffer = self.bufnr, silent = true, noremap = true })
+      vim.keymap.set("n", k, v, mappings_opts)
     end
   end
 
   for k, v in pairs(self.user_mappings or {}) do
-    vim.keymap.set("n", k, v, { buffer = self.bufnr, silent = true, noremap = true })
+    vim.keymap.set("n", k, v, mappings_opts)
   end
 
   for option, value in pairs(self.win_opts or {}) do

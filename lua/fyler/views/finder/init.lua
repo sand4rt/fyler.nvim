@@ -101,6 +101,7 @@ function Finder:open(kind)
       [rev_maps["SelectTab"]]    = self:_action "n_select_tab",
       [rev_maps["SelectVSplit"]] = self:_action "n_select_v_split",
     },
+    mappings_opts = view.mappings_opts,
     on_show       = function() indent.enable(self.win) end,
     on_hide       = function() indent.disable() end,
     render        = function() self:dispatch_refresh() end,
