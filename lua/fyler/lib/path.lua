@@ -83,7 +83,11 @@ end
 ---@return string
 function Path:normalize()
   if not self._normalized then
-    self._normalized = vim.fs.normalize(self:absolute())
+    if vim.endswith(self:absolute(), "/") then
+      self._normalized = vim.fs.joinpath(vim.fs.normalize(self:absolute()), "/")
+    else
+      self._normalized = vim.fs.normalize(self:absolute())
+    end
   end
   return self._normalized
 end
