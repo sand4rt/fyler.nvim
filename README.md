@@ -167,6 +167,11 @@ Fyler.nvim works out of the box with sensible defaults. Here's the complete conf
         ["#"] = "CollapseAll",
         ["<BS>"] = "CollapseNode",
       },
+      mappings_opts = {
+        nowait = false,
+        noremap = true,
+        silent = true,
+      },
       -- Current file tracking
       follow_current_file = true,
       -- File system watching(includes git status)
