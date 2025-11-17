@@ -133,6 +133,7 @@ local DEPRECATION_RULES = {
 ---@field icon table<string, string|nil>
 ---@field indentscope FylerConfigIndentScope
 ---@field mappings table<string, FylerConfigFinderMapping|function>
+---@field mappings_opts vim.keymap.set.Opts
 ---@field follow_current_file boolean
 ---@field win FylerConfigWin
 
@@ -211,6 +212,11 @@ local function defaults()
           ["."] = "GotoNode",
           ["#"] = "CollapseAll",
           ["<BS>"] = "CollapseNode",
+        },
+        mappings_opts = {
+          nowait = false,
+          noremap = true,
+          silent = true,
         },
         follow_current_file = true,
         watcher = {
