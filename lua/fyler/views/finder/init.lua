@@ -176,15 +176,21 @@ end
 
 ---@param self Finder
 ---@param on_render function
-Finder.dispatch_refresh = a.void_wrap(function(self, on_render)
+function Finder:dispatch_refresh(on_render)
   util.debounce("dispatch_refresh", 10, function()
     self.win.ui:render(ui.files(self.files:update():totable()), function()
-      if on_render then
-        on_render()
+      if config.values.views.finder.git_status.enabled then
+        a.void(function()
+          self.win.ui:render(a.wrap(ui.files_with_info)(self.files:update():totable()), on_render)
+        end)
+      else
+        if on_render then
+          on_render()
+        end
       end
     end)
   end)
-end)
+end
 
 function Finder:cursor_node_entry()
   local ref_id = parser.parse_ref_id(vim.api.nvim_get_current_line())

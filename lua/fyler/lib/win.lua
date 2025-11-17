@@ -88,11 +88,67 @@ function Win:get_cursor()
   return util.unpack(vim.api.nvim_win_get_cursor(self.winid))
 end
 
+function Win:set_local_buf_option(k, v)
+  if self:has_valid_bufnr() then
+    util.set_buf_option(self.bufnr, k, v)
+  end
+end
+
+function Win:set_local_win_option(k, v)
+  if self:has_valid_winid() then
+    util.set_win_option(self.winid, k, v)
+  end
+end
+
+function Win:get_local_buf_option(k)
+  if self:has_valid_bufnr() then
+    return util.get_buf_option(self.bufnr, k)
+  end
+end
+
+function Win:get_local_win_option(k)
+  if self:has_valid_winid() then
+    return util.get_win_option(self.winid, k)
+  end
+end
+
 ---@param row integer
 ---@param col integer
 function Win:set_cursor(row, col)
   if self:has_valid_winid() then
     vim.api.nvim_win_set_cursor(self.winid, { row, col })
+  end
+end
+
+---@param start integer
+---@param finish integer
+---@param lines string[]
+function Win:set_lines(start, finish, lines)
+  local was_modifiable = util.get_buf_option(self.bufnr, "modifiable")
+  local undolevels = util.get_buf_option(self.bufnr, "undolevels")
+
+  self:set_local_buf_option("modifiable", true)
+  self:set_local_buf_option("undolevels", -1)
+
+  if self:has_valid_bufnr() then
+    vim.api.nvim_buf_clear_namespace(self.bufnr, self.namespace, 0, -1)
+    vim.api.nvim_buf_set_lines(self.bufnr, start, finish, false, lines)
+  end
+
+  if not was_modifiable then
+    self:set_local_buf_option("modifiable", false)
+  end
+
+  self:set_local_buf_option("modified", false)
+  self:set_local_buf_option("undolevels", undolevels)
+end
+
+---@param row integer
+---@param col integer
+---@param options vim.api.keyset.set_extmark
+function Win:set_extmark(row, col, options)
+  if self:has_valid_bufnr() then
+    vim.api.nvim_buf_set_extmark(self.bufnr, self.namespace, row, col, options)
   end
 end
 

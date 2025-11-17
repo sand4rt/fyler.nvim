@@ -1,3 +1,5 @@
+local util = require "fyler.lib.util"
+
 ---@class UiComponentOption
 ---@field highlight string|nil
 ---@field virt_text string[][]|nil
@@ -24,6 +26,7 @@ function UiComponent.new(fn)
 
       return this
     end,
+
     __index = function(_, name)
       return rawget(UiComponent, name)
     end,
@@ -32,6 +35,21 @@ function UiComponent.new(fn)
   setmetatable(instance, mt)
 
   return instance
+end
+
+---@param fn fun(...)
+---@return function
+function UiComponent.new_async(fn)
+  return function(...)
+    local args = { ... }
+    local cb = table.remove(args)
+
+    table.insert(args, function(this)
+      cb(setmetatable(this, { __index = UiComponent }))
+    end)
+
+    fn(util.unpack(args))
+  end
 end
 
 function UiComponent:width()

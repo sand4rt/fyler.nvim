@@ -81,6 +81,7 @@ end
 
 local M = {}
 
+-- Returns only the file tree structure without any git status info
 M.files = Component.new(function(node)
   if not node or not node.children then
     return { tag = "files", children = {} }
@@ -92,33 +93,13 @@ M.files = Component.new(function(node)
     return { tag = "files", children = {} }
   end
 
-  -- Build git column and get git highlights only if enabled
-  local git_highlights = {}
-  local gitst_column = {}
-
-  if config.values.views.finder.git_status.enabled then
-    local git_entries = git.map_entries(
-      node.path,
-      util.tbl_map(flattened_entries, function(e)
-        return e.item.path
-      end)
-    )
-
-    for i, e in ipairs(git_entries) do
-      table.insert(gitst_column, Text(nil, { virt_text = { e } }))
-      git_highlights[i] = e[2]
-    end
-  end
-
   local files_column = {}
-  for i, e in ipairs(flattened_entries) do
+  for _, e in ipairs(flattened_entries) do
     local item, depth = e.item, e.depth
     local icon, hl = icon_and_hl(item)
 
     local icon_highlight = (item.type == "directory") and "FylerFSDirectoryIcon" or hl
-
-    local git_hl = config.values.views.finder.git_status.enabled and git_highlights[i] or nil
-    local name_highlight = git_hl or ((item.type == "directory") and "FylerFSDirectoryName" or nil)
+    local name_highlight = (item.type == "directory") and "FylerFSDirectoryName" or nil
 
     icon = icon and (icon .. " ") or ""
 
@@ -130,18 +111,91 @@ M.files = Component.new(function(node)
     table.insert(files_column, Row { indentation_text, icon_text, ref_id_text, name_text })
   end
 
-  -- Only include git column if enabled
-  local columns = { Column(files_column) }
-  if config.values.views.finder.git_status.enabled then
-    table.insert(columns, Column(gitst_column))
-  end
-
   return {
     tag = "files",
     children = {
-      Row(columns),
+      Row { Column(files_column) },
     },
   }
+end)
+
+-- Returns file tree with info column combined (async with callback)
+M.files_with_info = Component.new_async(function(node, callback)
+  if not node or not node.children then
+    return callback { tag = "files", children = {} }
+  end
+
+  local flattened_entries = flatten_tree(node)
+
+  if #flattened_entries == 0 then
+    return callback { tag = "files", children = {} }
+  end
+
+  -- Build files column
+  local files_column = {}
+  for _, e in ipairs(flattened_entries) do
+    local item, depth = e.item, e.depth
+    local icon, hl = icon_and_hl(item)
+
+    local icon_highlight = (item.type == "directory") and "FylerFSDirectoryIcon" or hl
+
+    icon = icon and (icon .. " ") or ""
+
+    local indentation_text = Text(string.rep(" ", 2 * depth))
+    local icon_text = Text(icon, { highlight = icon_highlight })
+    local ref_id_text = item.ref_id and Text(string.format("/%05d ", item.ref_id)) or Text ""
+    local name_text = Text(item.name)
+
+    table.insert(files_column, Row { indentation_text, icon_text, ref_id_text, name_text })
+  end
+
+  -- Build git column and get git highlights (async operation)
+  if config.values.views.finder.git_status.enabled then
+    git.map_entries_async(
+      node.path,
+      util.tbl_map(flattened_entries, function(e)
+        return e.item.path
+      end),
+      function(git_entries)
+        local git_highlights = {}
+        local gitst_column = {}
+
+        for i, e in ipairs(git_entries) do
+          table.insert(gitst_column, Text(nil, { virt_text = { e } }))
+          git_highlights[i] = e[2]
+        end
+
+        -- Apply git highlights to file names
+        for i, e in ipairs(flattened_entries) do
+          local item = e.item
+          local git_hl = git_highlights[i]
+          local name_highlight = git_hl or ((item.type == "directory") and "FylerFSDirectoryName" or nil)
+
+          -- Update the name text with git highlight
+          local row = files_column[i]
+          if row and row.children and row.children[4] then
+            row.children[4].option = row.children[4].option or {}
+            row.children[4].option.highlight = name_highlight
+          end
+        end
+
+        callback {
+          tag = "files",
+          children = {
+            Row { Column(files_column), Column(gitst_column) },
+          },
+        }
+      end
+    )
+  else
+    -- No git status, return immediately
+    callback {
+      tag = "files",
+      children = {
+        Row { Column(files_column) },
+      },
+    }
+  end
 end)
 
 M.operations = Component.new(function(operations)

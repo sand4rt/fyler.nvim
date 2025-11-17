@@ -54,6 +54,21 @@ function M.map_entries(root_dir, entries)
   end)
 end
 
+function M.map_entries_async(root_dir, entries, callback)
+  M.build_modified_lookup_for_async(root_dir, function(modified_lookup)
+    M.build_ignored_lookup_for_async(root_dir, entries, function(ignored_lookup)
+      local status_map = util.tbl_merge_force(modified_lookup, ignored_lookup)
+      local result = util.tbl_map(entries, function(e)
+        return {
+          config.values.views.finder.git_status.symbols[icon_map[status_map[e]]] or "",
+          hl_map[icon_map[status_map[e]]],
+        }
+      end)
+      callback(result)
+    end)
+  end)
+end
+
 ---@return string
 function M.worktree_root()
   return Process.new({
@@ -84,6 +99,33 @@ function M.build_modified_lookup_for(dir)
 end
 
 ---@param dir string
+---@param callback function
+function M.build_modified_lookup_for_async(dir, callback)
+  local process = Process.new {
+    path = "git",
+    args = { "-C", dir, "status", "--porcelain" },
+  }
+
+  process:spawn_async(function(code)
+    vim.schedule(function()
+      local lookup = {}
+
+      if code == 0 then
+        for _, line in process:stdout_iter() do
+          if line ~= "" then
+            local symbol = line:sub(1, 2)
+            local path = Path.new(dir):join(line:sub(4)):normalize()
+            lookup[path] = symbol
+          end
+        end
+      end
+
+      callback(lookup)
+    end)
+  end)
+end
+
+---@param dir string
 ---@param stdin string|string[]
 function M.build_ignored_lookup_for(dir, stdin)
   local process = Process.new({
@@ -100,6 +142,33 @@ function M.build_ignored_lookup_for(dir, stdin)
   end
 
   return lookup
+end
+
+---@param dir string
+---@param stdin string|string[]
+---@param callback function
+function M.build_ignored_lookup_for_async(dir, stdin, callback)
+  local process = Process.new {
+    path = "git",
+    args = { "-C", dir, "check-ignore", "--stdin" },
+    stdin = table.concat(util.tbl_wrap(stdin), "\n"),
+  }
+
+  process:spawn_async(function(code)
+    vim.schedule(function()
+      local lookup = {}
+
+      if code == 0 then
+        for _, line in process:stdout_iter() do
+          if line ~= "" then
+            lookup[line] = "!!"
+          end
+        end
+      end
+
+      callback(lookup)
+    end)
+  end)
 end
 
 return M
