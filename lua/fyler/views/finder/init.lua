@@ -175,23 +175,27 @@ function Finder:constrain_cursor()
   end
 end
 
+-- TODO: Maybe this function not suppose to be here
+Finder._dispatch_refresh_with_info = util.debounce_wrap(
+  50,
+  a.void_wrap(function(self)
+    self.win.ui:render(a.wrap(ui.files_with_info)(self.files:update():totable()))
+  end)
+)
+-- TODO: Maybe we can further optimize rendering.
 ---@param self Finder
 ---@param on_render function
-function Finder:dispatch_refresh(on_render)
-  util.debounce("dispatch_refresh", 10, function()
-    self.win.ui:render(ui.files(self.files:update():totable()), function()
-      if config.values.views.finder.git_status.enabled then
-        a.void(function()
-          self.win.ui:render(a.wrap(ui.files_with_info)(self.files:update():totable()), on_render)
-        end)
-      else
-        if on_render then
-          on_render()
-        end
-      end
-    end)
+Finder.dispatch_refresh = util.debounce_wrap(10, function(self, on_render)
+  -- Rendering file tree without additional info first
+  self.win.ui:render(ui.files(self.files:update():totable()), function()
+    if on_render then
+      on_render()
+    end
+
+    -- Debounced async call to render file tree(again) with additional information
+    self:_dispatch_refresh_with_info()
   end)
-end
+end)
 
 function Finder:cursor_node_entry()
   local ref_id = parser.parse_ref_id(vim.api.nvim_get_current_line())
@@ -271,7 +275,7 @@ end
 Finder.synchronize = a.void_wrap(function(self)
   local buf_lines = vim.api.nvim_buf_get_lines(self.win.bufnr, 0, -1, false)
   local operations = self.files:diff_with_lines(buf_lines)
-  local can_mutate
+  local can_mutate = false
   if vim.tbl_isempty(operations) then
     self:dispatch_refresh()
   elseif config.values.views.finder.confirm_simple and can_skip_confirmation(operations) then

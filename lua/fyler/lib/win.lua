@@ -125,16 +125,18 @@ end
 ---@param finish integer
 ---@param lines string[]
 function Win:set_lines(start, finish, lines)
+  if not self:has_valid_bufnr() then
+    return
+  end
+
   local was_modifiable = util.get_buf_option(self.bufnr, "modifiable")
   local undolevels = util.get_buf_option(self.bufnr, "undolevels")
 
   self:set_local_buf_option("modifiable", true)
   self:set_local_buf_option("undolevels", -1)
 
-  if self:has_valid_bufnr() then
-    vim.api.nvim_buf_clear_namespace(self.bufnr, self.namespace, 0, -1)
-    vim.api.nvim_buf_set_lines(self.bufnr, start, finish, false, lines)
-  end
+  vim.api.nvim_buf_clear_namespace(self.bufnr, self.namespace, 0, -1)
+  vim.api.nvim_buf_set_lines(self.bufnr, start, finish, false, lines)
 
   if not was_modifiable then
     self:set_local_buf_option("modifiable", false)

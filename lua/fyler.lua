@@ -75,11 +75,9 @@ function M.setup(opts)
   end
 
   ---@param name string|nil
-  M.track_buffer = function(name)
-    util.debounce("focus_buffer", 10, function()
-      finder.track_buffer(name)
-    end)
-  end
+  M.track_buffer = util.debounce_wrap(10, function(name)
+    finder.track_buffer(name)
+  end)
 end
 
 return M

@@ -1,5 +1,6 @@
 local Path = require "fyler.lib.path"
 local config = require "fyler.config"
+local util = require "fyler.lib.util"
 
 local M = {
   _instances = {}, ---@type table<string, uv.uv_fs_event_t>
@@ -17,8 +18,10 @@ function M.register(path, callback)
     return
   end
 
+  local wrapped_callback = util.debounce_wrap(200, callback)
+
   M._instances[_path:normalize()] = assert(vim.uv.new_fs_event())
-  M._instances[_path:normalize()]:start(_path:normalize(), {}, callback)
+  M._instances[_path:normalize()]:start(_path:normalize(), {}, wrapped_callback)
 end
 
 ---@param path string
