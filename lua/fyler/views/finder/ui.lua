@@ -8,11 +8,6 @@ local Text = Ui.Text
 local Row = Ui.Row
 local Column = Ui.Column
 
-local icon_provider = config.values.integrations.icon
-if type(icon_provider) == "string" then
-  icon_provider = require("fyler.integrations.icon")[icon_provider]
-end
-
 local function isdir(node)
   return node.type == "directory"
 end
@@ -61,7 +56,7 @@ end
 
 ---@return string|nil, string|nil
 local function icon_and_hl(item)
-  local icon, hl = icon_provider(item.type, item.path)
+  local icon, hl = config.icon_provider(item.type, item.path)
   if not icon or icon == "" then
     return
   end

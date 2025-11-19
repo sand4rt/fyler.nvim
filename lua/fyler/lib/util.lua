@@ -160,6 +160,17 @@ function M.set_buf_option(bufnr, option, value)
   vim.api.nvim_set_option_value(option, value, { buf = bufnr, scope = "local" })
 end
 
+---@param str string
+---@param max_length integer
+---@param trailing string
+function M.str_truncate(str, max_length, trailing)
+  trailing = trailing or "..."
+  if vim.fn.strdisplaywidth(str) > max_length then
+    str = vim.trim(str:sub(1, max_length - #trailing)) .. trailing
+  end
+  return str
+end
+
 ---@param fn function
 ---@param ... any
 ---@return boolean|any

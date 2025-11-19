@@ -352,6 +352,13 @@ function config.setup(opts)
 
   config.values = util.tbl_merge_force(config.defaults(), migrated_opts)
 
+  local icon_provider = config.values.integrations.icon
+  if type(icon_provider) == "string" then
+    config.icon_provider = require("fyler.integrations.icon")[icon_provider]
+  else
+    config.icon_provider = icon_provider
+  end
+
   require("fyler.autocmds").setup(config)
   require("fyler.hooks").setup(config)
   require("fyler.lib.hl").setup()

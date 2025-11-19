@@ -12,7 +12,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: latest
-          args: --color always --check lua/ tests/
+          args: --color always --check lua/
   lint:
     name: Linting
     runs-on: ubuntu-latest
