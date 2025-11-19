@@ -9,7 +9,7 @@
 ---
 --- Getting started with Fyler:
 --- 1. Run `:checkhealth fyler` to make sure everything is in right place.
---- 2. Fyler must be setup correctly before used. See |Fyler.Config|
+--- 2. Fyler must be setup correctly before used. See |Fyler.Setup|
 ---
 --- USAGE
 ---
@@ -34,7 +34,17 @@
 --- >lua
 ---   local fyler = require("fyler")
 ---
+---   -- Opens finder view with given options
 ---   fyler.open({ dir = "...", kind = "..." })
+---
+---   -- Toggles finder view with given options
+---   fyler.toggle({ dir = "...", kind = "..." })
+---
+---   -- Focuses finder view
+---   fyler.focus()
+---
+---   -- Focuses given file path or alternate buffer
+---   fyler.navigate("...")
 --- <
 ---
 ---@tag Fyler.nvim
@@ -54,6 +64,7 @@ function M.setup(opts)
   end
 
   local util = require "fyler.lib.util"
+  local log = require "fyler.log"
 
   -- Overwrite default configuration before setuping other components
   require("fyler.config").setup(opts)
@@ -62,22 +73,38 @@ function M.setup(opts)
 
   local finder = require "fyler.views.finder"
 
+  -- Fyler.API: Closes current finder view
   M.close = finder.close
 
+  -- Fyler.API: Opens finder view with provided options
   M.open = vim.schedule_wrap(function(args)
     args = args or {}
     finder.open(args.dir, args.kind)
   end)
 
+  -- Fyler.API: Toggles finder view with provided options
   M.toggle = function(args)
     args = args or {}
     finder.toggle(args.dir, args.kind)
   end
 
-  ---@param name string|nil
-  M.track_buffer = util.debounce_wrap(10, function(name)
-    finder.track_buffer(name)
+  -- Fyler.API: Focus finder view
+  M.focus = function()
+    finder.focus()
+  end
+
+  -- Fyler.API: Focuses given file path or alternate buffer
+  ---@param path string
+  M.navigate = util.debounce_wrap(10, function(path)
+    finder.navigate(path)
   end)
+
+  -- Use `focus_file` instead
+  ---@deprecated
+  M.track_buffer = function(...)
+    log.warn "[Fyler.nvim] 'track_buffer' is deprecated, use 'navigate' instead"
+    M.navigate(...)
+  end
 end
 
 return M

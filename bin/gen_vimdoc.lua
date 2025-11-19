@@ -31,6 +31,8 @@ local function run_tests()
   vim.opt.runtimepath:prepend "."
 
   local minidoc = require "mini.doc"
+  minidoc.setup()
+
   minidoc.generate(
     {
       "lua/fyler.lua",
@@ -41,6 +43,9 @@ local function run_tests()
       hooks = {
         file = function() end,
         sections = {
+          ["@signature"] = function(s)
+            s:remove()
+          end,
           ["@return"] = function(s)
             s.parent:clear_lines()
           end,

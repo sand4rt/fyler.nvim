@@ -44,7 +44,7 @@ function M.setup(config)
       group = augroup,
       desc = "Track current focused buffer in finder",
       callback = function(arg)
-        fyler.track_buffer(arg.file)
+        fyler.navigate(arg.file)
       end,
     })
   end

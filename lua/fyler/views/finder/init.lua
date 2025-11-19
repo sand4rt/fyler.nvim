@@ -205,7 +205,7 @@ function Finder:cursor_node_entry()
 end
 
 ---@param path string
-function Finder:track_buffer(path)
+function Finder:navigate(path)
   if parser.is_protocol_path(path) then
     if not util.is_valid_bufnr(self.win.old_bufnr) then
       return
@@ -340,8 +340,17 @@ function M.toggle(dir, kind)
   end
 end
 
+function M.focus()
+  local current = M._current
+  if current then
+    current.win:focus()
+  else
+    M.open()
+  end
+end
+
 ---@param name string|nil
-function M.track_buffer(name)
+function M.navigate(name)
   local current = M._current
   if name == "" or not current then
     return
@@ -355,7 +364,7 @@ function M.track_buffer(name)
     name = vim.api.nvim_buf_get_name(current.win.old_bufnr)
   end
 
-  current:track_buffer(Path.new(name):normalize())
+  current:navigate(Path.new(name):normalize())
 end
 
 ---@return boolean

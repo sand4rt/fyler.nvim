@@ -10,7 +10,7 @@ Why Fyler.nvim over |oil.nvim|?
 
 Getting started with Fyler:
 1. Run `:checkhealth fyler` to make sure everything is in right place.
-2. Fyler must be setup correctly before used. See |Fyler.Config|
+2. Fyler must be setup correctly before used. See |Fyler.Setup|
 
 USAGE
 
@@ -35,18 +35,162 @@ Fyler can be used through lua API:
 >lua
   local fyler = require("fyler")
 
+  -- Opens finder view with given options
   fyler.open({ dir = "...", kind = "..." })
+
+  -- Toggles finder view with given options
+  fyler.toggle({ dir = "...", kind = "..." })
+
+  -- Focuses finder view
+  fyler.focus()
+
+  -- Focuses given file path or alternate buffer
+  fyler.navigate("...")
 <
 
 ------------------------------------------------------------------------------
-                                                                  *Fyler.Config*
+                                                                   *Fyler.Setup*
 CONFIGURATION
 
 To setup Fyler put following code anywhere in your neovim runtime:
 >lua
   require("fyler").setup()
 <
-To know more about plugin customization. visit:
-https://github.com/A7Lavinraj/fyler.nvim/wiki/configuration-options
 
+------------------------------------------------------------------------------
+                                                                *Fyler.Defaults*
+DEFAULTS
+
+To know more about plugin customization. visit:
+`https://github.com/A7Lavinraj/fyler.nvim/wiki/configuration-options`
+
+>lua
+  function config.defaults()
+    return {
+      hooks = {},
+      integrations = {
+        icon = "mini_icons",
+      },
+      views = {
+        finder = {
+          close_on_select = true,
+          confirm_simple = false,
+          default_explorer = false,
+          delete_to_trash = false,
+          git_status = {
+            enabled = true,
+            symbols = {
+              Untracked = "?",
+              Added = "+",
+              Modified = "*",
+              Deleted = "x",
+              Renamed = ">",
+              Copied = "~",
+              Conflict = "!",
+              Ignored = "#",
+            },
+          },
+          icon = {
+            directory_collapsed = nil,
+            directory_empty = nil,
+            directory_expanded = nil,
+          },
+          indentscope = {
+            enabled = true,
+            group = "FylerIndentMarker",
+            marker = "│",
+          },
+          mappings = {
+            ["q"] = "CloseView",
+            ["<CR>"] = "Select",
+            ["<C-t>"] = "SelectTab",
+            ["|"] = "SelectVSplit",
+            ["-"] = "SelectSplit",
+            ["^"] = "GotoParent",
+            ["="] = "GotoCwd",
+            ["."] = "GotoNode",
+            ["#"] = "CollapseAll",
+            ["<BS>"] = "CollapseNode",
+          },
+          mappings_opts = {
+            nowait = false,
+            noremap = true,
+            silent = true,
+          },
+          follow_current_file = true,
+          watcher = {
+            enabled = false,
+          },
+          win = {
+            border = vim.o.winborder == "" and "single" or vim.o.winborder,
+            buf_opts = {
+              filetype = "fyler",
+              syntax = "fyler",
+              buflisted = false,
+              buftype = "acwrite",
+              expandtab = true,
+              shiftwidth = 2,
+            },
+            kind = "replace",
+            kinds = {
+              float = {
+                height = "70%",
+                width = "70%",
+                top = "10%",
+                left = "15%",
+              },
+              replace = {},
+              split_above = {
+                height = "70%",
+              },
+              split_above_all = {
+                height = "70%",
+                win_opts = {
+                  winfixheight = true,
+                },
+              },
+              split_below = {
+                height = "70%",
+              },
+              split_below_all = {
+                height = "70%",
+                win_opts = {
+                  winfixheight = true,
+                },
+              },
+              split_left = {
+                width = "70%",
+              },
+              split_left_most = {
+                width = "30%",
+                win_opts = {
+                  winfixwidth = true,
+                },
+              },
+              split_right = {
+                width = "30%",
+              },
+              split_right_most = {
+                width = "30%",
+                win_opts = {
+                  winfixwidth = true,
+                },
+              },
+            },
+            win_opts = {
+              concealcursor = "nvic",
+              conceallevel = 3,
+              cursorline = false,
+              number = false,
+              relativenumber = false,
+              winhighlight = "Normal:FylerNormal,NormalNC:FylerNormalNC",
+              wrap = false,
+            },
+          },
+        },
+      },
+    }
+  end
+
+<
  vim:tw=78:ts=8:noet:ft=help:norl:

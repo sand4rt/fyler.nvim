@@ -4,10 +4,8 @@
 --- >lua
 ---   require("fyler").setup()
 --- <
---- To know more about plugin customization. visit:
---- https://github.com/A7Lavinraj/fyler.nvim/wiki/configuration-options
 ---
----@tag Fyler.Config
+---@tag Fyler.Setup
 
 local deprecated = require "fyler.deprecated"
 local util = require "fyler.lib.util"
@@ -165,8 +163,15 @@ local DEPRECATION_RULES = {
 ---@field integrations FylerSetupIntegrations|nil
 ---@field views FylerConfigViews|nil
 
----@return FylerConfig
-local function defaults()
+--- DEFAULTS
+---
+--- To know more about plugin customization. visit:
+--- `https://github.com/A7Lavinraj/fyler.nvim/wiki/configuration-options`
+---
+---@eval return MiniDoc.afterlines_to_code(MiniDoc.current.eval_section)
+---
+---@tag Fyler.Defaults
+function config.defaults()
   return {
     hooks = {},
     integrations = {
@@ -345,7 +350,7 @@ function config.setup(opts)
 
   local migrated_opts = deprecated.migrate(opts, DEPRECATION_RULES)
 
-  config.values = util.tbl_merge_force(defaults(), migrated_opts)
+  config.values = util.tbl_merge_force(config.defaults(), migrated_opts)
 
   require("fyler.autocmds").setup(config)
   require("fyler.hooks").setup(config)
