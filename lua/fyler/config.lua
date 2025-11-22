@@ -265,7 +265,7 @@ function config.defaults()
               },
             },
             split_left = {
-              width = "70%",
+              width = "30%",
             },
             split_left_most = {
               width = "30%",

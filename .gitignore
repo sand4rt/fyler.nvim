@@ -1,5 +1,5 @@
 # Temporary test directory
-.tests
+.temp
 
 # Quick testing directory for local development
 .scratch
@@ -9,9 +9,3 @@
 
 # Docs helptags file
 doc/tags
-
-# python env
-.venv
-
-# python cache
-__pycache__

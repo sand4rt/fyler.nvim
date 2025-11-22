@@ -1,36 +1,11 @@
-local uv = vim.loop or vim.uv
-
-FYLER_TESTING_DIR = vim.fs.joinpath(vim.uv.cwd(), ".tests")
-
----@param path string
----@return boolean
-local function path_exists(path)
-  local _, err = uv.fs_stat(path)
-  return err == nil
-end
-
----@param repo string
-local function ensure_install(repo)
-  local name = repo:match "/(.*)$"
-  local install_path = vim.fs.joinpath(FYLER_TESTING_DIR, "repos", name)
-
-  if not path_exists(install_path) then
-    vim.system({ "git", "clone", "--depth=1", "git@github.com:" .. repo .. ".git", install_path }):wait()
-
-    if vim.v.shell_error > 0 then
-      return print("[FYLER.NVIM]: Failed to clone '" .. repo .. "'")
-    end
-  end
-
-  vim.opt.runtimepath:prepend(install_path)
-end
-
-local function run_tests()
-  ensure_install "nvim-mini/mini.doc"
+do
+  local get_dir = dofile("bin/setup_deps.lua").get_dir
 
   vim.opt.runtimepath:prepend "."
+  vim.opt.runtimepath:prepend(vim.fs.joinpath(get_dir "repo", "mini.doc"))
 
   local minidoc = require "mini.doc"
+
   minidoc.setup()
 
   minidoc.generate(
@@ -63,5 +38,3 @@ local function run_tests()
     }
   )
 end
-
-run_tests()
