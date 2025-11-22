@@ -272,6 +272,7 @@ local function run_mutation(operations)
   local count = 0
   local text = "Mutating (%d/%d)"
   local spinner = Spinner.new(string.format(text, count, #operations))
+  local last_focusable_operation = nil
   spinner:start()
 
   for _, operation in ipairs(operations) do
@@ -289,11 +290,17 @@ local function run_mutation(operations)
       async_wrapped_fs.copy(operation.src, operation.dst)
     end
 
+    if operation.type ~= "delete" then
+      last_focusable_operation = operation.path or operation.dst
+    end
+
     count = count + 1
     spinner:set_text(string.format(text, count, #operations))
   end
 
   spinner:stop()
+
+  return last_focusable_operation
 end
 
 ---@return boolean
@@ -326,12 +333,17 @@ function Finder:synchronize()
       can_mutate = get_confirmation(ui.operations(operations))
     end
 
+    local last_focusable_operation
     if can_mutate then
-      run_mutation(operations)
+      last_focusable_operation = run_mutation(operations)
     end
 
     if can_mutate then
-      self:dispatch_refresh()
+      self:dispatch_refresh(function()
+        if last_focusable_operation then
+          self:navigate(last_focusable_operation)
+        end
+      end)
     end
   end)
 end
