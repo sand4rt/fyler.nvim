@@ -185,6 +185,7 @@ To know more about plugin customization. visit:
               relativenumber = false,
               winhighlight = "Normal:FylerNormal,NormalNC:FylerNormalNC",
               wrap = false,
+              signcolumn = "no",
             },
           },
         },
