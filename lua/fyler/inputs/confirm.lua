@@ -44,12 +44,12 @@ function Confirm:open(options, message, on_submit)
     kind       = "float",
     left       = left,
     mappings   = {
-      ["y"] = function()
+      [{ 'y','o', '<Enter>' }] = function()
         self.window:hide()
         on_submit(true)
       end,
 
-      ["n"] = function()
+      [{ 'n', 'c', '<ESC>' }] = function()
         self.window:hide()
         on_submit(false)
       end
