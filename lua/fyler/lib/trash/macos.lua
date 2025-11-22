@@ -3,14 +3,14 @@ local fs = require "fyler.lib.fs"
 
 local M = {}
 
----@return string
-function M.get_trash_dir()
-  return Path.new(vim.uv.os_homedir() or vim.fn.expand "$HOME"):join(".Trash"):normalize()
+function M.get_trash_dir(callback)
+  vim.schedule(function()
+    callback(Path.new(vim.uv.os_homedir() or vim.fn.expand "$HOME"):join(".Trash"):normalize())
+  end)
 end
 
 ---@param basename string
-function M.next_name(basename)
-  local dir = M.get_trash_dir()
+function M.next_name(dir, basename)
   if not Path.new(dir):join(basename):exists() then
     return basename
   end
@@ -28,11 +28,16 @@ function M.next_name(basename)
 end
 
 ---@param path string
-function M.dump(path)
-  local trash_dir = M.get_trash_dir()
-  local path_to_trash = Path.new(path)
-  local target_path = Path.new(trash_dir):join(M.next_name(path_to_trash:basename()))
-  fs.mv(path_to_trash:normalize(), target_path:normalize())
+---@param callback function
+function M.dump(path, callback)
+  M.get_trash_dir(function(trash_dir)
+    local path_to_trash = Path.new(path)
+    local target_path = Path.new(trash_dir):join(M.next_name(trash_dir, path_to_trash:basename()))
+
+    fs.mv(path_to_trash:normalize(), target_path:normalize(), function(err)
+      callback(err)
+    end)
+  end)
 end
 
 return M

@@ -43,9 +43,10 @@ function M.setup(config)
     vim.api.nvim_create_autocmd("BufEnter", {
       group = augroup,
       desc = "Track current focused buffer in finder",
-      callback = function(arg)
+      -- Scheduling  to let Finder.files update completely
+      callback = vim.schedule_wrap(function(arg)
         fyler.navigate(arg.file)
-      end,
+      end),
     })
   end
 

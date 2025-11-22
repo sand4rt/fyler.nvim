@@ -265,7 +265,7 @@ function config.defaults()
               },
             },
             split_left = {
-              width = "70%",
+              width = "30%",
             },
             split_left_most = {
               width = "30%",
@@ -351,6 +351,13 @@ function config.setup(opts)
   local migrated_opts = deprecated.migrate(opts, DEPRECATION_RULES)
 
   config.values = util.tbl_merge_force(config.defaults(), migrated_opts)
+
+  local icon_provider = config.values.integrations.icon
+  if type(icon_provider) == "string" then
+    config.icon_provider = require("fyler.integrations.icon")[icon_provider]
+  else
+    config.icon_provider = icon_provider
+  end
 
   require("fyler.autocmds").setup(config)
   require("fyler.hooks").setup(config)

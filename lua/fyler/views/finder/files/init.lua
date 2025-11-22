@@ -218,93 +218,148 @@ function Files:add_child(parent_ref_id, opts)
 end
 
 ---@param ref_id integer|nil
----@return Files
-function Files:update(ref_id)
+---@param callback function
+function Files:update(ref_id, callback)
+  if type(ref_id) == "function" then
+    callback = ref_id
+    ref_id = nil
+  end
+
   if ref_id then
     local node = self:find_node_by_ref_id(ref_id)
-    if not node then
-      return self
+    if node then
+      self:_update(node, function(err)
+        if err then
+          return callback(err)
+        end
+        callback(nil, self)
+      end)
+    else
+      callback(nil, self)
     end
-    self:_update(node)
   else
-    self:_update(self.trie)
+    self:_update(self.trie, function(err)
+      if err then
+        return callback(err)
+      end
+      callback(nil, self)
+    end)
   end
-  return self
 end
 
 ---@param node Trie
-function Files:_update(node)
+---@param callback function
+function Files:_update(node, callback)
   local node_entry = self.manager:get(node.value)
   if not node_entry.open then
-    return
+    return callback(nil)
   end
 
-  local entries = fs.ls(node_entry.path)
-
-  local entry_paths = {}
-  for _, entry in ipairs(entries) do
-    entry_paths[entry.name] = entry
-  end
-
-  -- Unregister removed children
-  for name, child_node in pairs(node.children) do
-    if not entry_paths[name] then
-      local child_entry = self.manager:get(child_node.value)
-      if child_entry:isdir() then
-        self:_unregister_watcher(child_node, true)
-      end
-      node.children[name] = nil
+  fs.ls(node_entry.path, function(err, entries)
+    if err or not entries then
+      return callback(err)
     end
-  end
 
-  -- Add new children
-  for name, entry in pairs(entry_paths) do
-    if not node.children[name] then
-      local child_ref_id = self.manager:set(entry)
-      local child_node = Trie.new(child_ref_id)
-      node.children[name] = child_node
+    local entry_paths = {}
+    for _, entry in ipairs(entries) do
+      entry_paths[entry.name] = entry
+    end
 
-      local child_entry = self.manager:get(child_ref_id)
-      if child_entry:isdir() and child_entry.open then
-        self:_register_watcher(child_node, true)
+    -- Unregister removed children
+    for name, child_node in pairs(node.children) do
+      if not entry_paths[name] then
+        local child_entry = self.manager:get(child_node.value)
+        if child_entry:isdir() then
+          self:_unregister_watcher(child_node, true)
+        end
+        node.children[name] = nil
       end
     end
-  end
 
-  for _, child in pairs(node.children) do
-    self:_update(child)
-  end
+    -- Add new children
+    for name, entry in pairs(entry_paths) do
+      if not node.children[name] then
+        local child_ref_id = self.manager:set(entry)
+        local child_node = Trie.new(child_ref_id)
+        node.children[name] = child_node
+
+        local child_entry = self.manager:get(child_ref_id)
+        if child_entry:isdir() and child_entry.open then
+          self:_register_watcher(child_node, true)
+        end
+      end
+    end
+
+    -- Update children recursively
+    local children_list = {}
+    for _, child in pairs(node.children) do
+      table.insert(children_list, child)
+    end
+
+    local function update_next(index)
+      if index > #children_list then
+        return callback(nil)
+      end
+
+      self:_update(children_list[index], function(err)
+        if err then
+          return callback(err)
+        end
+        update_next(index + 1)
+      end)
+    end
+
+    update_next(1)
+  end)
 end
 
 ---@param path string
----@return integer|nil
-function Files:focus_path(path)
+---@param callback function
+function Files:focus_path(path, callback)
   local segments = self:path_to_segments(path)
   if not segments then
-    return nil
+    return callback(nil, nil)
   end
 
   if #segments == 0 then
-    return nil
+    return callback(nil, nil)
   end
 
   local current_node = self.trie
 
-  for _, segment in ipairs(segments) do
+  local function process_segment(index)
+    if index > #segments then
+      return callback(nil, current_node.value)
+    end
+
+    local segment = segments[index]
     local current_entry = self.manager:get(current_node.value)
+
     if current_entry:isdir() and not current_entry.open then
       self:expand_node(current_node.value)
-      self:update(current_node.value)
-    end
+      self:update(current_node.value, function(err)
+        if err then
+          return callback(err, nil)
+        end
 
-    if not current_node.children[segment] then
-      return nil
-    end
+        if not current_node.children[segment] then
+          return callback(nil, nil)
+        end
 
-    current_node = current_node.children[segment]
+        current_node = current_node.children[segment]
+        process_segment(index + 1)
+      end)
+    else
+      if not current_node.children[segment] then
+        return callback(nil, nil)
+      end
+
+      current_node = current_node.children[segment]
+      process_segment(index + 1)
+    end
   end
 
-  return current_node.value
+  process_segment(1)
 end
 
 ---@return table

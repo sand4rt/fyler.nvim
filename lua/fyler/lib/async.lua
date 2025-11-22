@@ -99,4 +99,17 @@ function M.void(async_fn, cb)
   execute_async(async_fn, cb)
 end
 
+M.schedule = M.wrap(vim.schedule)
+
+setmetatable(M, {
+  __index = function(_, k)
+    local _, module = pcall(require, "fyler.lib.async." .. k)
+    if not module then
+      require("fyler.log").error(string.format("Module '%s' is not implemented", k))
+    else
+      return module
+    end
+  end,
+})
+
 return M

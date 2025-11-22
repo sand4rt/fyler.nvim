@@ -1,7 +1,8 @@
-local Files = require "fyler.views.finder.files.init"
+local Files = require "fyler.views.finder.files"
 local Path = require "fyler.lib.path"
+local Spinner = require "fyler.lib.spinner"
 local Win = require "fyler.lib.win"
-local a = require "fyler.lib.async"
+local async = require "fyler.lib.async"
 local config = require "fyler.config"
 local fs = require "fyler.lib.fs"
 local indent = require "fyler.views.finder.indent"
@@ -19,12 +20,12 @@ local Finder = {}
 Finder.__index = Finder
 
 function Finder.new(dir, config)
-  local files = Files.new({
+  local files = Files.new {
     path = dir,
     open = true,
     type = "directory",
     name = vim.fn.fnamemodify(dir, ":t"),
-  }):update()
+  }
 
   local instance = {
     dir = dir,
@@ -138,12 +139,12 @@ function Finder:chdir(dir)
   assert(dir, "cannot change directory with empty path")
 
   self.files:_unregister_watcher(self.files.trie, true)
-  self.files = Files.new({
+  self.files = Files.new {
     path = dir,
     open = true,
     type = "directory",
     name = vim.fn.fnamemodify(dir, ":t"),
-  }):update()
+  }
 
   self.dir = dir
   self.files.finder = self
@@ -175,25 +176,35 @@ function Finder:constrain_cursor()
   end
 end
 
--- TODO: Maybe this function not suppose to be here
-Finder._dispatch_refresh_with_info = util.debounce_wrap(
-  50,
-  a.void_wrap(function(self)
-    self.win.ui:render(a.wrap(ui.files_with_info)(self.files:update():totable()))
-  end)
-)
--- TODO: Maybe we can further optimize rendering.
 ---@param self Finder
 ---@param on_render function
 Finder.dispatch_refresh = util.debounce_wrap(10, function(self, on_render)
-  -- Rendering file tree without additional info first
-  self.win.ui:render(ui.files(self.files:update():totable()), function()
-    if on_render then
-      on_render()
-    end
+  local files_to_table = async.wrap(function(callback)
+    self.files:update(nil, function(_, this)
+      callback(this:totable())
+    end)
+  end)
 
-    -- Debounced async call to render file tree(again) with additional information
-    self:_dispatch_refresh_with_info()
+  async.void(function()
+    -- Rendering file tree without additional info first
+    local files_table = files_to_table()
+
+    -- Have to schedule call due to fast event
+    vim.schedule(function()
+      self.win.ui:render(ui.files(files_table), function()
+        if on_render then
+          on_render()
+        end
+
+        -- TODO: I don't know why we need to reset syntax on entering fyler buffer with `:e`
+        util.set_buf_option(self.win.bufnr, "syntax", "fyler")
+
+        -- Rendering file tree with additional info
+        ui.files_with_info(files_table, function(files_with_info_table)
+          self.win.ui:render(files_with_info_table)
+        end)
+      end)
+    end)
   end)
 end)
 
@@ -217,45 +228,72 @@ function Finder:navigate(path)
     end
   end
 
-  local ref_id = self.files:focus_path(path)
-  if not ref_id then
-    return
-  end
-
-  self:dispatch_refresh(function()
-    if not (self.win:has_valid_winid() and self.win:has_valid_bufnr()) then
+  self.files:focus_path(path, function(_, ref_id)
+    if not ref_id then
       return
     end
 
-    if not parser.is_protocol_path(vim.api.nvim_buf_get_name(0)) then
-      self.win.old_bufnr = vim.api.nvim_get_current_buf()
-      self.win.old_winid = vim.api.nvim_get_current_win()
-    end
-
-    for row, buf_line in ipairs(vim.api.nvim_buf_get_lines(self.win.bufnr, 0, -1, false)) do
-      if buf_line:find(ref_id) then
-        self.win:set_cursor(row, 0)
+    self:dispatch_refresh(function()
+      if not (self.win:has_valid_winid() and self.win:has_valid_bufnr()) then
+        return
       end
-    end
+
+      if not parser.is_protocol_path(vim.api.nvim_buf_get_name(0)) then
+        self.win.old_bufnr = vim.api.nvim_get_current_buf()
+        self.win.old_winid = vim.api.nvim_get_current_win()
+      end
+
+      for row, buf_line in ipairs(vim.api.nvim_buf_get_lines(self.win.bufnr, 0, -1, false)) do
+        if buf_line:find(ref_id) then
+          self.win:set_cursor(row, 0)
+        end
+      end
+    end)
   end)
 end
 
+local async_wrapped_fs = setmetatable({}, {
+  __index = function(_, k)
+    return async.wrap(function(...)
+      fs[k](...)
+    end)
+  end,
+})
+
+local async_wrapped_trash = setmetatable({}, {
+  __index = function(_, k)
+    return async.wrap(function(...)
+      trash[k](...)
+    end)
+  end,
+})
+
 local function run_mutation(operations)
+  local count = 0
+  local text = "Mutating (%d/%d)"
+  local spinner = Spinner.new(string.format(text, count, #operations))
+  spinner:start()
+
   for _, operation in ipairs(operations) do
     if operation.type == "create" then
-      fs.create(operation.path, operation.entry_type == "directory")
+      async_wrapped_fs.create(operation.path, operation.entry_type == "directory")
     elseif operation.type == "delete" then
       if config.values.views.finder.delete_to_trash then
-        trash.dump(operation.path)
+        async_wrapped_trash.dump(operation.path)
       else
-        fs.delete(operation.path)
+        async_wrapped_fs.delete(operation.path)
       end
     elseif operation.type == "move" then
-      fs.move(operation.src, operation.dst)
+      async_wrapped_fs.move(operation.src, operation.dst)
     elseif operation.type == "copy" then
-      fs.copy(operation.src, operation.dst)
+      async_wrapped_fs.copy(operation.src, operation.dst)
     end
+
+    count = count + 1
+    spinner:set_text(string.format(text, count, #operations))
   end
+
+  spinner:stop()
 end
 
 ---@return boolean
@@ -268,30 +306,35 @@ local function can_skip_confirmation(operations)
   if count.create <= 5 and count.delete == 0 and count.move <= 1 and count.copy <= 1 then
     return true
   end
-
   return false
 end
 
-Finder.synchronize = a.void_wrap(function(self)
-  local buf_lines = vim.api.nvim_buf_get_lines(self.win.bufnr, 0, -1, false)
-  local operations = self.files:diff_with_lines(buf_lines)
-  local can_mutate = false
-  if vim.tbl_isempty(operations) then
-    self:dispatch_refresh()
-  elseif config.values.views.finder.confirm_simple and can_skip_confirmation(operations) then
-    can_mutate = true
-  else
-    can_mutate = input.confirm.open_async(ui.operations(operations))
-  end
+local get_confirmation = async.wrap(vim.schedule_wrap(function(...)
+  input.confirm.open(...)
+end))
 
-  if can_mutate then
-    run_mutation(operations)
-  end
+function Finder:synchronize()
+  async.void(function()
+    local buf_lines = vim.api.nvim_buf_get_lines(self.win.bufnr, 0, -1, false)
+    local operations = self.files:diff_with_lines(buf_lines)
+    local can_mutate = false
+    if vim.tbl_isempty(operations) then
+      self:dispatch_refresh()
+    elseif config.values.views.finder.confirm_simple and can_skip_confirmation(operations) then
+      can_mutate = true
+    else
+      can_mutate = get_confirmation(ui.operations(operations))
+    end
 
-  if can_mutate then
-    self:dispatch_refresh()
-  end
-end)
+    if can_mutate then
+      run_mutation(operations)
+    end
+
+    if can_mutate then
+      self:dispatch_refresh()
+    end
+  end)
+end
 
 local M = {
   _current = nil, ---@type Finder|nil

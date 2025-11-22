@@ -1,6 +1,5 @@
 local Ui = require "fyler.lib.ui"
 local Win = require "fyler.lib.win"
-local a = require "fyler.lib.async"
 local util = require "fyler.lib.util"
 
 local Confirm = {}
@@ -8,7 +7,7 @@ Confirm.__index = Confirm
 
 local function resolve_dim(width, height)
   local width = math.max(25, math.min(vim.o.columns, width))
-  local height = math.max(1, math.min(vim.o.lines, height))
+  local height = math.max(1, math.min(16, height))
   local left = ((vim.o.columns - width) * 0.5)
   local top = ((vim.o.lines - height) * 0.5)
   return math.floor(width), math.floor(height), math.floor(left), math.floor(top)
@@ -76,7 +75,7 @@ end
 
 local M = {}
 
-M.open = vim.schedule_wrap(function(message, on_submit)
+function M.open(message, on_submit)
   local width, height = 0, 0
   if message.width then
     width, height = message:width(), message:height()
@@ -91,8 +90,6 @@ M.open = vim.schedule_wrap(function(message, on_submit)
     width = width,
     height = height,
   }, message, on_submit)
-end)
-
-M.open_async = a.wrap(M.open)
+end
 
 return M

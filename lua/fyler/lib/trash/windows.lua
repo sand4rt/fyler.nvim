@@ -1,49 +1,59 @@
 local Path = require "fyler.lib.path"
 local M = {}
 
-function M.dump(path)
+---@param path string
+---@param callback function
+function M.dump(path, callback)
   local _path = Path.new(path)
   local abspath = _path:normalize()
 
   local ps_script = string.format(
     [[
-        $timeoutSeconds = 30;
-        $job = Start-Job -ScriptBlock {
-          Add-Type -AssemblyName Microsoft.VisualBasic;
-          $ErrorActionPreference = 'Stop';
-          $item = Get-Item -LiteralPath '%s';
-          if ($item.PSIsContainer) {
-            [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteDirectory('%s', 'OnlyErrorDialogs', 'SendToRecycleBin');
-          } else {
-            [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%s', 'OnlyErrorDialogs', 'SendToRecycleBin');
-          }
-        };
-        $completed = Wait-Job -Job $job -Timeout $timeoutSeconds;
-        if ($completed) {
-          $result = Receive-Job -Job $job -ErrorAction SilentlyContinue -ErrorVariable jobError;
-          Remove-Job -Job $job -Force;
-          if ($jobError) {
-            Write-Error $jobError;
-            exit 1;
-          }
+      $timeoutSeconds = 30;
+      $job = Start-Job -ScriptBlock {
+        Add-Type -AssemblyName Microsoft.VisualBasic;
+        $ErrorActionPreference = 'Stop';
+        $item = Get-Item -LiteralPath '%s';
+        if ($item.PSIsContainer) {
+          [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteDirectory('%s', 'OnlyErrorDialogs', 'SendToRecycleBin');
         } else {
-          Remove-Job -Job $job -Force;
-          Write-Error 'Operation timed out after 30 seconds';
+          [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%s', 'OnlyErrorDialogs', 'SendToRecycleBin');
+        }
+      };
+      $completed = Wait-Job -Job $job -Timeout $timeoutSeconds;
+      if ($completed) {
+        $result = Receive-Job -Job $job -ErrorAction SilentlyContinue -ErrorVariable jobError;
+        Remove-Job -Job $job -Force;
+        if ($jobError) {
+          Write-Error $jobError;
           exit 1;
         }
-      ]],
+      } else {
+        Remove-Job -Job $job -Force;
+        Write-Error 'Operation timed out after 30 seconds';
+        exit 1;
+      }
+    ]],
     abspath,
     abspath,
     abspath
   )
 
   local Process = require "fyler.lib.process"
-  local proc = Process.new({
+  local proc = Process.new {
     path = "powershell",
     args = { "-NoProfile", "-NonInteractive", "-Command", ps_script },
-  }):spawn()
+  }
 
-  assert(proc.code == 0, "failed to move to recycle bin: " .. (proc:err() or ""))
+  proc:spawn_async(function(code)
+    vim.schedule(function()
+      if code == 0 then
+        callback(nil)
+      else
+        callback("failed to move to recycle bin: " .. (proc:err() or ""))
+      end
+    end)
+  end)
 end
 
 return M
