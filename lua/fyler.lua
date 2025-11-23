@@ -64,7 +64,6 @@ function M.setup(opts)
   end
 
   local util = require "fyler.lib.util"
-  local log = require "fyler.log"
 
   -- Overwrite default configuration before setuping other components
   require("fyler.config").setup(opts)
@@ -98,13 +97,6 @@ function M.setup(opts)
   M.navigate = util.debounce_wrap(10, function(path)
     finder.navigate(path)
   end)
-
-  -- Use `focus_file` instead
-  ---@deprecated
-  M.track_buffer = function(...)
-    log.warn "[Fyler.nvim] 'track_buffer' is deprecated, use 'navigate' instead"
-    M.navigate(...)
-  end
 end
 
 return M

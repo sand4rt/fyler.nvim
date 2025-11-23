@@ -7,68 +7,9 @@
 ---
 ---@tag Fyler.Setup
 
-local deprecated = require "fyler.deprecated"
 local util = require "fyler.lib.util"
 
 local config = {}
-
-local DEPRECATION_RULES = {
-  deprecated.rename("close_on_select", "views.finder.close_on_select", {
-    message = "Configuration structure reorganized under 'views.finder'",
-  }),
-
-  deprecated.rename("confirm_simple", "views.finder.confirm_simple", {
-    message = "Configuration structure reorganized under 'views.finder'",
-  }),
-
-  deprecated.rename("default_explorer", "views.finder.default_explorer", {
-    message = "Configuration structure reorganized under 'views.finder'",
-  }),
-
-  deprecated.rename("delete_to_trash", "views.finder.delete_to_trash", {
-    message = "Configuration structure reorganized under 'views.finder'",
-  }),
-
-  deprecated.rename("git_status", "views.finder.git_status", {
-    message = "Configuration structure reorganized under 'views.finder'",
-  }),
-
-  deprecated.rename("indentscope", "views.finder.indentscope", {
-    message = "Configuration structure reorganized under 'views.finder'",
-  }),
-
-  deprecated.rename("mappings", "views.finder.mappings", {
-    message = "Configuration structure reorganized under 'views.finder'",
-  }),
-
-  deprecated.rename("win", "views.finder.win", {
-    message = "Configuration structure reorganized under 'views.finder'",
-  }),
-
-  deprecated.transform("icon_provider", "integrations.icon", function(old_value)
-    if old_value == "nvim_web_devicons" then
-      return "nvim_web_devicons"
-    elseif old_value == "none" then
-      return "none"
-    else
-      return "mini_icons"
-    end
-  end, {
-    message = "Icon provider moved to integrations.icon",
-  }),
-
-  deprecated.rename("track_current_buffer", "views.finder.follow_current_file", {
-    message = "Renamed for clarity",
-  }),
-
-  deprecated.remove("popups", {
-    message = "Popup configuration has been removed",
-  }),
-
-  deprecated.rename("win.kind_presets", "views.finder.win.kinds", {
-    message = "Window kind presets renamed to 'kinds'",
-  }),
-}
 
 ---@class FylerConfigGitStatus
 ---@field enabled boolean
@@ -349,9 +290,7 @@ end
 function config.setup(opts)
   opts = opts or {}
 
-  local migrated_opts = deprecated.migrate(opts, DEPRECATION_RULES)
-
-  config.values = util.tbl_merge_force(config.defaults(), migrated_opts)
+  config.values = util.tbl_merge_force(config.defaults(), opts)
 
   local icon_provider = config.values.integrations.icon
   if type(icon_provider) == "string" then
