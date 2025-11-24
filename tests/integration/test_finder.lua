@@ -253,4 +253,13 @@ T["synchronize"] = function(kind)
   child.dbg_screen()
 end
 
+T["scheme"] = function(_)
+  child.cmd(string.format([[ edit fyler://%s ]], dir_data))
+  vim.uv.sleep(50)
+  child.dbg_screen()
+  local lines = child.get_lines(0, 0, -1, false)
+  eq(lines[1]:match "/%d+%s(.*)$", "test-dir")
+  eq(lines[2]:match "/%d+%s(.*)$", "test-file")
+end
+
 return T
