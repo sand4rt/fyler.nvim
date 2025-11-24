@@ -57,6 +57,18 @@ function M.setup(config)
       require("fyler.views.finder").recover()
     end,
   })
+
+  vim.api.nvim_create_autocmd("VimEnter", {
+    group = augroup,
+    desc = "Auto call Fyler when Neovim is called to open a directory",
+    callback = function()
+      local arg = vim.fn.argv(0)
+
+      if vim.fn.isdirectory(arg) == 1 then
+        require("fyler").open { dir = arg }
+      end
+    end,
+  })
 end
 
 return M
