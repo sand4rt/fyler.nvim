@@ -330,7 +330,18 @@ function Finder:synchronize()
     elseif config.values.views.finder.confirm_simple and can_skip_confirmation(operations) then
       can_mutate = true
     else
-      can_mutate = get_confirmation(ui.operations(operations))
+      local cwd = Path.new(self.dir)
+      can_mutate = get_confirmation(ui.operations(util.tbl_map(operations, function(operation)
+        local _operation = vim.deepcopy(operation)
+        if operation.type == "create" or operation.type == "delete" then
+          _operation.path = cwd:relative(operation.path)
+        else
+          _operation.src = cwd:relative(operation.src)
+          _operation.dst = cwd:relative(operation.dst)
+        end
+
+        return _operation
+      end)))
     end
 
     local last_focusable_operation

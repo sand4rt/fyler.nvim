@@ -71,6 +71,7 @@ function M.setup()
 
   -- stylua: ignore start
   local hl_groups = {
+    FylerBlue            = { fg = palette.blue },
     FylerFSDirectoryIcon = { fg = palette.blue },
     FylerFSDirectoryName = { fg = palette.fg },
     FylerFSFile          = { fg = palette.white },
@@ -88,7 +89,7 @@ function M.setup()
     FylerGrey            = { fg = palette.grey },
     FylerRed             = { fg = palette.red },
     FylerYellow          = { fg = palette.yellow },
-
+    -- Groups with link must be after non-linked
     FylerBorder          = { link = "FylerNormal" },
     FylerIndentMarker    = { link = "FylerGrey" },
     FylerNormal          = { link = "Normal" },

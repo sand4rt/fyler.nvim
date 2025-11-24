@@ -194,46 +194,36 @@ M.files_with_info = Component.new_async(function(node, callback)
 end)
 
 M.operations = Component.new(function(operations)
-  local children = {}
+  local types = {}
+  local details = {}
   for _, operation in ipairs(operations) do
     if operation.type == "create" then
-      table.insert(
-        children,
-        Row {
-          Text("CREATE", { highlight = "FylerGreen" }),
-          Text " ",
-          Text(operation.path, { highlight = "" }),
-        }
-      )
+      table.insert(types, Text("CREATE", { highlight = "FylerGreen" }))
+      table.insert(details, Text(operation.path))
     elseif operation.type == "delete" then
       table.insert(
-        children,
-        Row {
-          Text("DELETE", { highlight = "FylerRed" }),
-          Text " ",
-          Text(operation.path, { highlight = "" }),
-        }
+        types,
+        Text(config.values.views.finder.delete_to_trash and "TRASH" or "DELETE", { highlight = "FylerRed" })
       )
+      table.insert(details, Text(operation.path))
     elseif operation.type == "move" then
+      table.insert(types, Text("MOVE", { highlight = "FylerYellow" }))
       table.insert(
-        children,
+        details,
         Row {
-          Text("MOVE", { highlight = "FylerYellow" }),
-          Text " ",
-          Text(operation.src, { highlight = "" }),
-          Text " ",
-          Text(operation.dst, { highlight = "" }),
+          Text(operation.src),
+          Text " > ",
+          Text(operation.dst),
         }
       )
     elseif operation.type == "copy" then
+      table.insert(types, Text("COPY", { highlight = "FylerBlue" }))
       table.insert(
-        children,
+        details,
         Row {
-          Text("COPY", { highlight = "FylerYellow" }),
-          Text " ",
-          Text(operation.src, { highlight = "" }),
-          Text " ",
-          Text(operation.dst, { highlight = "" }),
+          Text(operation.src),
+          Text " > ",
+          Text(operation.dst),
         }
       )
     else
@@ -244,7 +234,11 @@ M.operations = Component.new(function(operations)
   return {
     tag = "operations",
     children = {
-      Column(children),
+      Row {
+        Column(types),
+        Text " ",
+        Column(details),
+      },
     },
   }
 end)
