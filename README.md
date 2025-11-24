@@ -92,6 +92,13 @@ vim.keymap.set(
   for more detailed explanation and live showcase
 </h4>
 
+### Credits
+
+- [Mini.files](https://github.com/nvim-mini/mini.files) for undo levels handling.
+- [Neogit](https://github.com/NeogitOrg/neogit) for code architecture.
+- [Oil.nvim](https://github.com/stevearc/oil.nvim) for concept of buffer file editing.
+- [Telescope](https://github.com/nvim-telescope/telescope.nvim) for better asynchronous code syntax.
+
 ---
 
 <h4 align="center">Built with ❤️ for the Neovim community</h4>
