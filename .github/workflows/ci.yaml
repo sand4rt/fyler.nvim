@@ -36,4 +36,4 @@ jobs:
           git clone --depth=1 https://github.com/nvim-mini/mini.icons .tests/repos/mini.icons
           git clone --depth=1 https://github.com/nvim-tree/nvim-web-devicons .tests/repos/nvim-web-devicons
       - name: Running tests
-        run: make test
+        run: FYLER_DEBUG=1 make test

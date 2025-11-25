@@ -32,10 +32,9 @@ local T = MiniTest.new_set {
       child.o.laststatus = 3
       child.o.showtabline = 0
       child.o.cmdheight = 0
-      child.o.conceallevel = 0
 
       vim.fn.mkdir(dir_data)
-      vim.uv.fs_close(assert(vim.uv.fs_open(vim.fs.joinpath(dir_data, "foobar.txt"), "a", 420)))
+      vim.uv.fs_close(assert(vim.uv.fs_open(vim.fs.joinpath(dir_data, "test-file"), "a", 420)))
     end,
     post_case = function()
       child.stop()
@@ -56,7 +55,7 @@ T["open and close"] = function(kind)
 
   local lines = child.get_lines(0, 0, -1, false)
   eq(#lines, 1)
-  eq(lines[1]:match "foobar.txt", "foobar.txt")
+  eq(lines[1]:match "/%d+%s(.*)$", "test-file")
 
   child.type_keys "q"
 
@@ -68,14 +67,15 @@ T["create"] = function(kind)
 
   vim.uv.sleep(50)
 
-  child.set_lines(0, -1, -1, false, { "foobar-2.txt" })
-
+  child.set_lines(0, -1, -1, false, { "new-file", "new-dir/" })
   child.dbg_screen()
-
   child.cmd [[ write ]]
-
   child.dbg_screen()
 
+  local lines = child.api.nvim_buf_get_lines(0, 0, -1, false)
+  -- vim.print(child.o.filetype, lines)
+  -- eq(lines[1], "CREATE new-dir")
+  -- eq(lines[2], "CREATE new-file")
   child.type_keys "y"
 
   vim.uv.sleep(50)
@@ -89,13 +89,13 @@ T["delete"] = function(kind)
   vim.uv.sleep(50)
 
   child.set_lines(0, 0, -1, false, { "" })
-
   child.dbg_screen()
-
   child.cmd [[ write ]]
-
   child.dbg_screen()
 
+  local lines = child.api.nvim_buf_get_lines(0, 0, -1, false)
+  -- vim.print(child.o.filetype, lines)
+  -- eq(lines[1], "DELETE test-file")
   child.type_keys "y"
 
   vim.uv.sleep(50)
@@ -108,15 +108,14 @@ T["move"] = function(kind)
 
   vim.uv.sleep(50)
 
-  local updated_str = child.get_lines(0, 0, -1, false)[1]:gsub("foobar.txt", "barfoo.txt")
+  local updated_str = child.get_lines(0, 0, -1, false)[1]:gsub("test", "move")
   child.set_lines(0, 0, -1, false, { updated_str })
-
   child.dbg_screen()
-
   child.cmd [[ write ]]
-
   child.dbg_screen()
 
+  local lines = child.api.nvim_buf_get_lines(0, 0, -1, false)
+  eq(lines[1], "MOVE test-file > move-file")
   child.type_keys "y"
 
   vim.uv.sleep(50)
@@ -129,15 +128,14 @@ T["copy"] = function(kind)
 
   vim.uv.sleep(50)
 
-  local updated_str = child.get_lines(0, 0, -1, false)[1]:gsub("foobar.txt", "barfoo.txt")
+  local updated_str = child.get_lines(0, 0, -1, false)[1]:gsub("test", "copy")
   child.set_lines(0, -1, -1, false, { updated_str })
-
   child.dbg_screen()
-
   child.cmd [[ write ]]
-
   child.dbg_screen()
 
+  local lines = child.api.nvim_buf_get_lines(0, 0, -1, false)
+  eq(lines[1], "COPY test-file > copy-file")
   child.type_keys "y"
 
   vim.uv.sleep(50)
