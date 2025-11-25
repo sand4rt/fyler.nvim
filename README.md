@@ -28,6 +28,7 @@
   "A7Lavinraj/fyler.nvim",
   dependencies = { "nvim-mini/mini.icons" },
   branch = "stable",  -- Use stable branch for production
+  lazy = false, -- Necessary for `default_explorer` to work properly
   opts = {}
 }
 ```
@@ -86,18 +87,15 @@ vim.keymap.set(
 )
 ```
 
-<h4>
-  Run <code>:help fyler.nvim</code> OR visit
-  <a href="https://github.com/A7Lavinraj/fyler.nvim/wiki">wiki pages</a>
-  for more detailed explanation and live showcase
-</h4>
+> [!NOTE]
+> Run `:help fyler.nvim` OR visit [wiki pages](https://github.com/A7Lavinraj/fyler.nvim/wiki) for more detailed explanation and live showcase.
 
-### Credits
+### Credits to other plugins for inspiration
 
-- [Mini.files](https://github.com/nvim-mini/mini.files) for undo levels handling.
-- [Neogit](https://github.com/NeogitOrg/neogit) for code architecture.
-- [Oil.nvim](https://github.com/stevearc/oil.nvim) for concept of buffer file editing.
-- [Telescope](https://github.com/nvim-telescope/telescope.nvim) for better asynchronous code syntax.
+- [**Mini.files**](https://github.com/nvim-mini/mini.files)
+- [**Neogit**](https://github.com/NeogitOrg/neogit)
+- [**Oil.nvim**](https://github.com/stevearc/oil.nvim)
+- [**Telescope**](https://github.com/nvim-telescope/telescope.nvim)
 
 ---
 
