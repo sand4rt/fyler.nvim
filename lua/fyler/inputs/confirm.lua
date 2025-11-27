@@ -14,7 +14,7 @@ local function resolve_dim(width, height)
 end
 
 ---@param options table
-function Confirm:open(options, message, on_submit)
+function Confirm:open(options, message, onsubmit)
   local width, height, left, top = resolve_dim(options.width, options.height)
   -- stylua: ignore start
   self.window = Win.new {
@@ -23,7 +23,7 @@ function Confirm:open(options, message, on_submit)
         local cmd = util.cmd_history()
         self.window:hide()
 
-        on_submit()
+        onsubmit()
         if cmd == "qa" or cmd == "qall" or cmd == "quitall" then
           vim.schedule(function()
             vim.cmd.quitall {
@@ -46,12 +46,12 @@ function Confirm:open(options, message, on_submit)
     mappings   = {
       [{ 'y','o', '<Enter>' }] = function()
         self.window:hide()
-        on_submit(true)
+        onsubmit(true)
       end,
 
       [{ 'n', 'c', '<ESC>' }] = function()
         self.window:hide()
-        on_submit(false)
+        onsubmit(false)
       end
     },
     render     = function()

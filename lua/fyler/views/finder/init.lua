@@ -15,11 +15,10 @@ local util = require "fyler.lib.util"
 ---@class Finder
 ---@field dir string
 ---@field files Files
----@field config table
 local Finder = {}
 Finder.__index = Finder
 
-function Finder.new(dir, config)
+function Finder.new(dir)
   local files = Files.new {
     path = dir,
     open = true,
@@ -30,7 +29,6 @@ function Finder.new(dir, config)
   local instance = {
     dir = dir,
     files = files,
-    config = config,
   }
   instance.files.finder = instance
 
@@ -43,7 +41,6 @@ end
 function Finder:_action(name)
   local action = require("fyler.views.finder.actions")[name]
   assert(action, string.format("action %s is not available", name))
-
   return action(self)
 end
 
@@ -68,9 +65,9 @@ function Finder:same_as(dir, kind)
 end
 
 function Finder:open(kind)
-  local rev_maps = self.config.rev_maps "finder"
-  local user_maps = self.config.user_maps "finder"
-  local view = self.config.view("finder", kind)
+  local rev_maps = config.rev_maps "finder"
+  local user_maps = config.user_maps "finder"
+  local view = config.view("finder", kind)
 
   -- stylua: ignore start
   self.win = Win.new {
@@ -105,7 +102,14 @@ function Finder:open(kind)
     mappings_opts = view.mappings_opts,
     on_show       = function() indent.enable(self.win) end,
     on_hide       = function() indent.disable() end,
-    render        = function() self:dispatch_refresh() end,
+    render        = function()
+      self:dispatch_refresh(function()
+        local altbufnr = vim.fn.bufnr("#")
+        if config.values.views.finder.follow_current_file and altbufnr ~= -1 then
+          self:navigate(vim.api.nvim_buf_get_name(altbufnr))
+        end
+      end)
+    end,
     right         = view.win.right,
     title         = string.format(" %s ", self.dir),
     title_pos     = view.win.title_pos,
@@ -217,17 +221,6 @@ end
 
 ---@param path string
 function Finder:navigate(path)
-  if parser.is_protocol_path(path) then
-    if not util.is_valid_bufnr(self.win.old_bufnr) then
-      return
-    end
-
-    path = vim.fn.bufname(self.win.old_bufnr)
-    if parser.is_protocol_path(path) then
-      return
-    end
-  end
-
   self.files:focus_path(path, function(_, ref_id)
     if not ref_id then
       return
@@ -236,11 +229,6 @@ function Finder:navigate(path)
     self:dispatch_refresh(function()
       if not (self.win:has_valid_winid() and self.win:has_valid_bufnr()) then
         return
-      end
-
-      if not parser.is_protocol_path(vim.api.nvim_buf_get_name(0)) then
-        self.win.old_bufnr = vim.api.nvim_get_current_buf()
-        self.win.old_winid = vim.api.nvim_get_current_win()
       end
 
       for row, buf_line in ipairs(vim.api.nvim_buf_get_lines(self.win.bufnr, 0, -1, false)) do
@@ -366,39 +354,37 @@ local M = {
 
 ---@param dir string|nil
 ---@param kind WinKind|nil
----@param config table
 ---@return string, WinKind
-local function compute_opts(dir, kind, config)
+local function compute_opts(dir, kind)
   return Path.new(dir or fs.cwd()):normalize(), kind or config.values.views.finder.win.kind
 end
 
 function M.open(dir, kind)
-  dir, kind = compute_opts(dir, kind, config)
+  dir, kind = compute_opts(dir, kind)
 
-  if not M._current then
-    M._current = M._instance[dir] or Finder.new(dir, config)
-    M._instance[dir] = M._current
-    M._current:open(kind)
-  else
-    if not M._current:same_as(dir, kind) then
-      M._current:close()
-      M._current = M._instance[dir] or Finder.new(dir, config)
-      M._instance[dir] = M._current
-      M._current:open(kind)
+  local current = M._current
+  if not current or not current:same_as(dir, kind) then
+    if current then
+      current:close()
     end
+
+    current = M._instance[dir] or Finder.new(dir)
+    current:open(kind)
+
+    M._instance[dir] = current
+    M._current = current
   end
 end
 
 function M.close()
-  if M._current then
-    M._current:close()
+  local current = M._current
+  if current then
+    current:close()
     M._current = nil
   end
 end
 
 function M.toggle(dir, kind)
-  dir, kind = compute_opts(dir, kind, config)
-
   if M._current then
     M.close()
   else
@@ -415,39 +401,27 @@ function M.focus()
   end
 end
 
----@param name string|nil
-function M.navigate(name)
+---@param path string|nil
+function M.navigate(path)
   local current = M._current
-  if name == "" or not current then
+  if not path or not current or parser.is_protocol_path(path) then
     return
   end
 
-  if not name or parser.is_protocol_path(name) then
-    if not util.is_valid_bufnr(current.win.old_bufnr) then
-      return
-    end
-
-    name = vim.api.nvim_buf_get_name(current.win.old_bufnr)
-  end
-
-  current:navigate(Path.new(name):normalize())
-end
-
----@return boolean
-function M.is_valid()
-  local current = M._current
-  return not current
-    or not current.win:has_valid_winid()
-    or not current.win:has_valid_bufnr()
-    or current.win:winbuf() == current.win.bufnr
+  current:navigate(Path.new(path):normalize())
 end
 
 function M.recover()
-  if M.is_valid() then
+  local current = M._current
+  if not current then
     return
   end
 
-  M._current.win:recover()
+  if current.win:has_valid_winid() and current.win:has_valid_bufnr() and current.win:winbuf() == current.win.bufnr then
+    return
+  end
+
+  current.win:recover()
   M._current = nil
 end
 

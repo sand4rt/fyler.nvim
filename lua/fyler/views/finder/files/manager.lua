@@ -20,7 +20,7 @@ function Entry.new(opts)
 end
 
 ---@return boolean
-function Entry:isdir()
+function Entry:is_directory()
   return self.type == "directory"
 end
 

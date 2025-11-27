@@ -8,14 +8,14 @@ local Text = Ui.Text
 local Row = Ui.Row
 local Column = Ui.Column
 
-local function isdir(node)
+local function is_directory(node)
   return node.type == "directory"
 end
 
 local function sort_nodes(nodes)
   table.sort(nodes, function(x, y)
-    local x_is_dir = isdir(x)
-    local y_is_dir = isdir(y)
+    local x_is_dir = is_directory(x)
+    local y_is_dir = is_directory(y)
     if x_is_dir and not y_is_dir then
       return true
     elseif not x_is_dir and y_is_dir then

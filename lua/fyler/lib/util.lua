@@ -136,28 +136,36 @@ end
 ---@param option string
 ---@return any
 function M.get_win_option(winid, option)
-  return vim.api.nvim_get_option_value(option, { win = winid, scope = "local" })
+  if M.is_valid_winid(winid) then
+    return vim.api.nvim_get_option_value(option, { win = winid, scope = "local" })
+  end
 end
 
 ---@param bufnr integer
 ---@param option string
 ---@return any
 function M.get_buf_option(bufnr, option)
-  return vim.api.nvim_get_option_value(option, { buf = bufnr, scope = "local" })
+  if M.is_valid_bufnr(bufnr) then
+    return vim.api.nvim_get_option_value(option, { buf = bufnr, scope = "local" })
+  end
 end
 
 ---@param winid integer
 ---@param option string
 ---@param value any
 function M.set_win_option(winid, option, value)
-  vim.api.nvim_set_option_value(option, value, { win = winid, scope = "local" })
+  if M.is_valid_winid(winid) then
+    vim.api.nvim_set_option_value(option, value, { win = winid, scope = "local" })
+  end
 end
 
 ---@param bufnr integer
 ---@param option string
 ---@param value any
 function M.set_buf_option(bufnr, option, value)
-  vim.api.nvim_set_option_value(option, value, { buf = bufnr, scope = "local" })
+  if M.is_valid_bufnr(bufnr) then
+    vim.api.nvim_set_option_value(option, value, { buf = bufnr, scope = "local" })
+  end
 end
 
 ---@param str string

@@ -29,8 +29,6 @@ local util = require "fyler.lib.util"
 ---@field mappings table
 ---@field mappings_opts vim.keymap.set.Opts
 ---@field namespace integer
----@field old_bufnr integer|nil
----@field old_winid integer|nil
 ---@field on_hide function|nil
 ---@field on_show function|nil
 ---@field render function|nil
@@ -42,6 +40,7 @@ local util = require "fyler.lib.util"
 ---@field user_autocmds table
 ---@field user_mappings table
 ---@field width integer|string
+---@field win integer|nil
 ---@field win_opts table
 ---@field winid integer|nil
 local Win = {}
@@ -161,9 +160,6 @@ function Win:focus()
     return
   end
 
-  self.old_winid = vim.api.nvim_get_current_win()
-  self.old_bufnr = vim.api.nvim_get_current_buf()
-
   vim.api.nvim_set_current_win(windows[1])
 end
 
@@ -208,7 +204,7 @@ function Win:config()
   elseif self.kind:match "^replace" then
     return winconfig
   elseif self.kind:match "^float" then
-    winconfig.relative = "editor"
+    winconfig.relative = self.win and "win" or "editor"
     winconfig.border = self.border
     winconfig.title = self.title
     winconfig.title_pos = self.title_pos
@@ -216,6 +212,7 @@ function Win:config()
     winconfig.footer_pos = self.footer_pos
     winconfig.row = 0
     winconfig.col = 0
+    winconfig.win = self.win
 
     if not (not self.top and self.top == "none") then
       local magnitude, is_percentage = resolve_dim(self.top)
@@ -284,16 +281,13 @@ function Win:show()
     return
   end
 
-  -- Saving alternative "bufnr" and "winid" for later use
-  self.old_bufnr = vim.api.nvim_get_current_buf()
-  self.old_winid = vim.api.nvim_get_current_win()
-
   self.bufnr = vim.api.nvim_create_buf(false, true)
   if self.bufname then
     vim.api.nvim_buf_set_name(self.bufnr, self.bufname)
   end
 
   local win_config = self:config()
+  local current_bufnr = vim.api.nvim_get_current_buf()
   if win_config.split and (win_config.split:match "_all$" or win_config.split:match "_most$") then
     if win_config.split == "left_most" then
       vim.api.nvim_command(string.format("topleft %dvsplit", win_config.width))
@@ -309,7 +303,7 @@ function Win:show()
 
     self.winid = vim.api.nvim_get_current_win()
     if not self.enter then
-      vim.api.nvim_set_current_win(self.old_winid)
+      vim.api.nvim_set_current_win(current_bufnr)
     end
 
     vim.api.nvim_win_set_buf(self.winid, self.bufnr)
@@ -318,12 +312,6 @@ function Win:show()
     vim.api.nvim_win_set_buf(self.winid, self.bufnr)
   else
     self.winid = vim.api.nvim_open_win(self.bufnr, self.enter, win_config)
-
-    -- Trigger "BufEnter" event to focus buffer for floating window when "enter" enabled
-    -- [IMPORTANT]: This is necessary because "self.winid" will not get set on time to automatically triggered.
-    if self.enter then
-      vim.api.nvim_exec_autocmds("BufEnter", {})
-    end
   end
 
   if self.on_show then
@@ -367,24 +355,21 @@ function Win:show()
 end
 
 function Win:hide()
-  -- Recover alternate buffer if using "replace"|"split" window kind
+  vim.api.nvim_clear_autocmds { group = self.augroup }
+
   if self.kind:match "^replace" then
-    if
-      util.is_valid_winid(self.winid)
-      and util.is_valid_bufnr(self.old_bufnr)
-      and vim.api.nvim_buf_is_loaded(self.old_bufnr)
-    then
-      util.try(vim.api.nvim_win_set_buf, self.winid, self.old_bufnr)
+    local altbufnr = vim.fn.bufnr "#"
+    if altbufnr == -1 then
+      util.try(vim.cmd.enew)
+    else
+      util.try(vim.api.nvim_win_set_buf, self.winid, altbufnr)
     end
 
     util.try(vim.api.nvim_buf_delete, self.bufnr, { force = true })
   else
-    util.try(vim.api.nvim_win_close, self.winid, true)
+    util.try(vim.api.nvim_win_close, true)
     util.try(vim.api.nvim_buf_delete, self.bufnr, { force = true })
   end
-
-  self.winid = nil
-  self.bufnr = nil
 
   if self.on_hide then
     self.on_hide()
@@ -393,17 +378,19 @@ end
 
 -- Handle case when user open a NON FYLER BUFFER in "Fyler" window
 function Win:recover()
+  vim.api.nvim_clear_autocmds { group = self.augroup }
+
   if self.kind:match "^replace" or self.kind:match "^split" then
     util.try(vim.api.nvim_buf_delete, self.bufnr, { force = true })
   else
-    local cached_bufnr = vim.api.nvim_get_current_buf()
+    local current_bufnr = vim.api.nvim_get_current_buf()
     util.try(vim.api.nvim_win_close, self.winid, true)
     util.try(vim.api.nvim_buf_delete, self.bufnr, { force = true })
+    vim.api.nvim_win_set_buf(vim.api.nvim_get_current_win(), current_bufnr)
+  end
 
-    if util.is_valid_winid(self.old_winid) then
-      vim.api.nvim_win_set_buf(self.old_winid, cached_bufnr)
-      vim.api.nvim_set_current_win(self.old_winid)
-    end
+  if self.on_hide then
+    self.on_hide()
   end
 end
 

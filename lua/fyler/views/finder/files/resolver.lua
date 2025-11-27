@@ -65,7 +65,7 @@ end
 ---@param entry_type string|nil
 function Resolver:mark_operation(path, op_type, value, entry_type)
   local path_obj = Path.new(path)
-  local is_dir = path_obj:is_dir()
+  local is_dir = path_obj:is_directory()
   local normalized = path_obj:normalize()
 
   local segments = self:path_to_segments(normalized)
@@ -113,7 +113,7 @@ function Resolver:analyze_and_mark_creates(parsed_tree)
       local has_children = node.children and #node.children > 0
       if not has_children then
         -- Detect type from original path (before normalization)
-        local entry_type = Path.new(node.path):is_dir() and "directory" or "file"
+        local entry_type = Path.new(node.path):is_directory() and "directory" or "file"
         self:mark_operation(node.path, "create", true, entry_type)
       end
     end

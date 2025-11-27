@@ -172,7 +172,7 @@ function Path:is_link()
 end
 
 ---@return boolean
-function Path:is_dir()
+function Path:is_directory()
   local t = self:type()
   if t then
     return t == "directory"

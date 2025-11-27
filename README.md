@@ -94,7 +94,9 @@ vim.keymap.set(
 
 - [**Mini.files**](https://github.com/nvim-mini/mini.files)
 - [**Neogit**](https://github.com/NeogitOrg/neogit)
-- [**Oil.nvim**](https://github.com/stevearc/oil.nvim)
+- [**Nvim-window-picker**](https://github.com/s1n7ax/nvim-window-picker)
+- [**Oil**](https://github.com/stevearc/oil.nvim)
+- [**Snacks**](https://github.com/folke/snacks.nvim)
 - [**Telescope**](https://github.com/nvim-telescope/telescope.nvim)
 
 ---

@@ -45,7 +45,7 @@ end
 ---@param callback function
 function commands.ls(path, callback)
   local _path = Path.new(path)
-  if not (_path:exists() and _path:is_dir()) then
+  if not (_path:exists() and _path:is_directory()) then
     return callback(nil, nil)
   end
 
@@ -195,7 +195,7 @@ function commands.rm(path, flags, callback)
   local _path = Path.new(path)
   flags = flags or {}
 
-  if _path:is_dir() then
+  if _path:is_directory() then
     assert(flags.r, "cannot remove directory without -r flag: " .. path)
 
     _read_dir_iter(_path:normalize(), function(err, iter)
@@ -248,7 +248,7 @@ function commands.mv(src, dst, callback)
   commands.mkdir(_dst:parent():normalize(), { p = true }, function()
     -- Ignore error, parent might exist
 
-    if _src:is_dir() then
+    if _src:is_directory() then
       commands.mkdir(_dst:normalize(), { p = true }, function()
         -- Ignore error
 
@@ -312,7 +312,7 @@ function commands.cp(src, dst, flags, callback)
 
   assert(_src:exists(), "source does not exist: " .. src)
 
-  if _src:is_dir() then
+  if _src:is_directory() then
     assert(flags.r, "cannot copy directory without -r flag: " .. src)
 
     commands.mkdir(_dst:normalize(), { p = true }, function()

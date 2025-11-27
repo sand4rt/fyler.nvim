@@ -86,7 +86,7 @@ function Files:_register_watcher(node, register_self)
     return
   end
 
-  if register_self and entry:isdir() then
+  if register_self and entry:is_directory() then
     watcher.register(entry.path, function()
       self.finder:dispatch_refresh()
     end)
@@ -94,7 +94,7 @@ function Files:_register_watcher(node, register_self)
 
   for _, child in pairs(node.children) do
     local child_entry = self.manager:get(child.value)
-    if child_entry:isdir() and child_entry.open then
+    if child_entry:is_directory() and child_entry.open then
       watcher.register(child_entry.path, function()
         self.finder:dispatch_refresh()
       end)
@@ -111,13 +111,13 @@ function Files:_unregister_watcher(node, unregister_self)
     return
   end
 
-  if unregister_self and entry:isdir() then
+  if unregister_self and entry:is_directory() then
     watcher.unregister(entry.path)
   end
 
   for _, child in pairs(node.children) do
     local child_entry = self.manager:get(child.value)
-    if child_entry:isdir() then
+    if child_entry:is_directory() then
       watcher.unregister(child_entry.path)
       self:_unregister_watcher(child, false)
     end
@@ -129,7 +129,7 @@ function Files:expand_node(ref_id)
   local entry = self.manager:get(ref_id)
   assert(entry, "cannot locate entry with given ref_id")
 
-  if not entry:isdir() then
+  if not entry:is_directory() then
     return
   end
 
@@ -146,7 +146,7 @@ function Files:collapse_node(ref_id)
   local entry = self.manager:get(ref_id)
   assert(entry, "cannot locate entry with given ref_id")
 
-  if not entry:isdir() then
+  if not entry:is_directory() then
     return
   end
 
@@ -190,7 +190,7 @@ end
 ---@param node Trie
 function Files:_collapse_recursive(node)
   local entry = self.manager:get(node.value)
-  if entry:isdir() and entry.open then
+  if entry:is_directory() and entry.open then
     entry.open = false
     watcher.unregister(entry.path)
   end
@@ -269,7 +269,7 @@ function Files:_update(node, callback)
     for name, child_node in pairs(node.children) do
       if not entry_paths[name] then
         local child_entry = self.manager:get(child_node.value)
-        if child_entry:isdir() then
+        if child_entry:is_directory() then
           self:_unregister_watcher(child_node, true)
         end
         node.children[name] = nil
@@ -284,7 +284,7 @@ function Files:_update(node, callback)
         node.children[name] = child_node
 
         local child_entry = self.manager:get(child_ref_id)
-        if child_entry:isdir() and child_entry.open then
+        if child_entry:is_directory() and child_entry.open then
           self:_register_watcher(child_node, true)
         end
       end
@@ -335,7 +335,7 @@ function Files:focus_path(path, callback)
     local segment = segments[index]
     local current_entry = self.manager:get(current_node.value)
 
-    if current_entry:isdir() and not current_entry.open then
+    if current_entry:is_directory() and not current_entry.open then
       self:expand_node(current_node.value)
       self:update(current_node.value, function(err)
         if err then
@@ -392,7 +392,7 @@ function Files:_totable(node)
     table.insert(child_list, {
       name = name,
       node = child,
-      is_dir = child_entry:isdir(),
+      is_dir = child_entry:is_directory(),
     })
   end
 

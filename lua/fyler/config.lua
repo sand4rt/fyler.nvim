@@ -59,9 +59,18 @@ local config = {}
 
 ---@class FylerConfigWin
 ---@field border FylerConfigBorder|string[]
+---@field bottom integer|string
 ---@field buf_opts table<string, any>
+---@field footer string
+---@field footer_pos string
+---@field height integer|string
 ---@field kind WinKind
 ---@field kinds table<WinKind|string, FylerConfigWinKindOptions>
+---@field left integer|string
+---@field right integer|string
+---@field title_pos string
+---@field top integer|string
+---@field width integer|string
 ---@field win_opts table<string, any>
 
 ---@class FylerConfigViewsFinder

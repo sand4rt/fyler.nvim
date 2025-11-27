@@ -89,6 +89,7 @@ function M.setup()
     FylerGrey            = { fg = palette.grey },
     FylerRed             = { fg = palette.red },
     FylerYellow          = { fg = palette.yellow },
+    FylerWinPick         = { fg = palette.white, bg = palette.blue },
     -- Groups with link must be after non-linked
     FylerBorder          = { link = "FylerNormal" },
     FylerIndentMarker    = { link = "FylerGrey" },

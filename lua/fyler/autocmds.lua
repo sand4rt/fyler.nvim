@@ -8,6 +8,11 @@ function M.setup(config)
   config = config or {}
 
   if config.values.views.finder.default_explorer then
+    -- Disable NETRW plugin
+    vim.g.loaded_netrw = 1
+    vim.g.loaded_netrwPlugin = 1
+
+    -- Clear NETRW auto commands if NETRW loaded before disable
     vim.cmd "silent! autocmd! FileExplorer *"
     vim.cmd "autocmd VimEnter * ++once silent! autocmd! FileExplorer *"
 
@@ -43,7 +48,7 @@ function M.setup(config)
     vim.api.nvim_create_autocmd("BufEnter", {
       group = augroup,
       desc = "Track current focused buffer in finder",
-      -- Scheduling  to let Finder.files update completely
+      -- Scheduling to let Finder.files update completely
       callback = vim.schedule_wrap(function(arg)
         fyler.navigate(arg.file)
       end),

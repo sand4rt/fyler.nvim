@@ -63,13 +63,11 @@ function M.setup(opts)
     return
   end
 
-  local util = require "fyler.lib.util"
-
-  -- Overwrite default configuration before setuping other components
   require("fyler.config").setup(opts)
 
   did_setup = true
 
+  local util = require "fyler.lib.util"
   local finder = require "fyler.views.finder"
 
   -- Fyler.API: Closes current finder view
