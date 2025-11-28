@@ -19,6 +19,7 @@ local config = {}
 ---| "none"
 ---| "mini_icons"
 ---| "nvim_web_devicons"
+---| "vim_nerdfont"
 
 ---@class FylerConfigIntegrations
 ---@field icon FylerConfigIntegrationsIcon
