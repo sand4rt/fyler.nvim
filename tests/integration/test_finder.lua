@@ -34,7 +34,9 @@ local T = MiniTest.new_set {
       child.o.cmdheight = 0
 
       vim.fn.mkdir(dir_data)
-      vim.uv.fs_close(assert(vim.uv.fs_open(vim.fs.joinpath(dir_data, "test-file"), "a", 420)))
+      vim.fn.mkdir(vim.fs.joinpath(dir_data, "test-dir"))
+      vim.fn.writefile({ "test-deep-file content" }, vim.fs.joinpath(dir_data, "test-dir", "test-deep-file"), "a")
+      vim.fn.writefile({ "test-file content" }, vim.fs.joinpath(dir_data, "test-file"), "a")
     end,
     post_case = function()
       child.stop()
@@ -44,98 +46,206 @@ local T = MiniTest.new_set {
   },
 }
 
-T["open and close"] = function(kind)
+T["mappings"] = MiniTest.new_set {}
+
+T["mappings"]["Select"] = function(kind)
   child.cmd(string.format([[ Fyler dir=%s kind=%s ]], dir_data, kind))
 
   vim.uv.sleep(50)
 
-  eq(child.o.filetype, "fyler")
+  child.dbg_screen()
+
+  child.type_keys "<Enter>"
+
+  vim.uv.sleep(50)
+
+  local lines = child.get_lines(0, 0, -1, false)
+
+  eq(lines[1]:match "/%d+%s(.*)$", "test-dir")
+  eq(lines[2]:match "/%d+%s(.*)$", "test-deep-file")
+  eq(lines[3]:match "/%d+%s(.*)$", "test-file")
+
+  child.dbg_screen()
+  child.type_keys "<Enter>"
+
+  vim.uv.sleep(50)
+
+  local lines = child.get_lines(0, 0, -1, false)
+  eq(lines[1]:match "/%d+%s(.*)$", "test-dir")
+  eq(lines[2]:match "/%d+%s(.*)$", "test-file")
+
+  child.dbg_screen()
+end
+
+T["mappings"]["SelectSplit"] = function(kind)
+  child.cmd(string.format([[ Fyler dir=%s kind=%s ]], dir_data, kind))
+
+  vim.uv.sleep(50)
+
+  child.dbg_screen()
+
+  child.type_keys "G-"
+
+  eq(child.get_lines(0, 0, -1, false), { "test-file content" })
+
+  child.dbg_screen()
+end
+
+T["mappings"]["SelectVSplit"] = function(kind)
+  child.cmd(string.format([[ Fyler dir=%s kind=%s ]], dir_data, kind))
+
+  vim.uv.sleep(50)
+
+  child.dbg_screen()
+  child.type_keys "G|"
+
+  eq(child.get_lines(0, 0, -1, false), { "test-file content" })
+
+  child.dbg_screen()
+end
+
+T["mappings"]["SelectTab"] = function(kind)
+  child.cmd(string.format([[ Fyler dir=%s kind=%s ]], dir_data, kind))
+
+  vim.uv.sleep(50)
+
+  child.dbg_screen()
+  child.type_keys "G<C-t>"
+
+  eq(child.get_lines(0, 0, -1, false), { "test-file content" })
+
+  child.dbg_screen()
+end
+
+T["mappings"]["GotoParent"] = function(kind)
+  child.cmd(string.format([[ Fyler dir=%s kind=%s ]], vim.fs.joinpath(dir_data, "test-dir"), kind))
+
+  vim.uv.sleep(50)
+
+  child.dbg_screen()
+  child.type_keys "^"
+
+  vim.uv.sleep(50)
 
   child.dbg_screen()
 
   local lines = child.get_lines(0, 0, -1, false)
-  eq(#lines, 1)
-  eq(lines[1]:match "/%d+%s(.*)$", "test-file")
 
-  child.type_keys "q"
-
-  eq(child.o.filetype, "")
+  eq(lines[1]:match "/%d+%s(.*)$", "test-dir")
+  eq(lines[2]:match "/%d+%s(.*)$", "test-file")
 end
 
-T["create"] = function(kind)
+T["mappings"]["GotoCwd"] = function(kind)
+  -- NOTE: For some reason if doing cd first then fyler will not open
+  child.cmd(string.format([[ Fyler dir=%s kind=%s ]], vim.fs.joinpath(dir_data, "test-dir"), kind))
+  child.cmd(string.format([[ cd %s ]], dir_data))
+
+  vim.uv.sleep(50)
+
+  child.dbg_screen()
+  child.type_keys "="
+
+  vim.uv.sleep(50)
+
+  child.dbg_screen()
+
+  local lines = child.get_lines(0, 0, -1, false)
+
+  eq(lines[1]:match "/%d+%s(.*)$", "test-dir")
+  eq(lines[2]:match "/%d+%s(.*)$", "test-file")
+end
+
+T["mappings"]["GotoNode"] = function(kind)
   child.cmd(string.format([[ Fyler dir=%s kind=%s ]], dir_data, kind))
 
   vim.uv.sleep(50)
 
-  child.set_lines(0, -1, -1, false, { "new-file", "new-dir/" })
   child.dbg_screen()
-  child.cmd [[ write ]]
-  child.dbg_screen()
-
-  local lines = child.api.nvim_buf_get_lines(0, 0, -1, false)
-  -- vim.print(child.o.filetype, lines)
-  -- eq(lines[1], "CREATE new-dir")
-  -- eq(lines[2], "CREATE new-file")
-  child.type_keys "y"
+  child.type_keys "."
 
   vim.uv.sleep(50)
 
   child.dbg_screen()
+
+  local lines = child.get_lines(0, 0, -1, false)
+
+  eq(lines[1]:match "/%d+%s(.*)$", "test-deep-file")
 end
 
-T["delete"] = function(kind)
+T["mappings"]["CollapseAll"] = function(kind)
   child.cmd(string.format([[ Fyler dir=%s kind=%s ]], dir_data, kind))
 
   vim.uv.sleep(50)
 
-  child.set_lines(0, 0, -1, false, { "" })
   child.dbg_screen()
-  child.cmd [[ write ]]
-  child.dbg_screen()
-
-  local lines = child.api.nvim_buf_get_lines(0, 0, -1, false)
-  -- vim.print(child.o.filetype, lines)
-  -- eq(lines[1], "DELETE test-file")
-  child.type_keys "y"
+  child.type_keys "<Enter>"
 
   vim.uv.sleep(50)
 
   child.dbg_screen()
+  child.type_keys "j<Bs>"
+
+  vim.uv.sleep(50)
+
+  child.dbg_screen()
+
+  local lines = child.get_lines(0, 0, -1, false)
+  eq(lines[1]:match "/%d+%s(.*)$", "test-dir")
+  eq(lines[2]:match "/%d+%s(.*)$", "test-file")
 end
 
-T["move"] = function(kind)
+T["mappings"]["CollapseNode"] = function(kind)
   child.cmd(string.format([[ Fyler dir=%s kind=%s ]], dir_data, kind))
 
   vim.uv.sleep(50)
 
-  local updated_str = child.get_lines(0, 0, -1, false)[1]:gsub("test", "move")
-  child.set_lines(0, 0, -1, false, { updated_str })
   child.dbg_screen()
-  child.cmd [[ write ]]
-  child.dbg_screen()
-
-  local lines = child.api.nvim_buf_get_lines(0, 0, -1, false)
-  eq(lines[1], "MOVE test-file > move-file")
-  child.type_keys "y"
+  child.type_keys "<Enter>"
 
   vim.uv.sleep(50)
 
   child.dbg_screen()
+  child.type_keys "j<Bs>"
+
+  vim.uv.sleep(50)
+
+  child.dbg_screen()
+
+  local lines = child.get_lines(0, 0, -1, false)
+  eq(lines[1]:match "/%d+%s(.*)$", "test-dir")
+  eq(lines[2]:match "/%d+%s(.*)$", "test-file")
 end
 
-T["copy"] = function(kind)
+T["synchronize"] = function(kind)
   child.cmd(string.format([[ Fyler dir=%s kind=%s ]], dir_data, kind))
 
   vim.uv.sleep(50)
 
-  local updated_str = child.get_lines(0, 0, -1, false)[1]:gsub("test", "copy")
-  child.set_lines(0, -1, -1, false, { updated_str })
-  child.dbg_screen()
+  child.type_keys "<Enter>"
+
+  vim.uv.sleep(50)
+
+  local lines = child.get_lines(0, 0, -1, false)
+  lines[2] = lines[2]:gsub("test", "move")
+  local copy_line = lines[1]:gsub("test", "copy")
+  table.insert(lines, copy_line)
+  table.insert(lines, "new-dir/")
+  table.insert(lines, "new-file")
+  table.remove(lines, 3)
+
+  child.set_lines(0, 0, -1, false, lines)
   child.cmd [[ write ]]
   child.dbg_screen()
 
-  local lines = child.api.nvim_buf_get_lines(0, 0, -1, false)
-  eq(lines[1], "COPY test-file > copy-file")
+  local lines = child.get_lines(0, 0, -1, false)
+  table.sort(lines)
+
+  eq(lines[1], "COPY   test-dir > copy-dir")
+  eq(lines[2], "CREATE new-dir")
+  eq(lines[3], "CREATE new-file")
+  eq(lines[4], "DELETE test-file")
+  eq(lines[5], "MOVE   test-dir/test-deep-file > test-dir/move-deep-file")
+
   child.type_keys "y"
 
   vim.uv.sleep(50)
