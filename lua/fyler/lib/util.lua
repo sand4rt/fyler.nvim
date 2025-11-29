@@ -234,4 +234,16 @@ function M.cmd_history(index)
   return vim.fn.histget("cmd", index or -1)
 end
 
+---@return string|nil
+function M.get_visual_selection()
+  local start_mark = vim.api.nvim_buf_get_mark(0, "<")
+  local end_mark = vim.api.nvim_buf_get_mark(0, ">")
+  local start_row, start_col = start_mark[1], start_mark[2]
+  local end_row, end_col = end_mark[1], end_mark[2]
+  if start_row == 0 or end_row == 0 then
+    return nil
+  end
+  return table.concat(vim.api.nvim_buf_get_text(0, start_row - 1, start_col, end_row - 1, end_col + 1, {}))
+end
+
 return M

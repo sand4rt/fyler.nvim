@@ -1,13 +1,15 @@
 vim.api.nvim_create_user_command("Fyler", function(args)
+  local util = require "fyler.lib.util"
   local opts = {}
   for _, farg in ipairs(args.fargs) do
-    local k, v = require("fyler.lib.util").unpack(vim.split(farg, "="))
+    local k, v = util.unpack(vim.split(farg, "="))
     opts[k] = v
   end
 
-  require("fyler").open(opts)
+  require("fyler").open(util.tbl_merge_keep(opts, { dir = util.get_visual_selection() }))
 end, {
   nargs = "*",
+  range = true,
   complete = function(arglead, cmdline)
     local util = require "fyler.lib.util"
     if arglead:find "^kind=" then
