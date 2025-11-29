@@ -64,6 +64,8 @@ function Finder:same_as(dir, kind)
   return self.dir == dir and self.win.kind == kind
 end
 
+---@param kind WinKind
+---@param bufname string
 function Finder:load_with(kind, bufname)
   local rev_maps = config.rev_maps "finder"
   local user_maps = config.user_maps "finder"
