@@ -281,9 +281,15 @@ function Win:show()
     return
   end
 
-  self.bufnr = vim.api.nvim_create_buf(false, true)
   if self.bufname then
+    self.bufnr = vim.fn.bufnr(self.bufname)
+    if self.bufnr == -1 then
+      self.bufnr = vim.api.nvim_create_buf(false, true)
+    end
+
     vim.api.nvim_buf_set_name(self.bufnr, self.bufname)
+  else
+    self.bufnr = vim.api.nvim_create_buf(false, true)
   end
 
   local win_config = self:config()

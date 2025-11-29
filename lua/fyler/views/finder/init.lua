@@ -64,7 +64,7 @@ function Finder:same_as(dir, kind)
   return self.dir == dir and self.win.kind == kind
 end
 
-function Finder:open(kind)
+function Finder:load_with(kind, bufname)
   local rev_maps = config.rev_maps "finder"
   local user_maps = config.user_maps "finder"
   local view = config.view("finder", kind)
@@ -78,7 +78,7 @@ function Finder:open(kind)
       ["CursorMovedI"] = function() self:constrain_cursor() end,
     },
     border        = view.win.border,
-    bufname       = string.format("fyler://%s", self.dir),
+    bufname       = bufname,
     bottom        = view.win.bottom,
     buf_opts      = view.win.buf_opts,
     enter         = true,
@@ -123,7 +123,11 @@ function Finder:open(kind)
   }
   -- stylua: ignore end
 
-  self.win:show()
+  return self
+end
+
+function Finder:open(kind)
+  self:load_with(kind, string.format("fyler://%s", self.dir)).win:show()
 end
 
 function Finder:close()
