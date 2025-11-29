@@ -5,6 +5,7 @@ M.dependencies = {
   "nvim-mini/mini.test",
   "nvim-mini/mini.icons",
   "nvim-tree/nvim-web-devicons",
+  "lambdalisue/vim-nerdfont",
 }
 
 ---@parm name string|nil

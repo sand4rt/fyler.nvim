@@ -1,6 +1,7 @@
 ---@class IconIntegration
 ---@field mini_icon MiniIconsIntegration
 ---@field nvim_web_devicons NvimWebDeviconsIntegration
+---@field vim_nerdfont VimNerdfontIntegration
 local M = {}
 
 setmetatable(M, {
