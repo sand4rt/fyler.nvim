@@ -64,6 +64,8 @@ function Finder:same_as(dir, kind)
   return self.dir == dir and self.win.kind == kind
 end
 
+---@param kind WinKind
+---@param bufname string
 function Finder:load_with(kind, bufname)
   local rev_maps = config.rev_maps "finder"
   local user_maps = config.user_maps "finder"
@@ -427,6 +429,24 @@ function M.recover()
 
   current.win:recover()
   M._current = nil
+end
+
+function M.load(url)
+  local dir0 = (url:gsub(vim.pesc "fyler://", ""))
+  local dir, kind = compute_opts(dir0)
+
+  local current = M._current
+  if not current or not current:same_as(dir, kind) then
+    if current then
+      current:close()
+    end
+
+    current = M._instance[dir] or Finder.new(dir)
+    current:load_with(kind, url).win:show()
+
+    M._instance[dir] = current
+    M._current = current
+  end
 end
 
 return M

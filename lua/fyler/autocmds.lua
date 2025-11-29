@@ -62,6 +62,16 @@ function M.setup(config)
       require("fyler.views.finder").recover()
     end,
   })
+
+  vim.api.nvim_create_autocmd({ "BufReadCmd", "SessionLoadPost" }, {
+    group = augroup,
+    pattern = "fyler://*",
+    desc = "Load on fyler://",
+    nested = true,
+    callback = function(arg)
+      require("fyler.views.finder").load(arg.file)
+    end,
+  })
 end
 
 return M
