@@ -92,6 +92,7 @@ vim.keymap.set(
 
 ### Credits to other plugins for inspiration
 
+- [**GrugFar**](https://github.com/MagicDuck/grug-far.nvim)
 - [**Mini.files**](https://github.com/nvim-mini/mini.files)
 - [**Neogit**](https://github.com/NeogitOrg/neogit)
 - [**Nvim-window-picker**](https://github.com/s1n7ax/nvim-window-picker)
