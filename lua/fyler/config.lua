@@ -5,7 +5,7 @@
 ---   require("fyler").setup()
 --- <
 ---
----@tag Fyler.Setup
+---@tag fyler.setup
 
 local util = require "fyler.lib.util"
 
@@ -117,11 +117,11 @@ local config = {}
 --- DEFAULTS
 ---
 --- To know more about plugin customization. visit:
---- `https://github.com/A7Lavinraj/fyler.nvim/wiki/configuration-options`
+--- `https://github.com/A7Lavinraj/fyler.nvim/wiki/configuration`
 ---
 ---@eval return MiniDoc.afterlines_to_code(MiniDoc.current.eval_section)
 ---
----@tag Fyler.Defaults
+---@tag fyler.defaults
 function config.defaults()
   return {
     hooks = {},

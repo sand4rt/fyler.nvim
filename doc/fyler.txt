@@ -1,4 +1,4 @@
-                                                                    *Fyler.nvim*
+                                                                    *fyler.nvim*
 INTRODUCTION
 
 Fyler.nvim is a neovim file manager plugin based on buffer based file editing.
@@ -49,7 +49,7 @@ Fyler can be used through lua API:
 <
 
 ------------------------------------------------------------------------------
-                                                                   *Fyler.Setup*
+                                                                   *fyler.setup*
 CONFIGURATION
 
 To setup Fyler put following code anywhere in your neovim runtime:
@@ -58,11 +58,11 @@ To setup Fyler put following code anywhere in your neovim runtime:
 <
 
 ------------------------------------------------------------------------------
-                                                                *Fyler.Defaults*
+                                                                *fyler.defaults*
 DEFAULTS
 
 To know more about plugin customization. visit:
-`https://github.com/A7Lavinraj/fyler.nvim/wiki/configuration-options`
+`https://github.com/A7Lavinraj/fyler.nvim/wiki/configuration`
 
 >lua
   function config.defaults()

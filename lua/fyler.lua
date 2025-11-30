@@ -47,7 +47,7 @@
 ---   fyler.navigate("...")
 --- <
 ---
----@tag Fyler.nvim
+---@tag fyler.nvim
 
 local M = {}
 
