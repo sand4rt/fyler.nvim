@@ -7,6 +7,13 @@ local eq = MiniTest.expect.equality
 
 local dir_data = util.get_dir "data"
 
+---@param str string
+---@return string
+local function parse_name(str)
+  local name = string.match(str, "/%d+%s(.*)$")
+  return name
+end
+
 local T = MiniTest.new_set {
   parametrize = {
     { "float" },
@@ -57,8 +64,8 @@ T["open"] = function(kind)
 
   local lines = child.get_lines(0, 0, -1, false)
 
-  eq(lines[1]:match "/%d+%s(.*)$", "test-dir")
-  eq(lines[2]:match "/%d+%s(.*)$", "test-file")
+  eq(parse_name(lines[1]), "test-dir")
+  eq(parse_name(lines[2]), "test-file")
 
   child.type_keys "q"
 
@@ -76,8 +83,8 @@ T["toggle"] = function(kind)
 
   local lines = child.get_lines(0, 0, -1, false)
 
-  eq(lines[1]:match "/%d+%s(.*)$", "test-dir")
-  eq(lines[2]:match "/%d+%s(.*)$", "test-file")
+  eq(parse_name(lines[1]), "test-dir")
+  eq(parse_name(lines[2]), "test-file")
 
   child.cmd(string.format([[ lua require('fyler').toggle { dir = '%s', kind = '%s' } ]], dir_data, kind))
 
